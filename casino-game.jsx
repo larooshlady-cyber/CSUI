@@ -153,7 +153,7 @@ const VIP_WHEEL_PRIZES = [
 
 const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.7];
 const NODE_GAP = 170;
-const PAD_TOP = 160;
+const PAD_TOP = 200;
 
 /* ═══════════════════════════════════════════════════
    CONFETTI CANVAS — timed, self-contained
@@ -1696,7 +1696,7 @@ export default function CosmicCasino() {
   const sortedLevels = useMemo(() => [...levels].sort((a, b) => a.id - b.id), [levels]);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", maxWidth: 1400, height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif", margin: "0 auto" }}>
+    <div ref={containerRef} style={{ width: "100%", height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@200;300;400;500;600;700;800;900&display=swap');
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -1736,7 +1736,7 @@ export default function CosmicCasino() {
 
       {/* ═══ DESKTOP LEFT PANEL ═══ */}
       <div className="desktopOnly" style={{
-        position: "fixed", top: 0, left: 0, bottom: 0, width: 280, zIndex: 80,
+        position: "absolute", top: 0, left: 0, bottom: 0, width: 280, zIndex: 80,
         flexDirection: "column", padding: "20px 16px",
         background: "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
         borderRight: "1px solid rgba(255,255,255,0.04)",
@@ -1823,7 +1823,7 @@ export default function CosmicCasino() {
 
       {/* ═══ DESKTOP RIGHT PANEL ═══ */}
       <div className="desktopOnly" style={{
-        position: "fixed", top: 0, right: 0, bottom: 0, width: 260, zIndex: 80,
+        position: "absolute", top: 0, right: 0, bottom: 0, width: 260, zIndex: 80,
         flexDirection: "column", padding: "20px 16px",
         background: "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
         borderLeft: "1px solid rgba(255,255,255,0.04)",
@@ -2148,7 +2148,7 @@ export default function CosmicCasino() {
 
       {/* ── DESKTOP HUD (top bar spanning between panels) ── */}
       <div className="desktopOnly" style={{
-        position: "fixed", top: 0, left: 280, right: 260, zIndex: 90,
+        position: "absolute", top: 0, left: 280, right: 260, zIndex: 90,
         padding: "14px 28px", animation: "slideDown 0.5s ease-out",
         background: "linear-gradient(to bottom, rgba(1,0,14,0.97) 0%, rgba(1,0,14,0.8) 50%, rgba(1,0,14,0.4) 80%, transparent 100%)",
         alignItems: "center", justifyContent: "center", gap: 24,
@@ -2964,42 +2964,40 @@ export default function CosmicCasino() {
           }}>
             <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, #ffa028 50%, transparent 90%)" }} />
             <div style={{ padding: "30px 24px", textAlign: "center" }}>
+              {/* Star icon */}
               <div style={{ marginBottom: 16 }}>
                 <svg width="56" height="56" viewBox="0 0 40 40" fill="none">
-                  <polygon points="20,4 26,16 38,16 28,24 32,36 20,28 8,36 12,24 2,16 14,16" stroke="#ffa028" strokeWidth="1.8" fill="none" />
+                  <polygon points="20,4 26,16 38,16 28,24 32,36 20,28 8,36 12,24 2,16 14,16" stroke="#ffa028" strokeWidth="1.8" fill="rgba(255,160,40,0.1)" />
                 </svg>
               </div>
+
               <div style={{
                 fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#fff",
-                marginBottom: 8,
-              }}>MEGA SPIN</div>
+                marginBottom: 6,
+              }}>UNLOCK MEGA SPIN</div>
+
               <div style={{
                 fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
-                marginBottom: 20, lineHeight: 1.5,
-              }}>Make a deposit of at least $50 to unlock the Mega Spin wheel with prizes up to $500!</div>
+                marginBottom: 24, lineHeight: 1.6,
+              }}>Deposit minimum <span style={{ color: "#ffd232", fontWeight: 700 }}>$50</span> and unlock the Mega Spin wheel with a chance to win <span style={{ color: "#ffa028", fontWeight: 700 }}>$50 to $500</span> cash prize!</div>
 
+              {/* Prize range highlight */}
               <div style={{
-                display: "flex", gap: 8, marginBottom: 20,
+                padding: "16px", borderRadius: 16, marginBottom: 20,
+                background: "rgba(255,210,50,0.05)", border: "1px solid rgba(255,210,50,0.12)",
               }}>
-                {["$50", "$100", "$200", "$500"].map((amt, idx) => (
-                  <div key={idx} style={{
-                    flex: 1, padding: "14px 4px", borderRadius: 14, textAlign: "center",
-                    background: "rgba(255,160,40,0.04)",
-                    border: "1px solid rgba(255,160,40,0.12)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#ffa028" }}>{amt}</div>
-                  </div>
-                ))}
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 28, fontWeight: 900, color: "#ffd232", marginBottom: 4 }}>$50 — $500</div>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,210,50,0.4)", letterSpacing: "0.15em" }}>CASH PRIZE RANGE</div>
               </div>
 
+              {/* Minimum deposit note */}
               <div style={{
-                padding: "12px", borderRadius: 14, marginBottom: 16,
-                background: "rgba(255,210,50,0.05)", border: "1px solid rgba(255,210,50,0.12)",
+                padding: "12px 16px", borderRadius: 12, marginBottom: 20,
+                background: "rgba(255,160,40,0.06)", border: "1px solid rgba(255,160,40,0.12)",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
               }}>
-                <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#ffd232" }}>$50 — $500</span>
-                <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em" }}>PRIZE RANGE</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(255,160,40,0.5)" strokeWidth="2"/><path d="M12 8v5" stroke="rgba(255,160,40,0.6)" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="16" r="1" fill="rgba(255,160,40,0.6)"/></svg>
+                <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.55)" }}>Minimum deposit: <span style={{ color: "#ffa028", fontWeight: 800 }}>$50</span></span>
               </div>
 
               <button onClick={handleDepositDone} style={{
@@ -3008,14 +3006,23 @@ export default function CosmicCasino() {
                 color: "rgba(0,0,0,0.85)",
                 background: "linear-gradient(135deg, #ffa028, #ffd232)",
                 boxShadow: "0 8px 30px rgba(255,160,40,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
-              }}>DEPOSIT & SPIN</button>
+                position: "relative", overflow: "hidden",
+              }}>
+                DEPOSIT & SPIN
+                <div style={{
+                  position: "absolute", top: 0, width: "40%", height: "100%",
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                  animation: "ctaShine 2.5s ease-in-out infinite",
+                  pointerEvents: "none",
+                }} />
+              </button>
 
               <button onClick={() => setShowDeposit(false)} style={{
                 width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
                 cursor: "pointer", background: "transparent",
                 fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
                 color: "rgba(255,255,255,0.2)",
-              }}>Close</button>
+              }}>Maybe Later</button>
             </div>
           </div>
         </div>
