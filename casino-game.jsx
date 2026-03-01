@@ -261,20 +261,22 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
         ctx.stroke();
       }
 
-      // ── text — radiating outward from center, always readable ──
+      // ── text — positioned along radius, always horizontal ──
       ctx.save();
       const midAngle = sA + segAngle / 2;
-      ctx.rotate(midAngle);
-      // rotate so text reads radially outward (perpendicular to radius)
-      ctx.translate(r * 0.58, 0);
-      ctx.rotate(-Math.PI / 2);
+      const textR = r * 0.58;
+      const textX = Math.cos(midAngle) * textR;
+      const textY = Math.sin(midAngle) * textR;
+      ctx.translate(textX, textY);
+      // counter-rotate to keep text horizontal despite wheel rotation
+      ctx.rotate(-angleRef.current);
       ctx.fillStyle = prize.color;
       ctx.globalAlpha = prize.jackpot ? 1 : 0.85;
-      ctx.font = `bold ${prize.jackpot ? 13 : 11}px 'Orbitron',sans-serif`;
+      ctx.font = `bold ${prize.jackpot ? 15 : 13}px 'Orbitron',sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const lines = prize.label.split("\n");
-      lines.forEach((line, li) => ctx.fillText(line, 0, (li - (lines.length - 1) / 2) * 14));
+      lines.forEach((line, li) => ctx.fillText(line, 0, (li - (lines.length - 1) / 2) * 16));
       ctx.globalAlpha = 1;
       ctx.restore();
     }
@@ -1435,6 +1437,44 @@ export default function CosmicCasino() {
           : l.id === lvId + 1 ? { ...l, unlocked: true }
           : l
         );
+        // zoom to next island if it exists
+        const nextIdx = next.findIndex(l => l.id === lvId + 1);
+        if (nextIdx >= 0 && !next[nextIdx].complete) {
+          const el = scrollRef.current;
+          if (el) {
+            // scroll next island to center
+            const nextY = PAD_TOP + nextIdx * NODE_GAP;
+            const targetScroll = Math.max(0, nextY - dim.h / 2 + 50);
+            const startScroll = el.scrollTop;
+            const scrollDelta = targetScroll - startScroll;
+            const scrollDur = 800;
+            const t0 = performance.now();
+            const ease = (p) => p < 0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2;
+            // also apply zoom via CSS transform on the scroll container's content
+            el.style.transition = "none";
+            const animZoom = (now) => {
+              const p = Math.min(1, (now - t0) / scrollDur);
+              el.scrollTop = startScroll + scrollDelta * ease(p);
+              // zoom curve: ramp up to 1.15 at p=0.5, then hold
+              const zoomP = Math.min(1, p * 2);
+              const scale = 1 + 0.15 * ease(zoomP);
+              const originX = "50%";
+              const originY = (nextY) + "px";
+              el.style.transformOrigin = `${originX} ${originY}`;
+              el.style.transform = `scale(${scale})`;
+              if (p < 1) requestAnimationFrame(animZoom);
+              else {
+                // hold zoom briefly, then ease back out
+                setTimeout(() => {
+                  el.style.transition = "transform 0.8s cubic-bezier(0.22,1,0.36,1)";
+                  el.style.transform = "scale(1)";
+                  setTimeout(() => { el.style.transition = "none"; }, 850);
+                }, 600);
+              }
+            };
+            requestAnimationFrame(animZoom);
+          }
+        }
         // auto-complete next island if it was lockedButCompleted (pre-verified externally)
         const nextLv = next.find(l => l.id === lvId + 1);
         if (nextLv && nextLv.lockedButCompleted && nextLv.unlocked && !nextLv.complete) {
