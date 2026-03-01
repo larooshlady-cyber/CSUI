@@ -182,8 +182,49 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
   const drawWheel = useCallback(() => {
     const ctx = ctxRef.current;
     if (!ctx) return;
-    const size = 300, cx = size / 2, cy = size / 2, r = 125;
+    const size = 300, cx = size / 2, cy = size / 2, r = 120;
     ctx.clearRect(0, 0, size, size);
+
+    // ── outer metallic ring (layered for depth) ──
+    // dark base ring
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = "#1a1408";
+    ctx.beginPath(); ctx.arc(cx, cy, r + 4, 0, 6.28); ctx.stroke();
+    // gold mid ring
+    const ringG = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+    ringG.addColorStop(0, "#c8a020");
+    ringG.addColorStop(0.3, "#ffd740");
+    ringG.addColorStop(0.5, "#e8b810");
+    ringG.addColorStop(0.7, "#ffd740");
+    ringG.addColorStop(1, "#a07808");
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = ringG;
+    ctx.beginPath(); ctx.arc(cx, cy, r + 4, 0, 6.28); ctx.stroke();
+    // highlight edge
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(255,248,220,0.35)";
+    ctx.beginPath(); ctx.arc(cx, cy, r + 9, 0, Math.PI); ctx.stroke();
+
+    // ── LED rim pegs ──
+    const pegCount = 24;
+    const t = performance.now() / 1000;
+    for (let d = 0; d < pegCount; d++) {
+      const da = (d / pegCount) * Math.PI * 2 - Math.PI / 2;
+      const px = cx + Math.cos(da) * (r + 4);
+      const py = cy + Math.sin(da) * (r + 4);
+      const lit = (Math.floor(t * 3) + d) % 3 === 0;
+      // outer glow for lit pegs
+      if (lit) {
+        ctx.fillStyle = "rgba(255,230,120,0.3)";
+        ctx.beginPath(); ctx.arc(px, py, 5, 0, 6.28); ctx.fill();
+      }
+      // peg body
+      ctx.fillStyle = lit ? "#ffe878" : "#8a7020";
+      ctx.beginPath(); ctx.arc(px, py, 2.8, 0, 6.28); ctx.fill();
+      // peg highlight
+      ctx.fillStyle = lit ? "#fffde0" : "#b89828";
+      ctx.beginPath(); ctx.arc(px - 0.5, py - 0.5, 1.2, 0, 6.28); ctx.fill();
+    }
 
     // ── segments ──
     ctx.save();
@@ -193,122 +234,128 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
       const prize = prizes[i];
       const sA = i * segAngle, eA = sA + segAngle;
 
-      // fill
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, sA, eA); ctx.closePath();
-      const g = ctx.createRadialGradient(0, 0, 10, 0, 0, r);
+      // segment fill — darker base with subtle radial shading
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 1, sA, eA); ctx.closePath();
+      const g = ctx.createRadialGradient(0, 0, r * 0.15, 0, 0, r);
       g.addColorStop(0, prize.bg1);
-      g.addColorStop(1, prize.bg2);
+      g.addColorStop(0.5, prize.bg2);
+      g.addColorStop(1, prize.bg1);
       ctx.fillStyle = g;
       ctx.fill();
 
-      // divider line
-      ctx.strokeStyle = "rgba(255,210,50,0.12)";
-      ctx.lineWidth = 1;
+      // subtle inner sheen on each segment
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r * 0.85, sA + 0.04, eA - 0.04); ctx.closePath();
+      ctx.fillStyle = "rgba(255,255,255,0.02)";
+      ctx.fill();
+
+      // divider lines — metallic gold
+      ctx.strokeStyle = "rgba(200,170,50,0.35)";
+      ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(sA) * r, Math.sin(sA) * r); ctx.stroke();
 
-      // jackpot highlight edge
+      // jackpot subtle edge glow
       if (prize.jackpot) {
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, sA, eA); ctx.closePath();
-        ctx.strokeStyle = "rgba(255,210,50,0.15)";
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 1, sA + 0.02, eA - 0.02); ctx.closePath();
+        ctx.strokeStyle = "rgba(255,210,50,0.12)";
         ctx.lineWidth = 2;
         ctx.stroke();
       }
 
-      // text — centered in segment, always upright-readable
+      // ── text — radiating outward from center, always readable ──
       ctx.save();
       const midAngle = sA + segAngle / 2;
       ctx.rotate(midAngle);
-      ctx.translate(r * 0.62, 0);
-      // flip text 180° for bottom-half segments so it's never upside-down
-      const absAngle = (midAngle + angleRef.current) % (Math.PI * 2);
-      if (absAngle > Math.PI / 2 && absAngle < Math.PI * 1.5) {
-        ctx.rotate(Math.PI);
-      }
+      // rotate so text reads radially outward (perpendicular to radius)
+      ctx.translate(r * 0.58, 0);
+      ctx.rotate(-Math.PI / 2);
       ctx.fillStyle = prize.color;
-      ctx.globalAlpha = prize.jackpot ? 1 : 0.9;
-      ctx.font = `bold ${prize.jackpot ? 16 : 14}px 'Orbitron',sans-serif`;
+      ctx.globalAlpha = prize.jackpot ? 1 : 0.85;
+      ctx.font = `bold ${prize.jackpot ? 13 : 11}px 'Orbitron',sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const lines = prize.label.split("\n");
-      lines.forEach((ln, li) => ctx.fillText(ln, 0, (li - (lines.length - 1) / 2) * 18));
+      lines.forEach((line, li) => ctx.fillText(line, 0, (li - (lines.length - 1) / 2) * 14));
       ctx.globalAlpha = 1;
       ctx.restore();
     }
     ctx.restore();
 
-    // ── outer ring (single shadowBlur call) ──
-    ctx.save();
-    ctx.shadowColor = "rgba(255,210,50,0.4)";
-    ctx.shadowBlur = 12;
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = "rgba(255,210,50,0.55)";
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.28); ctx.stroke();
-    ctx.restore();
+    // inner trim ring
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(200,170,50,0.25)";
+    ctx.beginPath(); ctx.arc(cx, cy, r - 1, 0, 6.28); ctx.stroke();
 
-    // inner trim
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = "rgba(255,210,50,0.18)";
-    ctx.beginPath(); ctx.arc(cx, cy, r - 5, 0, 6.28); ctx.stroke();
-
-    // ── rim pegs (no shadowBlur — just solid dots) ──
-    const pegCount = 20;
-    for (let d = 0; d < pegCount; d++) {
-      const da = (d / pegCount) * Math.PI * 2;
-      const px = cx + Math.cos(da) * (r + 1);
-      const py = cy + Math.sin(da) * (r + 1);
-      ctx.fillStyle = "#ffd232";
-      ctx.beginPath(); ctx.arc(px, py, 2.5, 0, 6.28); ctx.fill();
-      // bright dot center
-      ctx.fillStyle = "#fff8dc";
-      ctx.beginPath(); ctx.arc(px, py, 1, 0, 6.28); ctx.fill();
-    }
-
-    // ── center hub ──
-    ctx.save();
-    ctx.shadowColor = "rgba(255,210,50,0.5)";
-    ctx.shadowBlur = 16;
-    const hg = ctx.createRadialGradient(cx - 3, cy - 3, 0, cx, cy, 22);
-    hg.addColorStop(0, "#fff8dc");
-    hg.addColorStop(0.3, "#ffd740");
-    hg.addColorStop(0.7, "#c89600");
-    hg.addColorStop(1, "#6a4500");
+    // ── center hub (layered metallic) ──
+    // shadow ring
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.beginPath(); ctx.arc(cx, cy + 1, 26, 0, 6.28); ctx.fill();
+    // dark outer hub
+    const hgOuter = ctx.createRadialGradient(cx, cy, 16, cx, cy, 26);
+    hgOuter.addColorStop(0, "#4a3800");
+    hgOuter.addColorStop(1, "#1a1000");
+    ctx.fillStyle = hgOuter;
+    ctx.beginPath(); ctx.arc(cx, cy, 26, 0, 6.28); ctx.fill();
+    // gold hub ring
+    ctx.lineWidth = 2.5;
+    const hubRingG = ctx.createLinearGradient(cx - 24, cy - 24, cx + 24, cy + 24);
+    hubRingG.addColorStop(0, "#c8a020");
+    hubRingG.addColorStop(0.5, "#ffd740");
+    hubRingG.addColorStop(1, "#a08010");
+    ctx.strokeStyle = hubRingG;
+    ctx.beginPath(); ctx.arc(cx, cy, 24, 0, 6.28); ctx.stroke();
+    // inner gold hub
+    const hg = ctx.createRadialGradient(cx - 4, cy - 4, 0, cx, cy, 20);
+    hg.addColorStop(0, "#fff0c0");
+    hg.addColorStop(0.25, "#ffd740");
+    hg.addColorStop(0.6, "#c89600");
+    hg.addColorStop(1, "#7a5800");
     ctx.fillStyle = hg;
-    ctx.beginPath(); ctx.arc(cx, cy, 22, 0, 6.28); ctx.fill();
-    ctx.restore();
-
-    // hub ring
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "rgba(255,210,50,0.5)";
-    ctx.beginPath(); ctx.arc(cx, cy, 22, 0, 6.28); ctx.stroke();
-
+    ctx.beginPath(); ctx.arc(cx, cy, 20, 0, 6.28); ctx.fill();
+    // hub highlight arc
+    ctx.strokeStyle = "rgba(255,248,220,0.4)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, 16, -Math.PI * 0.8, -Math.PI * 0.2); ctx.stroke();
     // hub text
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    ctx.fillStyle = "rgba(30,20,0,0.8)";
     ctx.font = "bold 11px 'Orbitron',sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("SPIN", cx, cy);
 
-    // ── pointer ──
+    // ── pointer (top, premium look) ──
     ctx.save();
-    ctx.shadowColor = "rgba(255,210,50,0.6)";
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = "#ffd232";
+    // pointer shadow
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
     ctx.beginPath();
-    ctx.moveTo(cx, cy - r + 10);
-    ctx.lineTo(cx - 11, cy - r - 14);
-    ctx.lineTo(cx + 11, cy - r - 14);
+    ctx.moveTo(cx, cy - r + 14);
+    ctx.lineTo(cx - 10, cy - r - 12);
+    ctx.lineTo(cx + 10, cy - r - 12);
     ctx.closePath();
     ctx.fill();
-    ctx.restore();
-    // pointer border
-    ctx.strokeStyle = "#b8960a";
+    // pointer body — gold gradient
+    const pG = ctx.createLinearGradient(cx, cy - r - 14, cx, cy - r + 12);
+    pG.addColorStop(0, "#ffd740");
+    pG.addColorStop(0.4, "#ffe880");
+    pG.addColorStop(1, "#c89600");
+    ctx.fillStyle = pG;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r + 12);
+    ctx.lineTo(cx - 10, cy - r - 14);
+    ctx.lineTo(cx + 10, cy - r - 14);
+    ctx.closePath();
+    ctx.fill();
+    // pointer edge
+    ctx.strokeStyle = "#a07808";
     ctx.lineWidth = 1;
+    ctx.stroke();
+    // pointer highlight
+    ctx.strokeStyle = "rgba(255,248,220,0.5)";
+    ctx.lineWidth = 0.5;
     ctx.beginPath();
     ctx.moveTo(cx, cy - r + 10);
-    ctx.lineTo(cx - 11, cy - r - 14);
-    ctx.lineTo(cx + 11, cy - r - 14);
-    ctx.closePath();
+    ctx.lineTo(cx - 7, cy - r - 10);
     ctx.stroke();
+    ctx.restore();
   }, [segments, segAngle, prizes]);
 
   // render loop — pauses during celebrating phase
@@ -1263,7 +1310,6 @@ export default function CosmicCasino() {
   const [selected, setSelected] = useState(null);
   const [showWheel, setShowWheel] = useState(false);
   const [showMegaWheel, setShowMegaWheel] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
   const [showTelegram, setShowTelegram] = useState(false);
   const [showKYC, setShowKYC] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
@@ -1427,7 +1473,7 @@ export default function CosmicCasino() {
   const handleLevelClick = useCallback((lv) => {
     if (lv.complete || lv.completing) return;
     if (!lv.unlocked) { setSelected(lv); return; }
-    if (lv.id === 1) setShowRegister(true);
+    if (lv.id === 1) setShowWheel(true);
     else if (lv.id === 2) setShowKYC(true);
     else if (lv.id === 3) { setPhoneStep(0); setPhoneNumber(""); setPhoneOtp(["","","",""]); setShowPhone(true); }
     else if (lv.id === 4) setShowTelegram(true);
@@ -1436,11 +1482,6 @@ export default function CosmicCasino() {
     else setSelected(lv);
   }, [triggerComplete]);
 
-  // after registration, show wheel
-  const handleRegisterDone = useCallback(() => {
-    setShowRegister(false);
-    setShowWheel(true);
-  }, []);
 
   // handle wheel win (Welcome Spin)
   const handleWheelWin = useCallback((prize) => {
@@ -2253,68 +2294,6 @@ export default function CosmicCasino() {
         />
       )}
 
-      {/* ── REGISTRATION MODAL (Island 1) ── */}
-      {showRegister && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 550,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
-          animation: "fadeIn 0.3s ease-out",
-        }}>
-          <div style={{
-            width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
-            background: "linear-gradient(165deg, #0a0a1a 0%, #0d0620 50%, #0a0a1a 100%)",
-            border: "1px solid rgba(255,210,50,0.15)",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,210,50,0.05)",
-            animation: "modalPop 0.4s ease-out",
-          }}>
-            <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, #ffd232 50%, transparent 90%)" }} />
-            <div style={{ padding: "30px 24px", textAlign: "center" }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🚀</div>
-              <div style={{
-                fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#fff",
-                marginBottom: 8,
-              }}>JOIN THE ADVENTURE</div>
-              <div style={{
-                fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
-                marginBottom: 24, lineHeight: 1.5,
-              }}>Create your account to spin the wheel and claim your welcome bonus!</div>
-
-              <div style={{
-                padding: "16px", borderRadius: 16, marginBottom: 16,
-                background: "rgba(255,210,50,0.05)", border: "1px solid rgba(255,210,50,0.12)",
-              }}>
-                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.15em", marginBottom: 8 }}>YOUR WELCOME REWARD</div>
-                <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-                  <div style={{ padding: "8px 16px", borderRadius: 10, background: "rgba(255,210,50,0.1)", border: "1px solid rgba(255,210,50,0.2)" }}>
-                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#ffd232" }}>150%</span>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>DEPOSIT BONUS</div>
-                  </div>
-                  <div style={{ padding: "8px 16px", borderRadius: 10, background: "rgba(0,230,255,0.06)", border: "1px solid rgba(0,230,255,0.15)" }}>
-                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#78c8ff" }}>+50 FS</span>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>FREE SPINS</div>
-                  </div>
-                </div>
-              </div>
-
-              <button onClick={handleRegisterDone} style={{
-                width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
-                fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, letterSpacing: "0.08em",
-                color: "rgba(0,0,0,0.85)",
-                background: "linear-gradient(135deg, #ffd740, #ffab00)",
-                boxShadow: "0 8px 30px rgba(255,210,50,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
-              }}>REGISTER NOW</button>
-
-              <button onClick={() => setShowRegister(false)} style={{
-                width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
-                cursor: "pointer", background: "transparent",
-                fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
-                color: "rgba(255,255,255,0.2)",
-              }}>Maybe Later</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── TELEGRAM VERIFICATION MODAL (Island 4) ── */}
       {showTelegram && (
