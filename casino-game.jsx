@@ -171,7 +171,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
   const canvasRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
-  const [phase, setPhase] = useState("spin"); // spin | celebrating | result
+  const [phase, setPhase] = useState("spin"); // spin | celebrating | register | result
   const angleRef = useRef(0);
   const ctxRef = useRef(null);
   const phaseRef = useRef("spin");
@@ -446,12 +446,12 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
           position: "relative",
           width: "min(92vw, 380px)", maxHeight: "92vh", overflow: "hidden", borderRadius: 24,
           background: "linear-gradient(170deg, rgba(28,22,52,0.98), rgba(8,4,20,0.99))",
-          boxShadow: "0 0 0 1px rgba(255,210,50,0.1), 0 0 120px rgba(255,210,50,0.08), 0 50px 100px rgba(0,0,0,0.5)",
+          boxShadow: phase === "result" ? "0 0 0 1px rgba(0,230,118,0.1), 0 0 120px rgba(0,230,118,0.08), 0 50px 100px rgba(0,0,0,0.5)" : "0 0 0 1px rgba(255,210,50,0.1), 0 0 120px rgba(255,210,50,0.08), 0 50px 100px rgba(0,0,0,0.5)",
           animation: "modalPop 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}>
-          <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, rgba(255,210,50,0.5) 50%, transparent 90%)" }} />
+          <div style={{ height: 2, background: phase === "result" ? "linear-gradient(90deg, transparent 10%, rgba(0,230,118,0.5) 50%, transparent 90%)" : "linear-gradient(90deg, transparent 10%, rgba(255,210,50,0.5) 50%, transparent 90%)" }} />
 
-          {phase !== "result" ? (
+          {(phase === "spin" || phase === "celebrating") ? (
             <>
               <div style={{ textAlign: "center", padding: "28px 24px 8px" }}>
                 <div style={{
@@ -502,14 +502,14 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
           ) : (
             <>
               {/* ── MISSION CLEARED header ── */}
-              <div style={{ textAlign: "center", padding: "20px 20px 0" }}>
-                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
-                  {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : "CONGRATULATIONS"}
+              <div style={{ textAlign: "center", padding: "22px 20px 0" }}>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
+                  {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : "You Won a Bonus!"}
                 </div>
                 <div style={{
-                  fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, letterSpacing: "0.04em",
-                  color: "#ffd740", lineHeight: 1.2,
-                }}>You Won a Bonus!</div>
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, letterSpacing: "0.04em",
+                  color: "#ffffff", lineHeight: 1.2,
+                }}>Stage 1 Complete</div>
               </div>
 
               {title === "MEGA SPIN" ? (
@@ -540,74 +540,110 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                 </>
               ) : (
                 <>
-                  {/* ── Your reward (compact) ── */}
-                  <div style={{
-                    margin: "16px 16px 0", padding: "14px 16px", borderRadius: 16,
-                    background: "rgba(255,210,50,0.04)", border: "1px solid rgba(255,210,50,0.12)",
-                    textAlign: "center",
-                  }}>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.2em", marginBottom: 10 }}>YOU WON</div>
-                    <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "center" }}>
-                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232" }}>150%</span>
-                      <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 14, color: "rgba(255,255,255,0.2)" }}>+</span>
-                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#00e5ff" }}>50 FS</span>
-                    </div>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>Deposit Bonus + Free Spins</div>
-                  </div>
-
-                  {/* ── Claim notice ── */}
-                  <div style={{
-                    margin: "10px 16px 0", padding: "10px 14px", borderRadius: 12,
-                    background: "rgba(255,160,40,0.05)", border: "1px solid rgba(255,160,40,0.12)",
-                    display: "flex", alignItems: "center", gap: 10,
-                  }}>
-                    <span style={{ fontSize: 16 }}>&#127873;</span>
-                    <div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>Prize reserved for <span style={{ color: "#ffa028", fontWeight: 700 }}>{countdownStr}</span></div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>Create an account to claim your rewards</div>
-                    </div>
-                  </div>
-
-                  {/* ── Journey preview ── */}
-                  <div style={{
-                    margin: "10px 16px 0", padding: "12px 14px", borderRadius: 12,
-                    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
-                  }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 10 }}>UNLOCK MORE REWARDS</div>
-                    {[
-                      { name: "KYC Verification", reward: "+50 FS", color: "#78c8ff", highlight: true, next: true },
-                      { name: "Phone Verify", reward: "100% CB", color: "#ff3278", highlight: false },
-                      { name: "Telegram", reward: "+$20", color: "#00b4ff", highlight: false },
-                      { name: "Mega Spin", reward: "$50–500", color: "#ffa028", highlight: false },
-                      { name: "Final Prize", reward: "$500", color: "#00e676", highlight: true },
-                    ].map((r, idx) => {
-                      const hl = r.highlight;
-                      const bgColor = r.next ? `rgba(${120},${200},${255},0.06)` : hl ? "rgba(0,230,118,0.06)" : "transparent";
-                      const borderColor = r.next ? `rgba(${120},${200},${255},0.18)` : hl ? "rgba(0,230,118,0.15)" : "transparent";
-                      return (
-                      <div key={idx} style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: hl ? "8px 10px" : "5px 0",
-                        marginTop: hl ? 4 : 0,
-                        borderRadius: hl ? 10 : 0,
-                        background: bgColor,
-                        border: hl ? `1px solid ${borderColor}` : "none",
-                        opacity: hl ? 1 : 0.55,
-                      }}>
-                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: r.next ? 600 : 400, color: hl ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)" }}>{r.name}{r.next ? <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.3)", fontWeight: 400, marginLeft: 6 }}>— next</span> : null}</span>
-                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: hl ? 15 : 13, fontWeight: hl ? 900 : 700, color: r.color, textShadow: hl ? `0 0 12px ${r.color}55` : "none" }}>{r.reward}</span>
+                  {/* ── Single clean content flow ── */}
+                  <div style={{ padding: "0 20px" }}>
+                    {/* Prize hero container */}
+                    <div style={{
+                      textAlign: "center", margin: "18px 0 10px", padding: "16px 20px",
+                      borderRadius: 14, background: "rgba(0,230,118,0.04)", border: "1px solid rgba(0,230,118,0.12)",
+                    }}>
+                      <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "baseline" }}>
+                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 30, fontWeight: 900, color: "#00e676" }}>150%</span>
+                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, color: "rgba(0,230,118,0.3)" }}>+</span>
+                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 30, fontWeight: 900, color: "#00e676" }}>100 FS</span>
                       </div>
-                    );})}
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.3)", marginTop: 6, letterSpacing: "0.08em" }}>Unlocks after registration & KYC</div>
+                    </div>
+
+                    {/* Claim timer */}
+                    <div style={{ textAlign: "center", fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 18px" }}>
+                      Reserved for <span style={{ color: "#ffa028", fontWeight: 700 }}>{countdownStr}</span> — create an account to claim
+                    </div>
+
+                    {/* Timeline */}
+                    <div style={{ position: "relative", paddingLeft: 34 }}>
+                      {/* Vertical line — animated grow */}
+                      <div style={{ position: "absolute", left: 10, top: 18, bottom: 18, width: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
+                      {/* Gold segment — covers stage 1 steps */}
+                      <div style={{ position: "absolute", left: 10, top: 18, height: 56, width: 2, background: "linear-gradient(180deg, #ffd232, rgba(255,210,50,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.5s ease-out 0.3s both" }} />
+
+                      {/* Stage 1 label */}
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(255,210,50,0.35)", letterSpacing: "0.15em", padding: "2px 0 0", animation: "tlSlideIn 0.4s ease-out 0.2s both" }}>STAGE 1</div>
+
+                      {/* Stage 1 steps: Register + KYC */}
+                      {[
+                        { name: "Register", reward: "150% + 50 FS", next: true },
+                        { name: "KYC Verification", reward: "+50 FS" },
+                      ].map((r, idx) => (
+                        <div key={`s1-${idx}`} style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
+                          animation: `tlSlideIn 0.4s ease-out ${0.25 + idx * 0.12}s both`,
+                        }}>
+                          <div style={{
+                            position: "absolute", left: -31, top: "50%", transform: "translateY(-50%)",
+                            width: 16, height: 16, borderRadius: "50%",
+                            background: "#ffd232",
+                            border: "2px solid rgba(255,210,50,0.3)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            boxShadow: "0 0 10px rgba(255,210,50,0.5), 0 0 20px rgba(255,210,50,0.15)",
+                            animation: "tlBeepGold 1.5s ease-in-out infinite",
+                          }} />
+                          <div>
+                            <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
+                              {r.name}
+                              {r.next && <span style={{ fontSize: 12, color: "rgba(255,210,50,0.6)", marginLeft: 6 }}>next</span>}
+                            </div>
+                          </div>
+                          <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{r.reward}</span>
+                        </div>
+                      ))}
+
+                      {/* Separator between stages */}
+                      <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "4px 0" }} />
+
+                      {/* ── Remaining steps ── */}
+                      {[
+                        { name: "Phone Verify", reward: "100% CB" },
+                        { name: "Telegram", reward: "+$20" },
+                        { name: "Mega Spin", reward: "$50–$500" },
+                      ].map((r, idx) => (
+                        <div key={idx} style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
+                          animation: `tlSlideIn 0.4s ease-out ${0.44 + idx * 0.12}s both`,
+                        }}>
+                          <div style={{
+                            position: "absolute", left: -28, top: "50%", transform: "translateY(-50%)",
+                            width: 10, height: 10, borderRadius: "50%",
+                            background: "rgba(255,255,255,0.1)",
+                          }} />
+                          <div>
+                            <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: 400, color: "rgba(255,255,255,0.35)" }}>
+                              {r.name}
+                            </div>
+                          </div>
+                          <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: "rgba(255,255,255,0.3)" }}>{r.reward}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* ── CTA ── */}
-                  <div style={{ padding: "14px 16px 18px" }}>
+                  <div style={{ padding: "16px 20px 18px" }}>
                     <button onClick={() => handleContinue(true)} style={{
-                      width: "100%", padding: 16, borderRadius: 16, border: "none",
-                      fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.1em",
+                      width: "100%", padding: 15, borderRadius: 14, border: "none",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.1em",
                       cursor: "pointer", background: "linear-gradient(135deg,#ffd232,#ffab00)", color: "rgba(0,0,0,0.85)",
-                      boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
-                    }}>CREATE ACCOUNT</button>
+                      boxShadow: "0 6px 24px rgba(255,210,50,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
+                      position: "relative", overflow: "hidden",
+                    }}>
+                      CREATE ACCOUNT
+                      <div style={{
+                        position: "absolute", top: 0, width: "40%", height: "100%",
+                        background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
+                        animation: "ctaShine 2.5s ease-in-out infinite",
+                        pointerEvents: "none",
+                      }} />
+                    </button>
                   </div>
                 </>
               )}
@@ -1553,15 +1589,21 @@ export default function CosmicCasino() {
         @keyframes prizeOverlayOut { 0%{opacity:1} 100%{opacity:0} }
         @keyframes prizeCardIn { 0%{transform:scale(0.3) rotateX(40deg);opacity:0;filter:blur(10px)} 50%{transform:scale(1.08) rotateX(-2deg);opacity:1;filter:blur(0)} 70%{transform:scale(0.97) rotateX(1deg);opacity:1} 100%{transform:scale(1) rotateX(0deg);opacity:1} }
         @keyframes prizeShine { 0%{background-position:-200% center} 100%{background-position:200% center} }
-        @keyframes prizePulse { 0%,100%{box-shadow:0 0 40px rgba(255,210,50,0.2), 0 0 80px rgba(255,210,50,0.08)} 50%{box-shadow:0 0 60px rgba(255,210,50,0.35), 0 0 120px rgba(255,210,50,0.15)} }
+        @keyframes prizePulse { 0%,100%{box-shadow:0 0 40px rgba(0,230,118,0.2), 0 0 80px rgba(0,230,118,0.08)} 50%{box-shadow:0 0 60px rgba(0,230,118,0.35), 0 0 120px rgba(0,230,118,0.15)} }
         @keyframes prizeStarBurst { 0%{transform:scale(0) rotate(0deg);opacity:0} 40%{transform:scale(1.2) rotate(180deg);opacity:0.6} 100%{transform:scale(2) rotate(360deg);opacity:0} }
         @keyframes prizeRing { 0%{transform:translate(-50%,-50%) scale(0.2);opacity:0.8;border-width:6px} 100%{transform:translate(-50%,-50%) scale(2.5);opacity:0;border-width:1px} }
         @keyframes prizeFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
         @keyframes prizeTextPop { 0%{transform:scale(0) translateY(20px);opacity:0} 100%{transform:scale(1) translateY(0);opacity:1} }
         @keyframes prizeGlowLine { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
         @keyframes dotPulse { 0%,100%{opacity:0.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
+        @keyframes pulse { 0%,100%{transform:translateY(-50%) scale(1);opacity:0.4} 50%{transform:translateY(-50%) scale(1.5);opacity:0} }
         @keyframes rewardFloat { 0%{transform:translate(-50%,-50%) scale(0.5);opacity:0} 15%{transform:translate(-50%,-80%) scale(1.2);opacity:1} 60%{transform:translate(-50%,-180%) scale(1);opacity:1} 100%{transform:translate(-50%,-260%) scale(0.8);opacity:0} }
         @keyframes completionFlash { 0%{opacity:1} 100%{opacity:0} }
+        @keyframes tlSlideIn { 0%{transform:translateX(-12px);opacity:0} 100%{transform:translateX(0);opacity:1} }
+        @keyframes tlLineGrow { 0%{transform:scaleY(0)} 100%{transform:scaleY(1)} }
+        @keyframes tlDotPop { 0%{transform:translateY(-50%) scale(0)} 60%{transform:translateY(-50%) scale(1.3)} 100%{transform:translateY(-50%) scale(1)} }
+        @keyframes tlBeepGold { 0%,100%{transform:translateY(-50%) scale(1);box-shadow:0 0 6px rgba(255,210,50,0.2), 0 0 12px rgba(255,210,50,0.08)} 50%{transform:translateY(-50%) scale(1.12);box-shadow:0 0 12px rgba(255,210,50,0.5), 0 0 24px rgba(255,210,50,0.2)} }
+        @keyframes ctaShine { 0%{left:-100%} 100%{left:200%} }
         .hideScroll::-webkit-scrollbar{width:0} .hideScroll{scrollbar-width:none}
         @media(min-width:769px){
           .mobileOnly{display:none!important}
@@ -2613,11 +2655,11 @@ export default function CosmicCasino() {
           <div style={{
             width: "min(92vw, 400px)", borderRadius: 28, overflow: "hidden",
             background: "linear-gradient(165deg, #0d0620 0%, #1a0d08 50%, #0d0620 100%)",
-            border: "2px solid rgba(255,210,50,0.25)",
-            boxShadow: "0 0 60px rgba(255,210,50,0.1), 0 30px 80px rgba(0,0,0,0.5)",
+            border: "2px solid rgba(0,230,118,0.25)",
+            boxShadow: "0 0 60px rgba(0,230,118,0.1), 0 30px 80px rgba(0,0,0,0.5)",
             animation: "modalPop 0.5s ease-out",
           }}>
-            <div style={{ height: 3, background: "linear-gradient(90deg, transparent 5%, #ffd232 30%, #00e676 50%, #ffd232 70%, transparent 95%)" }} />
+            <div style={{ height: 3, background: "linear-gradient(90deg, transparent 5%, #00e676 30%, #00c853 50%, #00e676 70%, transparent 95%)" }} />
             <div style={{ padding: "30px 24px", textAlign: "center" }}>
               <div style={{ fontSize: 56, marginBottom: 12, animation: "dotPulse 1.5s ease-in-out infinite" }}>👑</div>
               <div style={{
