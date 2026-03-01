@@ -576,25 +576,29 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                   }}>
                     <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 10 }}>UNLOCK MORE REWARDS</div>
                     {[
-                      { name: "KYC Verification", reward: "+50 FS", color: "#78c8ff", highlight: false },
+                      { name: "KYC Verification", reward: "+50 FS", color: "#78c8ff", highlight: true, next: true },
                       { name: "Phone Verify", reward: "100% CB", color: "#ff3278", highlight: false },
                       { name: "Telegram", reward: "+$20", color: "#00b4ff", highlight: false },
                       { name: "Mega Spin", reward: "$50–500", color: "#ffa028", highlight: false },
                       { name: "Final Prize", reward: "$500", color: "#00e676", highlight: true },
-                    ].map((r, idx) => (
+                    ].map((r, idx) => {
+                      const hl = r.highlight;
+                      const bgColor = r.next ? `rgba(${120},${200},${255},0.06)` : hl ? "rgba(0,230,118,0.06)" : "transparent";
+                      const borderColor = r.next ? `rgba(${120},${200},${255},0.18)` : hl ? "rgba(0,230,118,0.15)" : "transparent";
+                      return (
                       <div key={idx} style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: r.highlight ? "8px 10px" : "5px 0",
-                        marginTop: r.highlight ? 4 : 0,
-                        borderRadius: r.highlight ? 10 : 0,
-                        background: r.highlight ? "rgba(0,230,118,0.06)" : "transparent",
-                        border: r.highlight ? "1px solid rgba(0,230,118,0.15)" : "none",
-                        opacity: r.highlight ? 1 : 0.55,
+                        padding: hl ? "8px 10px" : "5px 0",
+                        marginTop: hl ? 4 : 0,
+                        borderRadius: hl ? 10 : 0,
+                        background: bgColor,
+                        border: hl ? `1px solid ${borderColor}` : "none",
+                        opacity: hl ? 1 : 0.55,
                       }}>
-                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: r.highlight ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.5)" }}>{r.name}</span>
-                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: r.highlight ? 16 : 13, fontWeight: r.highlight ? 900 : 700, color: r.color, textShadow: r.highlight ? `0 0 12px ${r.color}55` : "none" }}>{r.reward}</span>
+                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: r.next ? 600 : 400, color: hl ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.5)" }}>{r.name}{r.next ? <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.3)", fontWeight: 400, marginLeft: 6 }}>— next</span> : null}</span>
+                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: hl ? 15 : 13, fontWeight: hl ? 900 : 700, color: r.color, textShadow: hl ? `0 0 12px ${r.color}55` : "none" }}>{r.reward}</span>
                       </div>
-                    ))}
+                    );})}
                   </div>
 
                   {/* ── CTA ── */}
