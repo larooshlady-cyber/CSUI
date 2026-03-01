@@ -489,16 +489,14 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
           ) : (
             <>
               {/* ── MISSION CLEARED header ── */}
-              <div style={{ textAlign: "center", padding: "18px 20px 0" }}>
-                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 6 }}>
-                  {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : "STAGE 1 CLEARED"}
+              <div style={{ textAlign: "center", padding: "20px 20px 0" }}>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
+                  {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : "CONGRATULATIONS"}
                 </div>
                 <div style={{
-                  fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, letterSpacing: "0.04em",
-                  background: "linear-gradient(135deg,#ffd740,#ffab00,#fff3b0)",
-                  backgroundSize: "300% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                  animation: "shimmer 2.5s linear infinite", lineHeight: 1.2,
-                }}>MISSION SUCCEED!</div>
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, letterSpacing: "0.04em",
+                  color: "#ffd740", lineHeight: 1.2,
+                }}>You Won a Bonus!</div>
               </div>
 
               {title === "MEGA SPIN" ? (
@@ -529,104 +527,65 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                 </>
               ) : (
                 <>
-                  {/* ── Current prizes ── */}
-                  <div style={{ display: "flex", gap: 10, margin: "14px 16px 0" }}>
-                    <div style={{ flex: 1, padding: "14px 8px", borderRadius: 16, textAlign: "center",
-                      background: "linear-gradient(145deg,rgba(255,210,50,0.1),rgba(255,160,40,0.03))",
-                      border: "1.5px solid rgba(255,210,50,0.2)",
-                    }}>
-                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232", textShadow: "0 0 20px rgba(255,210,50,0.5)", lineHeight: 1.1 }}>150%</div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,210,50,0.55)", letterSpacing: "0.15em", marginTop: 4, textTransform: "uppercase" }}>Deposit Bonus</div>
-                    </div>
-                    <div style={{ flex: 1, padding: "14px 8px", borderRadius: 16, textAlign: "center",
-                      background: "linear-gradient(145deg,rgba(0,229,255,0.08),rgba(0,180,255,0.02))",
-                      border: "1.5px solid rgba(0,229,255,0.2)",
-                    }}>
-                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#00e5ff", textShadow: "0 0 20px rgba(0,229,255,0.4)", lineHeight: 1.1 }}>+50 FS</div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(0,229,255,0.45)", letterSpacing: "0.15em", marginTop: 4, textTransform: "uppercase" }}>Free Spins</div>
-                    </div>
-                  </div>
-
-                  {/* ── no strings badge ── */}
-                  <div style={{ display: "flex", justifyContent: "center", gap: 6, margin: "12px 12px 0" }}>
-                    {["NO DEPOSIT", "NO WAGER", "NO STRINGS"].map((t, i) => (
-                      <span key={i} style={{
-                        padding: "5px 10px", borderRadius: 8, whiteSpace: "nowrap",
-                        background: "rgba(0,230,118,0.08)", border: "1.5px solid rgba(0,230,118,0.2)",
-                        fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#00e676",
-                        letterSpacing: "0.06em",
-                      }}>{t}</span>
-                    ))}
-                  </div>
-
-                  {/* ── ALL JOURNEY REWARDS ── */}
+                  {/* ── Your reward (compact) ── */}
                   <div style={{
-                    margin: "14px 16px 0", padding: "12px 14px", borderRadius: 16,
-                    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                    margin: "16px 16px 0", padding: "14px 16px", borderRadius: 16,
+                    background: "rgba(255,210,50,0.04)", border: "1px solid rgba(255,210,50,0.12)",
+                    textAlign: "center",
                   }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.25em", marginBottom: 10 }}>YOUR JOURNEY REWARDS</div>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 10 }}>YOU WON</div>
+                    <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "center" }}>
+                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#ffd232" }}>150%</span>
+                      <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)" }}>+</span>
+                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#00e5ff" }}>50 FS</span>
+                    </div>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 6 }}>Deposit Bonus + Free Spins</div>
+                  </div>
+
+                  {/* ── Claim notice ── */}
+                  <div style={{
+                    margin: "10px 16px 0", padding: "10px 14px", borderRadius: 12,
+                    background: "rgba(255,160,40,0.05)", border: "1px solid rgba(255,160,40,0.12)",
+                    display: "flex", alignItems: "center", gap: 10,
+                  }}>
+                    <span style={{ fontSize: 16 }}>&#127873;</span>
+                    <div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>Prize reserved for <span style={{ color: "#ffa028", fontWeight: 700 }}>{countdownStr}</span></div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 2 }}>Create an account to claim your rewards</div>
+                    </div>
+                  </div>
+
+                  {/* ── Journey preview (compact) ── */}
+                  <div style={{
+                    margin: "10px 16px 0", padding: "10px 14px", borderRadius: 12,
+                    background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)",
+                  }}>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.2)", letterSpacing: "0.2em", marginBottom: 8 }}>UNLOCK MORE REWARDS</div>
                     {[
-                      { step: 1, name: "Welcome Spin", reward: "+50 FS / 150%", color: "#ffd232", unlocked: true },
-                      { step: 2, name: "KYC", reward: "+50 FS", color: "#78c8ff", unlocked: false },
-                      { step: 3, name: "Phone", reward: "100% CB", color: "#ff3278", unlocked: false },
-                      { step: 4, name: "Telegram", reward: "+$20", color: "#00b4ff", unlocked: false },
-                      { step: 5, name: "Mega Spin", reward: "$50-500", color: "#ffa028", unlocked: false },
-                      { step: 6, name: "Final", reward: "$500", color: "#00e676", unlocked: false },
+                      { name: "KYC", reward: "+50 FS", color: "#78c8ff" },
+                      { name: "Phone", reward: "100% CB", color: "#ff3278" },
+                      { name: "Telegram", reward: "+$20", color: "#00b4ff" },
+                      { name: "Mega Spin", reward: "$50–500", color: "#ffa028" },
+                      { name: "Final", reward: "$500 Cash", color: "#00e676" },
                     ].map((r, idx) => (
                       <div key={idx} style={{
-                        display: "flex", alignItems: "center", gap: 10, padding: "6px 0",
-                        opacity: r.unlocked ? 1 : 0.4,
-                        animation: `prizeCardIn 0.5s ease-out ${0.1 + idx * 0.12}s both`,
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "4px 0", opacity: 0.45,
                       }}>
-                        <div style={{
-                          width: 22, height: 22, borderRadius: 6, flexShrink: 0,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          background: r.unlocked ? `${r.color}22` : "rgba(255,255,255,0.03)",
-                          border: `1px solid ${r.unlocked ? `${r.color}44` : "rgba(255,255,255,0.06)"}`,
-                        }}>
-                          {r.unlocked
-                            ? <span style={{ color: "#00e676", fontSize: 11 }}>&#10003;</span>
-                            : <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.3)" }}>{r.step}</span>
-                          }
-                        </div>
-                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.6)", flex: 1 }}>{r.name}</span>
-                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800, color: r.unlocked ? r.color : "rgba(255,255,255,0.2)" }}>{r.reward}</span>
+                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.5)" }}>{r.name}</span>
+                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 700, color: r.color }}>{r.reward}</span>
                       </div>
                     ))}
                   </div>
 
-                  {/* ── $500 guaranteed banner ── */}
-                  <div style={{
-                    margin: "8px 16px 0", padding: "10px 14px", borderRadius: 14,
-                    background: "linear-gradient(135deg,rgba(0,230,118,0.06),rgba(0,180,255,0.02))",
-                    border: "1.5px solid rgba(0,230,118,0.15)",
-                    display: "flex", alignItems: "center", gap: 12,
-                  }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#00e676", textShadow: "0 0 14px rgba(0,230,118,0.3)", lineHeight: 1, whiteSpace: "nowrap" }}>$500</div>
-                    <div>
-                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#00e676", letterSpacing: "0.12em" }}>GUARANTEED CASH PRIZE</div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,255,255,0.22)", marginTop: 2, letterSpacing: "0.04em" }}>Complete all steps to claim</div>
-                    </div>
-                  </div>
-
-                  {/* ── 24h countdown urgency ── */}
-                  <div style={{
-                    margin: "10px 16px 0", padding: "8px 12px", borderRadius: 10,
-                    background: "rgba(255,160,40,0.06)", border: "1px solid rgba(255,160,40,0.15)",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  }}>
-                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: "#ffa028" }}>{countdownStr}</span>
-                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,160,40,0.6)", letterSpacing: "0.08em" }}>COMPLETE ALL STEPS FOR 2x BONUS</span>
-                  </div>
-
                   {/* ── CTA ── */}
-                  <div style={{ padding: "12px 16px 18px" }}>
+                  <div style={{ padding: "14px 16px 18px" }}>
                     <button onClick={() => handleContinue(true)} style={{
                       width: "100%", padding: 16, borderRadius: 16, border: "none",
-                      fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.12em",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.1em",
                       cursor: "pointer", background: "linear-gradient(135deg,#ffd232,#ffab00)", color: "rgba(0,0,0,0.85)",
                       boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
-                    }}>CONTINUE JOURNEY</button>
+                    }}>CREATE ACCOUNT</button>
                   </div>
                 </>
               )}
@@ -1437,44 +1396,6 @@ export default function CosmicCasino() {
           : l.id === lvId + 1 ? { ...l, unlocked: true }
           : l
         );
-        // zoom to next island if it exists
-        const nextIdx = next.findIndex(l => l.id === lvId + 1);
-        if (nextIdx >= 0 && !next[nextIdx].complete) {
-          const el = scrollRef.current;
-          if (el) {
-            // scroll next island to center
-            const nextY = PAD_TOP + nextIdx * NODE_GAP;
-            const targetScroll = Math.max(0, nextY - dim.h / 2 + 50);
-            const startScroll = el.scrollTop;
-            const scrollDelta = targetScroll - startScroll;
-            const scrollDur = 800;
-            const t0 = performance.now();
-            const ease = (p) => p < 0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2;
-            // also apply zoom via CSS transform on the scroll container's content
-            el.style.transition = "none";
-            const animZoom = (now) => {
-              const p = Math.min(1, (now - t0) / scrollDur);
-              el.scrollTop = startScroll + scrollDelta * ease(p);
-              // zoom curve: ramp up to 1.15 at p=0.5, then hold
-              const zoomP = Math.min(1, p * 2);
-              const scale = 1 + 0.15 * ease(zoomP);
-              const originX = "50%";
-              const originY = (nextY) + "px";
-              el.style.transformOrigin = `${originX} ${originY}`;
-              el.style.transform = `scale(${scale})`;
-              if (p < 1) requestAnimationFrame(animZoom);
-              else {
-                // hold zoom briefly, then ease back out
-                setTimeout(() => {
-                  el.style.transition = "transform 0.8s cubic-bezier(0.22,1,0.36,1)";
-                  el.style.transform = "scale(1)";
-                  setTimeout(() => { el.style.transition = "none"; }, 850);
-                }, 600);
-              }
-            };
-            requestAnimationFrame(animZoom);
-          }
-        }
         // auto-complete next island if it was lockedButCompleted (pre-verified externally)
         const nextLv = next.find(l => l.id === lvId + 1);
         if (nextLv && nextLv.lockedButCompleted && nextLv.unlocked && !nextLv.complete) {
