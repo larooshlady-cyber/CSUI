@@ -64,18 +64,18 @@ const INITIAL_LEVELS = [
 ];
 
 const WHEEL_PRIZES = [
-  { label: "150% DEP\n+50 FS", color: "#ffe0a0", bg1: "#3a2810", bg2: "#584018", jackpot: true },
-  { label: "20 Free\nSpins", color: "#ffe0a0", bg1: "#181c30", bg2: "#222840" },
-  { label: "75% DEP\nBonus", color: "#ffe0a0", bg1: "#301c18", bg2: "#442820" },
-  { label: "10 Free\nSpins", color: "#ffe0a0", bg1: "#181c30", bg2: "#222840" },
+  { label: "150% DEP\n+50 FS", color: "#ffd780", bg1: "#4a3010", bg2: "#6a4c1a", jackpot: true },
+  { label: "20 Free\nSpins", color: "#ffd780", bg1: "#141838", bg2: "#1e2850" },
+  { label: "75% DEP\nBonus", color: "#ffd780", bg1: "#3e1c14", bg2: "#5a2e20" },
+  { label: "10 Free\nSpins", color: "#ffd780", bg1: "#141838", bg2: "#1e2850" },
 ];
 const JACKPOT_INDEX = 0; // always land here
 
 const MEGA_WHEEL_PRIZES = [
-  { label: "$500\nJackpot", color: "#ffe0a0", bg1: "#3a2810", bg2: "#584018", jackpot: true },
-  { label: "$200\nBonus", color: "#ffe0a0", bg1: "#301c18", bg2: "#442820" },
-  { label: "$100\nCash", color: "#ffe0a0", bg1: "#181c30", bg2: "#222840" },
-  { label: "$50\nBonus", color: "#ffe0a0", bg1: "#301c18", bg2: "#442820" },
+  { label: "$500\nJackpot", color: "#ffd780", bg1: "#4a3010", bg2: "#6a4c1a", jackpot: true },
+  { label: "$200\nBonus", color: "#ffd780", bg1: "#3e1c14", bg2: "#5a2e20" },
+  { label: "$100\nCash", color: "#ffd780", bg1: "#141838", bg2: "#1e2850" },
+  { label: "$50\nBonus", color: "#ffd780", bg1: "#3e1c14", bg2: "#5a2e20" },
 ];
 
 const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.7];
