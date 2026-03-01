@@ -64,18 +64,18 @@ const INITIAL_LEVELS = [
 ];
 
 const WHEEL_PRIZES = [
-  { label: "150% DEP\n+50 FS", color: "#ffe8a0", bg1: "#2a1a08", bg2: "#3d2a0c", jackpot: true },
-  { label: "20 Free\nSpins", color: "#c8b080", bg1: "#0c0e18", bg2: "#14182a" },
-  { label: "75% DEP\nBonus", color: "#ffe8a0", bg1: "#1e1210", bg2: "#2c1a16" },
-  { label: "10 Free\nSpins", color: "#c8b080", bg1: "#0c0e18", bg2: "#14182a" },
+  { label: "150% DEP\n+50 FS", color: "#ffe0a0", bg1: "#3a2810", bg2: "#584018", jackpot: true },
+  { label: "20 Free\nSpins", color: "#ffe0a0", bg1: "#181c30", bg2: "#222840" },
+  { label: "75% DEP\nBonus", color: "#ffe0a0", bg1: "#301c18", bg2: "#442820" },
+  { label: "10 Free\nSpins", color: "#ffe0a0", bg1: "#181c30", bg2: "#222840" },
 ];
 const JACKPOT_INDEX = 0; // always land here
 
 const MEGA_WHEEL_PRIZES = [
-  { label: "$500\nJackpot", color: "#ffe8a0", bg1: "#2a1a08", bg2: "#3d2a0c", jackpot: true },
-  { label: "$200\nBonus", color: "#c8b080", bg1: "#1e1210", bg2: "#2c1a16" },
-  { label: "$100\nCash", color: "#ffe8a0", bg1: "#0c0e18", bg2: "#14182a" },
-  { label: "$50\nBonus", color: "#c8b080", bg1: "#1e1210", bg2: "#2c1a16" },
+  { label: "$500\nJackpot", color: "#ffe0a0", bg1: "#3a2810", bg2: "#584018", jackpot: true },
+  { label: "$200\nBonus", color: "#ffe0a0", bg1: "#301c18", bg2: "#442820" },
+  { label: "$100\nCash", color: "#ffe0a0", bg1: "#181c30", bg2: "#222840" },
+  { label: "$50\nBonus", color: "#ffe0a0", bg1: "#301c18", bg2: "#442820" },
 ];
 
 const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.7];
@@ -285,8 +285,8 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
       // counter-rotate to keep text horizontal despite wheel rotation
       ctx.rotate(-angleRef.current);
       ctx.fillStyle = prize.color;
-      ctx.globalAlpha = prize.jackpot ? 1 : 0.7;
-      ctx.font = `bold ${prize.jackpot ? 14 : 12}px 'Orbitron',sans-serif`;
+      ctx.globalAlpha = 0.9;
+      ctx.font = "bold 13px 'Orbitron',sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const lines = prize.label.split("\n");
