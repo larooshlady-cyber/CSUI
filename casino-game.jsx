@@ -733,7 +733,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
    ═══════════════════════════════════════════════════ */
 /* ── Preload island PNGs ── */
 const islandImages = {};
-const islandImgNames = ["Islandio", "IS-CYAN", "IS-PURPLE", "IS-GREEN", "IS-RED"];
+const islandImgNames = ["Islandio", "IS-CYAN", "IS-PURPLE", "IS-GREEN", "IS-RED", "KYC"];
 let allIslandsReady = false;
 let islandsLoadedCount = 0;
 for (const name of islandImgNames) {
@@ -752,7 +752,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
   propsRef.current = { width, height, levels, completingId, allComplete };
   // smooth color/opacity transitions for each island
   const animColors = useRef(levels.map(lv => ({
-    r: lv.complete ? 0 : lv.r, g: lv.complete ? 200 : lv.g, b: lv.complete ? 80 : lv.b,
+    r: lv.r, g: lv.g, b: lv.b,
     alpha: lv.unlocked ? 1 : 0.35,
   })));
 
@@ -813,10 +813,9 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
       for (let i = 0; i < levels.length; i++) {
         const lv = levels[i];
         const ac = animColors.current[i];
-        const shifting = lv.complete || lv.completing; // shift to green during completing phase too
-        const tR = shifting ? 0 : lv.r;
-        const tG = shifting ? 200 : lv.g;
-        const tB = shifting ? 80 : lv.b;
+        const tR = lv.r;
+        const tG = lv.g;
+        const tB = lv.b;
         const tA = lv.unlocked ? 1 : 0.35;
         ac.r += (tR - ac.r) * lerpSpeed;
         ac.g += (tG - ac.g) * lerpSpeed;
@@ -975,7 +974,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
 
         // ── draw island PNG (color-matched or green if complete) ──
         if (state.current.imgReady) {
-          const imgKey = lv.complete ? "IS-GREEN" : (ISLAND_MAP[lv.id] || "Islandio");
+          const imgKey = ISLAND_MAP[lv.id] || "Islandio";
           const img = islandImages[imgKey];
           if (img && img.complete) {
             const imgW = 220 * sc;
@@ -1000,8 +999,8 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
             const iconCy = ry - imgH * 0.12;
             ctx.save();
             ctx.globalAlpha = ac.alpha * 0.85;
-            ctx.strokeStyle = lv.complete ? "#00e676" : lv.accent || "#fff";
-            ctx.fillStyle = lv.complete ? "rgba(0,230,118,0.15)" : `rgba(${lv.r},${lv.g},${lv.b},0.12)`;
+            ctx.strokeStyle = lv.accent || "#fff";
+            ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.12)`;
             ctx.lineWidth = 2 * sc;
             ctx.lineCap = "round"; ctx.lineJoin = "round";
 
@@ -1017,18 +1016,12 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
                 ctx.stroke();
               }
             } else if (lv.icon === "kyc") {
-              // ID card icon
-              const cw = iconSz * 0.8, ch = iconSz * 0.6;
-              ctx.beginPath();
-              ctx.roundRect(iconCx - cw / 2, iconCy - ch / 2, cw, ch, 3 * sc);
-              ctx.stroke(); ctx.fill();
-              ctx.beginPath(); ctx.arc(iconCx - cw * 0.15, iconCy - ch * 0.05, iconSz * 0.12, 0, Math.PI * 2); ctx.stroke();
-              ctx.beginPath();
-              ctx.moveTo(iconCx + cw * 0.1, iconCy - ch * 0.15);
-              ctx.lineTo(iconCx + cw * 0.35, iconCy - ch * 0.15);
-              ctx.moveTo(iconCx + cw * 0.1, iconCy + ch * 0.1);
-              ctx.lineTo(iconCx + cw * 0.3, iconCy + ch * 0.1);
-              ctx.stroke();
+              // KYC png icon
+              const kycImg = islandImages["KYC"];
+              if (kycImg && kycImg.complete) {
+                const kycSz = iconSz * 1.82;
+                ctx.drawImage(kycImg, iconCx - kycSz / 2, iconCy - kycSz / 2, kycSz, kycSz);
+              }
             } else if (lv.icon === "phone") {
               // phone icon
               const pw = iconSz * 0.4, ph = iconSz * 0.7;
@@ -1933,8 +1926,8 @@ export default function CosmicCasino() {
             const sy = PAD_TOP + i * NODE_GAP;
             const jp = lv.id === 6;
             const locked = !lv.unlocked;
-            const iconColor = lv.complete ? "#00e676" : lv.accent;
-            const iconR = lv.complete ? 0 : lv.r, iconG = lv.complete ? 200 : lv.g, iconB = lv.complete ? 80 : lv.b;
+            const iconColor = lv.accent;
+
             return (
               <div key={lv.id} ref={el => { islandElsRef.current[i] = el; }} style={{
                 position: "absolute", top: sy - 55, left: sx - (jp ? 130 : 110), width: jp ? 260 : 220, height: jp ? 240 : 200,
@@ -1948,15 +1941,15 @@ export default function CosmicCasino() {
                   transition: "opacity 0.8s ease",
                 }}>
                   <svg width={jp ? 40 : 28} height={jp ? 40 : 28} viewBox="0 0 40 40" fill="none">
-                    {lv.icon === "wheel" && <>
-                      <circle cx="20" cy="20" r="16" stroke={iconColor} strokeWidth="3" fill="none" />
-                      <circle cx="20" cy="20" r="4" fill={iconColor} />
-                      {[0,45,90,135,180,225,270,315].map(a => <line key={a} x1="20" y1="20" x2={20+Math.cos(a*Math.PI/180)*14} y2={20+Math.sin(a*Math.PI/180)*14} stroke={iconColor} strokeWidth="1.5" />)}
-                    </>}
                     {lv.icon === "kyc" && <>
                       <rect x="8" y="6" width="24" height="28" rx="3" stroke={iconColor} strokeWidth="2.5" fill="none" />
                       <circle cx="20" cy="17" r="5" stroke={iconColor} strokeWidth="2" fill="none" />
                       <path d="M12 30 Q20 24 28 30" stroke={iconColor} strokeWidth="2" fill="none" />
+                    </>}
+                    {lv.icon === "wheel" && <>
+                      <circle cx="20" cy="20" r="16" stroke={iconColor} strokeWidth="3" fill="none" />
+                      <circle cx="20" cy="20" r="4" fill={iconColor} />
+                      {[0,45,90,135,180,225,270,315].map(a => <line key={a} x1="20" y1="20" x2={20+Math.cos(a*Math.PI/180)*14} y2={20+Math.sin(a*Math.PI/180)*14} stroke={iconColor} strokeWidth="1.5" />)}
                     </>}
                     {lv.icon === "email" && <>
                       <rect x="5" y="10" width="30" height="20" rx="3" stroke={iconColor} strokeWidth="2.5" fill="none" />
@@ -2006,13 +1999,14 @@ export default function CosmicCasino() {
                 {/* Prize bubble — shown when completed */}
                 {lv.complete && (
                   <div style={{
-                    position: "absolute", top: jp ? 75 : 90, left: "50%", transform: "translateX(-50%)",
+                    position: "absolute", top: jp ? 85 : 100, left: "50%", transform: "translateX(-50%)",
                     zIndex: 31, pointerEvents: "none",
                     display: "flex", alignItems: "center", gap: 6,
-                    padding: "5px 12px", borderRadius: 20,
-                    background: "rgba(0,230,118,0.12)",
-                    border: "1px solid rgba(0,230,118,0.3)",
-                    boxShadow: "0 0 12px rgba(0,230,118,0.15)",
+                    padding: "6px 14px", borderRadius: 20,
+                    background: "linear-gradient(135deg, rgba(0,230,118,0.35), rgba(0,200,83,0.25))",
+                    border: "1.5px solid rgba(0,230,118,0.7)",
+                    boxShadow: "0 0 16px rgba(0,230,118,0.4), 0 0 6px rgba(0,230,118,0.2) inset",
+                    backdropFilter: "blur(6px)",
                     whiteSpace: "nowrap",
                     animation: "fadeIn 0.5s ease-out",
                   }}>
@@ -2047,8 +2041,9 @@ export default function CosmicCasino() {
                       )}
                     </svg>
                     <span style={{
-                      fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800,
-                      color: "#00e676", letterSpacing: "0.05em",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 900,
+                      color: "#fff", letterSpacing: "0.05em",
+                      textShadow: "0 0 8px rgba(0,230,118,0.8), 0 1px 2px rgba(0,0,0,0.5)",
                     }}>{lv.rewardShort}</span>
                   </div>
                 )}
@@ -2058,15 +2053,9 @@ export default function CosmicCasino() {
                   position: "absolute", bottom: -16, left: "50%", transform: "translateX(-50%)",
                   textAlign: "center", whiteSpace: "nowrap",
                   padding: "10px 16px 9px", borderRadius: 14,
-                  background: lv.complete
-                    ? "rgba(0,20,10,0.75)"
-                    : locked ? "rgba(5,3,15,0.65)" : "rgba(5,3,15,0.75)",
-                  border: lv.complete
-                    ? "1px solid rgba(0,230,118,0.2)"
-                    : locked ? "1px solid rgba(255,255,255,0.04)" : `1px solid rgba(${lv.r},${lv.g},${lv.b},0.2)`,
-                  boxShadow: lv.complete
-                    ? "0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(0,230,118,0.1)"
-                    : "0 4px 16px rgba(0,0,0,0.4)",
+                  background: locked ? "rgba(5,3,15,0.65)" : "rgba(5,3,15,0.75)",
+                  border: locked ? "1px solid rgba(255,255,255,0.04)" : `1px solid rgba(${lv.r},${lv.g},${lv.b},0.2)`,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
                   opacity: locked ? 0.5 : 1,
                   transition: "opacity 0.8s ease",
                 }}>
@@ -2076,7 +2065,7 @@ export default function CosmicCasino() {
                     fontSize: 14, fontWeight: 900,
                     color: locked ? "rgba(255,255,255,0.25)" : "#fff",
                     letterSpacing: "0.1em", textTransform: "uppercase",
-                    textShadow: lv.complete ? "0 0 12px rgba(0,230,118,0.5), 0 1px 6px rgba(0,0,0,0.8)" : "0 1px 6px rgba(0,0,0,0.8)",
+                    textShadow: "0 1px 6px rgba(0,0,0,0.8)",
                     transition: "color 0.8s ease, text-shadow 0.8s ease",
                   }}>{lv.name}</div>
 
@@ -2096,7 +2085,7 @@ export default function CosmicCasino() {
                           <span style={{
                             fontFamily: "'Orbitron', sans-serif", fontSize: 13, fontWeight: 800,
                             color: "#00e676", letterSpacing: "0.05em",
-                          }}>{lv.rewardShort}</span>
+                          }}>COMPLETED</span>
                         </span>
                       </>
                     ) : locked && lv.lockedButCompleted ? (
@@ -2178,7 +2167,7 @@ export default function CosmicCasino() {
                     fontFamily: "'Exo 2',sans-serif", fontSize: 8, fontWeight: 700,
                     color: done ? "rgba(0,230,118,0.5)" : active ? `rgba(${lv.r},${lv.g},${lv.b},0.6)` : "rgba(255,255,255,0.1)",
                     whiteSpace: "nowrap",
-                  }}>{lv.rewardShort}</span>
+                  }}>{done ? "Completed" : lv.rewardShort}</span>
                 </div>
               </div>
             );
@@ -2300,7 +2289,7 @@ export default function CosmicCasino() {
                       justifyContent: isFirst ? "flex-start" : isLast ? "flex-end" : "center",
                       textShadow: done ? "0 0 6px rgba(0,230,118,0.5)" : "none",
                       height: 22, display: "flex", alignItems: "center",
-                    }}>{lv.rewardShort}</div>
+                    }}>{done ? "Completed" : lv.rewardShort}</div>
                   );
 
                   return (
