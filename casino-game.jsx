@@ -58,7 +58,7 @@ const INITIAL_LEVELS = [
   { id: 6, name: "Next Journey", icon: "crown", r: 255, g: 210, b: 50, accent: "#ffd232", reward: "Unlock New World", rewardShort: "NEW WORLD", task: "Complete All Steps", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
   { id: 5, name: "Mega Spin", icon: "deposit", r: 255, g: 160, b: 40, accent: "#ffa028", reward: "Wheel Ticket $50-500", rewardShort: "$50-500", task: "Deposit min $50", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
   { id: 4, name: "Telegram Verify", icon: "telegram", r: 0, g: 180, b: 255, accent: "#00b4ff", reward: "+$20 Bonus", rewardShort: "+$20", task: "Join Telegram", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 3, name: "Phone Verification", icon: "phone", r: 255, g: 50, b: 120, accent: "#ff3278", reward: "100% Cashback", rewardShort: "100% CB", task: "Verify Phone", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 3, name: "Phone Verification", icon: "phone", r: 255, g: 50, b: 120, accent: "#ff3278", reward: "100% Cashback", rewardShort: "100% CB", task: "Verify Phone", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: true },
   { id: 2, name: "KYC Verification", icon: "kyc", r: 120, g: 200, b: 255, accent: "#78c8ff", reward: "+50 Free Spins", rewardShort: "+50 FS", task: "Verify Identity", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
   { id: 1, name: "Welcome Spin", icon: "wheel", r: 255, g: 210, b: 50, accent: "#ffd232", reward: "+50 FS / 150% Dep", rewardShort: "+50FS / 150%", task: "Spin the Wheel", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
 ];
@@ -2095,11 +2095,11 @@ export default function CosmicCasino() {
                         background: "rgba(0,230,118,0.08)",
                         border: "1px solid rgba(0,230,118,0.2)",
                       }}>
-                        <span style={{ color: "rgba(0,230,118,0.6)", fontSize: 11, lineHeight: 1 }}>&#10003;</span>
+                        <span style={{ color: "rgba(0,230,118,0.6)", fontSize: 13, lineHeight: 1 }}>&#10003;</span>
                         <span style={{
-                          fontFamily: "'Orbitron', sans-serif", fontSize: 11, fontWeight: 800,
+                          fontFamily: "'Orbitron', sans-serif", fontSize: 10, fontWeight: 800,
                           color: "rgba(0,230,118,0.5)", letterSpacing: "0.05em",
-                        }}>VERIFIED</span>
+                        }}>CLEAR PREVIOUS STAGE</span>
                       </span>
                     ) : locked ? (
                       <span style={{
