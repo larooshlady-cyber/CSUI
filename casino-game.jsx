@@ -55,12 +55,12 @@ function CharacterPlaceholder({ size = 120, style = {} }) {
 }
 
 const INITIAL_LEVELS = [
-  { id: 6, name: "Next Journey", icon: "crown", r: 255, g: 210, b: 50, accent: "#ffd232", reward: "Unlock New World", rewardShort: "NEW WORLD", task: "Complete All Steps", unlocked: false, complete: false },
-  { id: 5, name: "Mega Spin", icon: "deposit", r: 255, g: 160, b: 40, accent: "#ffa028", reward: "Wheel Ticket $50-500", rewardShort: "$50-500", task: "Deposit min $50", unlocked: false, complete: false },
-  { id: 4, name: "Telegram Verify", icon: "telegram", r: 0, g: 180, b: 255, accent: "#00b4ff", reward: "+$20 Bonus", rewardShort: "+$20", task: "Join Telegram", unlocked: false, complete: false },
-  { id: 3, name: "Phone Verification", icon: "phone", r: 255, g: 50, b: 120, accent: "#ff3278", reward: "100% Cashback", rewardShort: "100% CB", task: "Verify Phone", unlocked: false, complete: false },
-  { id: 2, name: "KYC Verification", icon: "kyc", r: 120, g: 200, b: 255, accent: "#78c8ff", reward: "+50 Free Spins", rewardShort: "+50 FS", task: "Verify Identity", unlocked: false, complete: false },
-  { id: 1, name: "Welcome Spin", icon: "wheel", r: 255, g: 210, b: 50, accent: "#ffd232", reward: "+50 FS / 150% Dep", rewardShort: "+50FS / 150%", task: "Spin the Wheel", unlocked: true, complete: false },
+  { id: 6, name: "Next Journey", icon: "crown", r: 255, g: 210, b: 50, accent: "#ffd232", reward: "Unlock New World", rewardShort: "NEW WORLD", task: "Complete All Steps", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 5, name: "Mega Spin", icon: "deposit", r: 255, g: 160, b: 40, accent: "#ffa028", reward: "Wheel Ticket $50-500", rewardShort: "$50-500", task: "Deposit min $50", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 4, name: "Telegram Verify", icon: "telegram", r: 0, g: 180, b: 255, accent: "#00b4ff", reward: "+$20 Bonus", rewardShort: "+$20", task: "Join Telegram", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 3, name: "Phone Verification", icon: "phone", r: 255, g: 50, b: 120, accent: "#ff3278", reward: "100% Cashback", rewardShort: "100% CB", task: "Verify Phone", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 2, name: "KYC Verification", icon: "kyc", r: 120, g: 200, b: 255, accent: "#78c8ff", reward: "+50 Free Spins", rewardShort: "+50 FS", task: "Verify Identity", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 1, name: "Welcome Spin", icon: "wheel", r: 255, g: 210, b: 50, accent: "#ffd232", reward: "+50 FS / 150% Dep", rewardShort: "+50FS / 150%", task: "Spin the Wheel", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
 ];
 
 const WHEEL_PRIZES = [
@@ -70,7 +70,15 @@ const WHEEL_PRIZES = [
   { label: "10 Free\nSpins", color: "#00e676", bg1: "#0a2a15", bg2: "#103d20" },
 ];
 const JACKPOT_INDEX = 0; // always land here
-const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.5];
+
+const MEGA_WHEEL_PRIZES = [
+  { label: "$500\nJackpot", color: "#ffd232", bg1: "#3a2d08", bg2: "#5c4a0a", jackpot: true },
+  { label: "$200\nBonus", color: "#ff3278", bg1: "#2a0c18", bg2: "#3d1225" },
+  { label: "$100\nCash", color: "#00e676", bg1: "#0a2a15", bg2: "#103d20" },
+  { label: "$50\nBonus", color: "#78c8ff", bg1: "#0d1a2e", bg2: "#142840" },
+];
+
+const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.7];
 const NODE_GAP = 170;
 const PAD_TOP = 130;
 
@@ -159,7 +167,7 @@ function ConfettiCanvas() {
 /* ═══════════════════════════════════════════════════
    WHEEL OF FORTUNE — always lands on jackpot
    ═══════════════════════════════════════════════════ */
-function WheelOfFortune({ onClose, onWin }) {
+function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL OF FORTUNE", countdownStr = "23:59:59" }) {
   const canvasRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
@@ -168,7 +176,7 @@ function WheelOfFortune({ onClose, onWin }) {
   const ctxRef = useRef(null);
   const phaseRef = useRef("spin");
 
-  const segments = WHEEL_PRIZES.length;
+  const segments = prizes.length;
   const segAngle = (Math.PI * 2) / segments;
 
   const drawWheel = useCallback(() => {
@@ -182,7 +190,7 @@ function WheelOfFortune({ onClose, onWin }) {
     ctx.translate(cx, cy);
     ctx.rotate(angleRef.current);
     for (let i = 0; i < segments; i++) {
-      const prize = WHEEL_PRIZES[i];
+      const prize = prizes[i];
       const sA = i * segAngle, eA = sA + segAngle;
 
       // fill
@@ -301,7 +309,7 @@ function WheelOfFortune({ onClose, onWin }) {
     ctx.lineTo(cx + 11, cy - r - 14);
     ctx.closePath();
     ctx.stroke();
-  }, [segments, segAngle]);
+  }, [segments, segAngle, prizes]);
 
   // render loop — pauses during celebrating phase
   useEffect(() => {
@@ -360,7 +368,7 @@ function WheelOfFortune({ onClose, onWin }) {
   };
 
   const handleContinue = (registerBonus) => {
-    onWin({ ...WHEEL_PRIZES[JACKPOT_INDEX], registerBonus });
+    onWin({ ...prizes[JACKPOT_INDEX], registerBonus });
   };
 
   return (
@@ -388,7 +396,7 @@ function WheelOfFortune({ onClose, onWin }) {
                   background: "linear-gradient(135deg,#ffd740,#ffab00,#ffd740,#fff3b0)",
                   backgroundSize: "300% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
                   animation: "shimmer 3s linear infinite",
-                }}>WHEEL OF FORTUNE</div>
+                }}>{title}</div>
                 <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", letterSpacing: "0.25em", marginTop: 8, fontWeight: 600 }}>SPIN TO START YOUR JOURNEY</div>
               </div>
 
@@ -433,7 +441,9 @@ function WheelOfFortune({ onClose, onWin }) {
             <>
               {/* ── MISSION CLEARED header ── */}
               <div style={{ textAlign: "center", padding: "18px 20px 0" }}>
-                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 6 }}>STAGE 1 CLEARED</div>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 6 }}>
+                  {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : "STAGE 1 CLEARED"}
+                </div>
                 <div style={{
                   fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, letterSpacing: "0.04em",
                   background: "linear-gradient(135deg,#ffd740,#ffab00,#fff3b0)",
@@ -442,98 +452,135 @@ function WheelOfFortune({ onClose, onWin }) {
                 }}>MISSION SUCCEED!</div>
               </div>
 
-              {/* ── prizes side by side ── */}
-              <div style={{ display: "flex", gap: 10, margin: "14px 16px 0" }}>
-                <div style={{ flex: 1, padding: "14px 8px", borderRadius: 16, textAlign: "center",
-                  background: "linear-gradient(145deg,rgba(255,210,50,0.1),rgba(255,160,40,0.03))",
-                  border: "1.5px solid rgba(255,210,50,0.2)",
-                }}>
-                  <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232", textShadow: "0 0 20px rgba(255,210,50,0.5)", lineHeight: 1.1 }}>150%</div>
-                  <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,210,50,0.55)", letterSpacing: "0.15em", marginTop: 4, textTransform: "uppercase" }}>Deposit Bonus</div>
-                </div>
-                <div style={{ flex: 1, padding: "14px 8px", borderRadius: 16, textAlign: "center",
-                  background: "linear-gradient(145deg,rgba(0,229,255,0.08),rgba(0,180,255,0.02))",
-                  border: "1.5px solid rgba(0,229,255,0.2)",
-                }}>
-                  <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#00e5ff", textShadow: "0 0 20px rgba(0,229,255,0.4)", lineHeight: 1.1 }}>+50 FS</div>
-                  <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(0,229,255,0.45)", letterSpacing: "0.15em", marginTop: 4, textTransform: "uppercase" }}>Free Spins</div>
-                </div>
-              </div>
-
-              {/* ── no strings badge ── */}
-              <div style={{ display: "flex", justifyContent: "center", gap: 6, margin: "12px 12px 0" }}>
-                {["NO DEPOSIT", "NO WAGER", "NO STRINGS"].map((t, i) => (
-                  <span key={i} style={{
-                    padding: "5px 10px", borderRadius: 8, whiteSpace: "nowrap",
-                    background: "rgba(0,230,118,0.08)", border: "1.5px solid rgba(0,230,118,0.2)",
-                    fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#00e676",
-                    letterSpacing: "0.06em",
-                  }}>{t}</span>
-                ))}
-              </div>
-
-              {/* ── NEXT STEP — emphasized ── */}
-              <div style={{
-                margin: "14px 16px 0", padding: "14px 16px", borderRadius: 16,
-                background: "linear-gradient(135deg, rgba(0,229,255,0.1), rgba(120,200,255,0.04))",
-                border: "1.5px solid rgba(0,229,255,0.3)",
-                boxShadow: "0 0 24px rgba(0,229,255,0.08), inset 0 1px 0 rgba(255,255,255,0.04)",
-              }}>
-                <div style={{
-                  fontFamily: "'Orbitron',sans-serif", fontSize: 8.5, fontWeight: 800,
-                  color: "rgba(0,229,255,0.5)", letterSpacing: "0.25em", marginBottom: 8,
-                }}>NEXT STEP</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "linear-gradient(135deg, rgba(0,229,255,0.15), rgba(120,200,255,0.05))",
-                    border: "1.5px solid rgba(0,229,255,0.25)",
-                  }}>
-                    <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-                      <rect x="8" y="6" width="24" height="28" rx="3" stroke="#00e5ff" strokeWidth="2.5" fill="none" />
-                      <circle cx="20" cy="17" r="5" stroke="#00e5ff" strokeWidth="2" fill="none" />
-                      <path d="M12 30 Q20 24 28 30" stroke="#00e5ff" strokeWidth="2" fill="none" />
-                    </svg>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 800, color: "#fff", letterSpacing: "0.05em" }}>KYC VERIFICATION</div>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 3 }}>
-                      Unlock <span style={{ color: "#00e5ff", fontWeight: 700 }}>+50 extra Free Spins</span>
+              {title === "MEGA SPIN" ? (
+                <>
+                  {/* ── Mega Spin prize display ── */}
+                  <div style={{ display: "flex", justifyContent: "center", margin: "20px 16px 0" }}>
+                    <div style={{ padding: "20px 32px", borderRadius: 20, textAlign: "center",
+                      background: "linear-gradient(145deg,rgba(255,210,50,0.12),rgba(255,160,40,0.04))",
+                      border: "2px solid rgba(255,210,50,0.3)",
+                      boxShadow: "0 0 40px rgba(255,210,50,0.1)",
+                    }}>
+                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 36, fontWeight: 900, color: "#ffd232", textShadow: "0 0 30px rgba(255,210,50,0.6)", lineHeight: 1.1 }}>
+                        {prizes[JACKPOT_INDEX].label.replace("\n", " ")}
+                      </div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 700, color: "rgba(255,210,50,0.55)", letterSpacing: "0.2em", marginTop: 8, textTransform: "uppercase" }}>YOUR PRIZE</div>
                     </div>
                   </div>
-                  <div style={{
-                    padding: "6px 10px", borderRadius: 10,
-                    background: "rgba(0,229,255,0.12)", border: "1px solid rgba(0,229,255,0.25)",
-                  }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: "#00e5ff", textShadow: "0 0 10px rgba(0,229,255,0.3)", whiteSpace: "nowrap" }}>+50 FS</div>
+
+                  {/* ── CTA ── */}
+                  <div style={{ padding: "20px 16px 18px" }}>
+                    <button onClick={() => handleContinue(false)} style={{
+                      width: "100%", padding: 16, borderRadius: 16, border: "none",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.12em",
+                      cursor: "pointer", background: "linear-gradient(135deg,#ffd232,#ffab00)", color: "rgba(0,0,0,0.85)",
+                      boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
+                    }}>CLAIM PRIZE</button>
                   </div>
-                </div>
-              </div>
+                </>
+              ) : (
+                <>
+                  {/* ── Current prizes ── */}
+                  <div style={{ display: "flex", gap: 10, margin: "14px 16px 0" }}>
+                    <div style={{ flex: 1, padding: "14px 8px", borderRadius: 16, textAlign: "center",
+                      background: "linear-gradient(145deg,rgba(255,210,50,0.1),rgba(255,160,40,0.03))",
+                      border: "1.5px solid rgba(255,210,50,0.2)",
+                    }}>
+                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232", textShadow: "0 0 20px rgba(255,210,50,0.5)", lineHeight: 1.1 }}>150%</div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,210,50,0.55)", letterSpacing: "0.15em", marginTop: 4, textTransform: "uppercase" }}>Deposit Bonus</div>
+                    </div>
+                    <div style={{ flex: 1, padding: "14px 8px", borderRadius: 16, textAlign: "center",
+                      background: "linear-gradient(145deg,rgba(0,229,255,0.08),rgba(0,180,255,0.02))",
+                      border: "1.5px solid rgba(0,229,255,0.2)",
+                    }}>
+                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#00e5ff", textShadow: "0 0 20px rgba(0,229,255,0.4)", lineHeight: 1.1 }}>+50 FS</div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(0,229,255,0.45)", letterSpacing: "0.15em", marginTop: 4, textTransform: "uppercase" }}>Free Spins</div>
+                    </div>
+                  </div>
 
-              {/* ── $500 guaranteed banner ── */}
-              <div style={{
-                margin: "8px 16px 0", padding: "10px 14px", borderRadius: 14,
-                background: "linear-gradient(135deg,rgba(0,230,118,0.06),rgba(0,180,255,0.02))",
-                border: "1.5px solid rgba(0,230,118,0.15)",
-                display: "flex", alignItems: "center", gap: 12,
-              }}>
-                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#00e676", textShadow: "0 0 14px rgba(0,230,118,0.3)", lineHeight: 1, whiteSpace: "nowrap" }}>$500</div>
-                <div>
-                  <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#00e676", letterSpacing: "0.12em" }}>GUARANTEED CASH PRIZE</div>
-                  <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,255,255,0.22)", marginTop: 2, letterSpacing: "0.04em" }}>Complete all steps to claim</div>
-                </div>
-              </div>
+                  {/* ── no strings badge ── */}
+                  <div style={{ display: "flex", justifyContent: "center", gap: 6, margin: "12px 12px 0" }}>
+                    {["NO DEPOSIT", "NO WAGER", "NO STRINGS"].map((t, i) => (
+                      <span key={i} style={{
+                        padding: "5px 10px", borderRadius: 8, whiteSpace: "nowrap",
+                        background: "rgba(0,230,118,0.08)", border: "1.5px solid rgba(0,230,118,0.2)",
+                        fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#00e676",
+                        letterSpacing: "0.06em",
+                      }}>{t}</span>
+                    ))}
+                  </div>
 
-              {/* ── CTA ── */}
-              <div style={{ padding: "12px 16px 18px" }}>
-                <button onClick={() => handleContinue(true)} style={{
-                  width: "100%", padding: 16, borderRadius: 16, border: "none",
-                  fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.12em",
-                  cursor: "pointer", background: "linear-gradient(135deg,#ffd232,#ffab00)", color: "rgba(0,0,0,0.85)",
-                  boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
-                }}>REGISTER NOW</button>
-              </div>
+                  {/* ── ALL JOURNEY REWARDS ── */}
+                  <div style={{
+                    margin: "14px 16px 0", padding: "12px 14px", borderRadius: 16,
+                    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                  }}>
+                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.25em", marginBottom: 10 }}>YOUR JOURNEY REWARDS</div>
+                    {[
+                      { step: 1, name: "Welcome Spin", reward: "+50 FS / 150%", color: "#ffd232", unlocked: true },
+                      { step: 2, name: "KYC", reward: "+50 FS", color: "#78c8ff", unlocked: false },
+                      { step: 3, name: "Phone", reward: "100% CB", color: "#ff3278", unlocked: false },
+                      { step: 4, name: "Telegram", reward: "+$20", color: "#00b4ff", unlocked: false },
+                      { step: 5, name: "Mega Spin", reward: "$50-500", color: "#ffa028", unlocked: false },
+                      { step: 6, name: "Final", reward: "$500", color: "#00e676", unlocked: false },
+                    ].map((r, idx) => (
+                      <div key={idx} style={{
+                        display: "flex", alignItems: "center", gap: 10, padding: "6px 0",
+                        opacity: r.unlocked ? 1 : 0.4,
+                        animation: `prizeCardIn 0.5s ease-out ${0.1 + idx * 0.12}s both`,
+                      }}>
+                        <div style={{
+                          width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: r.unlocked ? `${r.color}22` : "rgba(255,255,255,0.03)",
+                          border: `1px solid ${r.unlocked ? `${r.color}44` : "rgba(255,255,255,0.06)"}`,
+                        }}>
+                          {r.unlocked
+                            ? <span style={{ color: "#00e676", fontSize: 11 }}>&#10003;</span>
+                            : <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.3)" }}>{r.step}</span>
+                          }
+                        </div>
+                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.6)", flex: 1 }}>{r.name}</span>
+                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800, color: r.unlocked ? r.color : "rgba(255,255,255,0.2)" }}>{r.reward}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* ── $500 guaranteed banner ── */}
+                  <div style={{
+                    margin: "8px 16px 0", padding: "10px 14px", borderRadius: 14,
+                    background: "linear-gradient(135deg,rgba(0,230,118,0.06),rgba(0,180,255,0.02))",
+                    border: "1.5px solid rgba(0,230,118,0.15)",
+                    display: "flex", alignItems: "center", gap: 12,
+                  }}>
+                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#00e676", textShadow: "0 0 14px rgba(0,230,118,0.3)", lineHeight: 1, whiteSpace: "nowrap" }}>$500</div>
+                    <div>
+                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#00e676", letterSpacing: "0.12em" }}>GUARANTEED CASH PRIZE</div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,255,255,0.22)", marginTop: 2, letterSpacing: "0.04em" }}>Complete all steps to claim</div>
+                    </div>
+                  </div>
+
+                  {/* ── 24h countdown urgency ── */}
+                  <div style={{
+                    margin: "10px 16px 0", padding: "8px 12px", borderRadius: 10,
+                    background: "rgba(255,160,40,0.06)", border: "1px solid rgba(255,160,40,0.15)",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  }}>
+                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: "#ffa028" }}>{countdownStr}</span>
+                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,160,40,0.6)", letterSpacing: "0.08em" }}>COMPLETE ALL STEPS FOR 2x BONUS</span>
+                  </div>
+
+                  {/* ── CTA ── */}
+                  <div style={{ padding: "12px 16px 18px" }}>
+                    <button onClick={() => handleContinue(true)} style={{
+                      width: "100%", padding: 16, borderRadius: 16, border: "none",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.12em",
+                      cursor: "pointer", background: "linear-gradient(135deg,#ffd232,#ffab00)", color: "rgba(0,0,0,0.85)",
+                      boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
+                    }}>CONTINUE JOURNEY</button>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
@@ -557,13 +604,18 @@ for (const name of islandImgNames) {
   islandImages[name] = img;
 }
 // Map level id → island image name
-const ISLAND_MAP = { 1: "Islandio", 2: "IS-CYAN", 3: "IS-RED", 4: "IS-CYAN", 5: "Islandio", 6: "Islandio" };
+const ISLAND_MAP = { 1: "Islandio", 2: "IS-CYAN", 3: "IS-RED", 4: "IS-PURPLE", 5: "IS-RED", 6: "IS-CYAN" };
 
-function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, islandElsRef }) {
+function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, islandElsRef, completingId, completingStartRef, allComplete }) {
   const ref = useRef(null);
   const state = useRef({ stars: null, dust: null, t: 0, imgReady: false });
-  const propsRef = useRef({ width, height, levels });
-  propsRef.current = { width, height, levels };
+  const propsRef = useRef({ width, height, levels, completingId, allComplete });
+  propsRef.current = { width, height, levels, completingId, allComplete };
+  // smooth color/opacity transitions for each island
+  const animColors = useRef(levels.map(lv => ({
+    r: lv.complete ? 0 : lv.r, g: lv.complete ? 200 : lv.g, b: lv.complete ? 80 : lv.b,
+    alpha: lv.unlocked ? 1 : 0.35,
+  })));
 
   useEffect(() => {
     // init stars
@@ -596,7 +648,9 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
     const ctx = c.getContext("2d");
     let raf;
     const draw = () => {
-      const { width, height, levels } = propsRef.current;
+      const { width, height, levels, completingId: cId, allComplete: allDone } = propsRef.current;
+      const cStart = completingStartRef?.current;
+      const cElapsed = cId != null && cStart ? (performance.now() - cStart) / 1000 : 0; // seconds
       const scrollY = scrollElRef.current ? scrollElRef.current.scrollTop : 0;
       const dpr = window.devicePixelRatio || 1;
       if (c.width !== width * dpr || c.height !== height * dpr) {
@@ -607,6 +661,23 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
       const totalH = levels.length * NODE_GAP + PAD_TOP + 180;
       state.current.t += 0.014;
       const t = state.current.t;
+
+      // ─── SMOOTH COLOR/OPACITY LERP per island ───
+      const lerpSpeed = 0.04; // ~0.8s transition at 60fps
+      for (let i = 0; i < levels.length; i++) {
+        const lv = levels[i];
+        const ac = animColors.current[i];
+        const shifting = lv.complete || lv.completing; // shift to green during completing phase too
+        const tR = shifting ? 0 : lv.r;
+        const tG = shifting ? 200 : lv.g;
+        const tB = shifting ? 80 : lv.b;
+        const tA = lv.unlocked ? 1 : 0.35;
+        ac.r += (tR - ac.r) * lerpSpeed;
+        ac.g += (tG - ac.g) * lerpSpeed;
+        ac.b += (tB - ac.b) * lerpSpeed;
+        ac.alpha += (tA - ac.alpha) * lerpSpeed;
+      }
+
       ctx.clearRect(0, 0, width, height);
 
       // ─── BACKGROUND GRADIENT ───
@@ -690,8 +761,8 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
 
       for (let i = 0; i < levels.length - 1; i++) {
         const a = nodeScreenPos[i], b = nodeScreenPos[i + 1];
-        let lv = levels[i];
-        if (lv.complete) { lv = { ...lv, r: 0, g: 200, b: 80 }; }
+        const ac = animColors.current[i];
+        let lv = { ...levels[i], r: Math.round(ac.r), g: Math.round(ac.g), b: Math.round(ac.b) };
         const mx = (a.x + b.x) / 2 + (a.x < b.x ? -50 : 50);
         const my = (a.y + b.y) / 2;
 
@@ -754,12 +825,13 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
       // ─── NODES: ROCK + PORTAL ───
       const labelPos = [];
       for (let i = 0; i < levels.length; i++) {
-        let lv = levels[i];
-        // Override color to green when stage is complete
-        if (lv.complete) { lv = { ...lv, r: 0, g: 200, b: 80 }; }
+        const ac = animColors.current[i];
+        let lv = { ...levels[i], r: Math.round(ac.r), g: Math.round(ac.g), b: Math.round(ac.b) };
         const cx = nodeScreenPos[i].x;
-        // subtle levitation — each island has its own phase
-        const levitate = Math.sin(t * 1.5 + i * 1.7) * 4.5;
+        // subtle levitation — each island has its own phase, boosted during completion
+        const baseLevitate = Math.sin(t * 1.5 + i * 1.7) * 4.5;
+        const completeBounce = (cId === lv.id && cElapsed > 0 && cElapsed < 2) ? Math.sin(cElapsed * 8) * (1 - cElapsed / 2) * 12 : 0;
+        const levitate = baseLevitate + completeBounce;
         const cy = nodeScreenPos[i].y + levitate;
         // sync HTML overlay element with same levitation
         if (islandElsRef?.current?.[i]) {
@@ -767,11 +839,10 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         }
         const jp = lv.id === 6;
         const sc = jp ? 1.25 : 1.0;
-        const locked = !lv.unlocked;
         const seed = lv.id;
 
         ctx.save();
-        if (locked) ctx.globalAlpha = 0.35;
+        ctx.globalAlpha = ac.alpha;
 
         // ── AMBIENT GLOW ──
         const ambG = ctx.createRadialGradient(cx, cy + 10, 0, cx, cy + 10, 140 * sc);
@@ -808,6 +879,98 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
             const imgX = cx - imgW / 2;
             const imgY = ry - imgH * 0.45;
             ctx.drawImage(img, imgX, imgY, imgW, imgH);
+            // ── white glow-up overlay during completion (200ms offset per plan) ──
+            if (cId === lv.id && cElapsed > 0.2 && cElapsed < 1.7) {
+              const ge = cElapsed - 0.2; // offset elapsed
+              const glowA = ge < 0.3 ? ge / 0.3 : (1 - (ge - 0.3) / 1.2);
+              ctx.globalCompositeOperation = "lighter";
+              ctx.globalAlpha = glowA * 0.5;
+              ctx.drawImage(img, imgX, imgY, imgW, imgH);
+              ctx.globalCompositeOperation = "source-over";
+              ctx.globalAlpha = ac.alpha;
+            }
+
+            // ── themed icon overlay on island image ──
+            const iconSz = 28 * sc;
+            const iconCx = cx;
+            const iconCy = ry - imgH * 0.12;
+            ctx.save();
+            ctx.globalAlpha = ac.alpha * 0.85;
+            ctx.strokeStyle = lv.complete ? "#00e676" : lv.accent || "#fff";
+            ctx.fillStyle = lv.complete ? "rgba(0,230,118,0.15)" : `rgba(${lv.r},${lv.g},${lv.b},0.12)`;
+            ctx.lineWidth = 2 * sc;
+            ctx.lineCap = "round"; ctx.lineJoin = "round";
+
+            if (lv.icon === "wheel") {
+              // wheel/fortune icon
+              ctx.beginPath(); ctx.arc(iconCx, iconCy, iconSz * 0.5, 0, Math.PI * 2); ctx.stroke(); ctx.fill();
+              ctx.beginPath(); ctx.arc(iconCx, iconCy, iconSz * 0.12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+              for (let a = 0; a < 8; a++) {
+                const angle = a * Math.PI / 4 + t * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(iconCx + Math.cos(angle) * iconSz * 0.15, iconCy + Math.sin(angle) * iconSz * 0.15);
+                ctx.lineTo(iconCx + Math.cos(angle) * iconSz * 0.42, iconCy + Math.sin(angle) * iconSz * 0.42);
+                ctx.stroke();
+              }
+            } else if (lv.icon === "kyc") {
+              // ID card icon
+              const cw = iconSz * 0.8, ch = iconSz * 0.6;
+              ctx.beginPath();
+              ctx.roundRect(iconCx - cw / 2, iconCy - ch / 2, cw, ch, 3 * sc);
+              ctx.stroke(); ctx.fill();
+              ctx.beginPath(); ctx.arc(iconCx - cw * 0.15, iconCy - ch * 0.05, iconSz * 0.12, 0, Math.PI * 2); ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(iconCx + cw * 0.1, iconCy - ch * 0.15);
+              ctx.lineTo(iconCx + cw * 0.35, iconCy - ch * 0.15);
+              ctx.moveTo(iconCx + cw * 0.1, iconCy + ch * 0.1);
+              ctx.lineTo(iconCx + cw * 0.3, iconCy + ch * 0.1);
+              ctx.stroke();
+            } else if (lv.icon === "phone") {
+              // phone icon
+              const pw = iconSz * 0.4, ph = iconSz * 0.7;
+              ctx.beginPath();
+              ctx.roundRect(iconCx - pw / 2, iconCy - ph / 2, pw, ph, 4 * sc);
+              ctx.stroke(); ctx.fill();
+              ctx.beginPath(); ctx.arc(iconCx, iconCy + ph * 0.32, iconSz * 0.06, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            } else if (lv.icon === "telegram") {
+              // paper plane icon
+              ctx.beginPath();
+              ctx.moveTo(iconCx - iconSz * 0.45, iconCy);
+              ctx.lineTo(iconCx + iconSz * 0.45, iconCy - iconSz * 0.35);
+              ctx.lineTo(iconCx + iconSz * 0.15, iconCy + iconSz * 0.4);
+              ctx.lineTo(iconCx - iconSz * 0.05, iconCy + iconSz * 0.05);
+              ctx.closePath();
+              ctx.stroke(); ctx.fill();
+              ctx.beginPath();
+              ctx.moveTo(iconCx + iconSz * 0.45, iconCy - iconSz * 0.35);
+              ctx.lineTo(iconCx - iconSz * 0.05, iconCy + iconSz * 0.05);
+              ctx.stroke();
+            } else if (lv.icon === "deposit") {
+              // star icon
+              const pts = 5, outerR = iconSz * 0.45, innerR = iconSz * 0.2;
+              ctx.beginPath();
+              for (let p = 0; p < pts * 2; p++) {
+                const a = (p * Math.PI / pts) - Math.PI / 2;
+                const r = p % 2 === 0 ? outerR : innerR;
+                if (p === 0) ctx.moveTo(iconCx + Math.cos(a) * r, iconCy + Math.sin(a) * r);
+                else ctx.lineTo(iconCx + Math.cos(a) * r, iconCy + Math.sin(a) * r);
+              }
+              ctx.closePath(); ctx.stroke(); ctx.fill();
+            } else if (lv.icon === "crown") {
+              // crown icon
+              const crW = iconSz * 0.7, crH = iconSz * 0.45;
+              ctx.beginPath();
+              ctx.moveTo(iconCx - crW / 2, iconCy + crH * 0.3);
+              ctx.lineTo(iconCx - crW / 2, iconCy - crH * 0.2);
+              ctx.lineTo(iconCx - crW * 0.15, iconCy + crH * 0.1);
+              ctx.lineTo(iconCx, iconCy - crH * 0.5);
+              ctx.lineTo(iconCx + crW * 0.15, iconCy + crH * 0.1);
+              ctx.lineTo(iconCx + crW / 2, iconCy - crH * 0.2);
+              ctx.lineTo(iconCx + crW / 2, iconCy + crH * 0.3);
+              ctx.closePath(); ctx.stroke(); ctx.fill();
+            }
+            ctx.restore();
+            ctx.globalAlpha = ac.alpha;
           }
         }
 
@@ -1101,6 +1264,88 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
           ctx.beginPath(); ctx.arc(ax, ay, 1.2, 0, 6.28); ctx.fill();
         }
 
+        // ── COMPLETION ANIMATION ──
+        if (cId === lv.id && cElapsed > 0 && cElapsed < 2.5) {
+          const ce = cElapsed;
+
+          // 1. Portal burst — expanding shockwave ring
+          if (ce < 1.2) {
+            const burstP = ce / 1.2;
+            const burstR = portalRx * (1 + burstP * 4);
+            const burstA = (1 - burstP) * 0.6;
+            ctx.strokeStyle = `rgba(0,230,118,${burstA})`;
+            ctx.lineWidth = 3 * (1 - burstP) + 0.5;
+            ctx.beginPath(); ctx.arc(cx, portalY, burstR, 0, 6.28); ctx.stroke();
+            // inner flash
+            if (ce < 0.3) {
+              const flashA = (1 - ce / 0.3) * 0.5;
+              const fg = ctx.createRadialGradient(cx, portalY, 0, cx, portalY, portalRx * 2);
+              fg.addColorStop(0, `rgba(255,255,255,${flashA})`);
+              fg.addColorStop(0.4, `rgba(0,230,118,${flashA * 0.5})`);
+              fg.addColorStop(1, "transparent");
+              ctx.fillStyle = fg;
+              ctx.fillRect(cx - portalRx * 3, portalY - portalRy * 3, portalRx * 6, portalRy * 6);
+            }
+          }
+
+          // 2. Explosion particles
+          if (ce < 1.8) {
+            const pCount = 20;
+            for (let ep = 0; ep < pCount; ep++) {
+              const eAngle = (ep / pCount) * 6.28 + lv.id * 1.3;
+              const eSpeed = 60 + 40 * Math.sin(ep * 2.7);
+              const eP = Math.min(1, ce / 1.5);
+              const eDist = eSpeed * eP * (1 - eP * 0.4);
+              const ex = cx + Math.cos(eAngle) * eDist;
+              const ey = portalY + Math.sin(eAngle) * eDist * 0.6;
+              const eA = (1 - eP) * 0.8;
+              const eSize = (1 - eP) * 3 + 0.5;
+              ctx.fillStyle = ep % 3 === 0 ? `rgba(255,255,255,${eA})` : `rgba(0,230,118,${eA})`;
+              ctx.beginPath(); ctx.arc(ex, ey, eSize, 0, 6.28); ctx.fill();
+            }
+          }
+
+          // 3. Green sparkles rising from island
+          if (ce > 0.2 && ce < 2.0) {
+            const sparkP = (ce - 0.2) / 1.8;
+            for (let sp = 0; sp < 12; sp++) {
+              const sAngle = sp * 0.52 + ce * 2;
+              const sRise = sparkP * 80 * (0.5 + 0.5 * Math.sin(sp * 1.7));
+              const sx = cx + Math.sin(sAngle) * (15 + sp * 3);
+              const sy = cy - sRise;
+              const sA = (1 - sparkP) * 0.7;
+              ctx.fillStyle = `rgba(0,230,118,${sA})`;
+              ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, 6.28); ctx.fill();
+            }
+          }
+
+          // 4. Beam ignite to next island (after 0.8s)
+          if (ce > 0.8 && ce < 2.0 && i < levels.length - 1) {
+            const bP = Math.min(1, (ce - 0.8) / 0.8);
+            const next = nodeScreenPos[i + 1];
+            if (next) {
+              const bx = (a => a.x)(nodeScreenPos[i]);
+              const by = nodeScreenPos[i].y + 55;
+              const nx2 = next.x;
+              const ny2 = next.y - 25;
+              const bmx = (bx + nx2) / 2 + (bx < nx2 ? -50 : 50);
+              const bmy = (by + ny2) / 2;
+              // energy pulse traveling along beam
+              const pulseT = bP;
+              const px2 = (1-pulseT)*(1-pulseT)*bx + 2*(1-pulseT)*pulseT*bmx + pulseT*pulseT*nx2;
+              const py2 = (1-pulseT)*(1-pulseT)*by + 2*(1-pulseT)*pulseT*bmy + pulseT*pulseT*ny2;
+              const pg = ctx.createRadialGradient(px2, py2, 0, px2, py2, 20);
+              pg.addColorStop(0, `rgba(0,230,118,${0.8 * (1 - bP * 0.5)})`);
+              pg.addColorStop(0.5, `rgba(0,230,118,${0.3 * (1 - bP * 0.5)})`);
+              pg.addColorStop(1, "transparent");
+              ctx.fillStyle = pg;
+              ctx.fillRect(px2 - 20, py2 - 20, 40, 40);
+              ctx.fillStyle = `rgba(255,255,255,${0.9 * (1 - bP * 0.3)})`;
+              ctx.beginPath(); ctx.arc(px2, py2, 3, 0, 6.28); ctx.fill();
+            }
+          }
+        }
+
         ctx.restore();
         labelPos.push({ x: cx, y: ry + depth + 22 * sc, id: lv.id });
       }
@@ -1128,6 +1373,59 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         }
       }
 
+      // ─── ALL COMPLETE: synchronized portal pulse wave + New World teaser ───
+      if (allDone && nodeScreenPos.length > 0) {
+        // synchronized green pulse wave across all portals
+        for (let i = 0; i < nodeScreenPos.length; i++) {
+          const np = nodeScreenPos[i];
+          const waveDelay = i * 0.15;
+          const waveP = (Math.sin(t * 2 - waveDelay) + 1) / 2;
+          const pulseR = 30 + waveP * 25;
+          const pulseA = 0.1 + waveP * 0.15;
+          ctx.strokeStyle = `rgba(0,230,118,${pulseA})`;
+          ctx.lineWidth = 2 * (1 - waveP) + 0.5;
+          ctx.beginPath(); ctx.arc(np.x, np.y, pulseR, 0, 6.28); ctx.stroke();
+          // inner glow
+          const ig2 = ctx.createRadialGradient(np.x, np.y, 0, np.x, np.y, pulseR);
+          ig2.addColorStop(0, `rgba(0,230,118,${pulseA * 0.3})`);
+          ig2.addColorStop(1, "transparent");
+          ctx.fillStyle = ig2;
+          ctx.beginPath(); ctx.arc(np.x, np.y, pulseR, 0, 6.28); ctx.fill();
+        }
+
+        // "New World" teaser portal above island 6 (index 0 in levels array)
+        const topNode = nodeScreenPos[0];
+        const portalX = topNode.x;
+        const portalY2 = topNode.y - 100;
+        const teaserPulse = (Math.sin(t * 1.5) + 1) / 2;
+        const teaserR = 20 + teaserPulse * 8;
+        // outer ring
+        ctx.strokeStyle = `rgba(180,120,255,${0.3 + teaserPulse * 0.3})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(portalX, portalY2, teaserR, 0, 6.28); ctx.stroke();
+        // inner swirl
+        const swG = ctx.createRadialGradient(portalX, portalY2, 0, portalX, portalY2, teaserR);
+        swG.addColorStop(0, `rgba(180,120,255,${0.25 + teaserPulse * 0.15})`);
+        swG.addColorStop(0.5, `rgba(100,60,200,${0.1 + teaserPulse * 0.05})`);
+        swG.addColorStop(1, "transparent");
+        ctx.fillStyle = swG;
+        ctx.beginPath(); ctx.arc(portalX, portalY2, teaserR, 0, 6.28); ctx.fill();
+        // rotating particles around teaser
+        for (let tp = 0; tp < 6; tp++) {
+          const tAngle = t * 1.2 + (tp / 6) * 6.28;
+          const tDist = teaserR + 8 + Math.sin(t * 2 + tp) * 4;
+          const tx = portalX + Math.cos(tAngle) * tDist;
+          const ty = portalY2 + Math.sin(tAngle) * tDist * 0.6;
+          ctx.fillStyle = `rgba(180,120,255,${0.4 + teaserPulse * 0.3})`;
+          ctx.beginPath(); ctx.arc(tx, ty, 1.5, 0, 6.28); ctx.fill();
+        }
+        // "?" text
+        ctx.fillStyle = `rgba(200,160,255,${0.5 + teaserPulse * 0.3})`;
+        ctx.font = "bold 16px 'Orbitron',sans-serif";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText("?", portalX, portalY2);
+      }
+
       onNodePositions(labelPos);
       raf = requestAnimationFrame(draw);
     };
@@ -1146,12 +1444,72 @@ export default function CosmicCasino() {
   const [freeSpins, setFreeSpins] = useState(0);
   const [selected, setSelected] = useState(null);
   const [showWheel, setShowWheel] = useState(false);
+  const [showMegaWheel, setShowMegaWheel] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [showTelegram, setShowTelegram] = useState(false);
+  const [showKYC, setShowKYC] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+  const [showDeposit, setShowDeposit] = useState(false);
+  const [showFinalCeremony, setShowFinalCeremony] = useState(false);
+  const [showJourneyComplete, setShowJourneyComplete] = useState(false);
+  const [showCompletionConfetti, setShowCompletionConfetti] = useState(false);
   const [dim, setDim] = useState({ w: 400, h: 700 });
   const labelsRef = useRef([]);
   const islandElsRef = useRef([]);
   const [introPlayed, setIntroPlayed] = useState(false);
+  // telegram promo code — stable across re-renders
+  const [telegramCode] = useState(() => "MYBC-" + Math.random().toString(36).substring(2, 6).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase());
+  // phone modal state
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneOtp, setPhoneOtp] = useState(["", "", "", ""]);
+  const [phoneStep, setPhoneStep] = useState(0); // 0=phone, 1=otp
+  const otpRefs = useRef([]);
+  // deposit amount selection
+  const [depositAmount, setDepositAmount] = useState("$50");
+  // 24h countdown
+  const [countdownEnd] = useState(() => Date.now() + 24 * 60 * 60 * 1000);
+  const [countdownStr, setCountdownStr] = useState("23:59:59");
   const scrollRef = useRef(null);
   const containerRef = useRef(null);
+  // completion animation state
+  const [completingId, setCompletingId] = useState(null);
+  const completingStartRef = useRef(null);
+  // reward pop overlay
+  const [rewardPop, setRewardPop] = useState(null); // { text, x, y }
+  // bonus tracking
+  const [bonuses, setBonuses] = useState({
+    depositBonus: null,   // "150%" after island 1
+    freeSpins: 0,         // cumulative FS
+    cashback: null,       // "100%" after island 3
+    telegramBonus: null,  // "+$20" after island 4
+    megaSpinPrize: null,  // prize from island 5
+  });
+
+  // 24h countdown timer
+  useEffect(() => {
+    const tick = () => {
+      const remaining = Math.max(0, countdownEnd - Date.now());
+      const h = Math.floor(remaining / 3600000);
+      const m = Math.floor((remaining % 3600000) / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      setCountdownStr(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [countdownEnd]);
+
+  // simulate external verification check (phone/telegram pre-completed)
+  // In production: replace with API call. Use ?preVerified=3,4 in URL to test.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const preVerified = (params.get("preVerified") || "").split(",").map(Number).filter(Boolean);
+    if (preVerified.length > 0) {
+      setLevels(prev => prev.map(l =>
+        preVerified.includes(l.id) && !l.unlocked ? { ...l, lockedButCompleted: true } : l
+      ));
+    }
+  }, []);
 
   // auto-scroll intro: start at top, smoothly reveal level 1 at bottom
   useEffect(() => {
@@ -1176,36 +1534,138 @@ export default function CosmicCasino() {
     return () => clearTimeout(timer);
   }, [introPlayed]);
 
+  // trigger the completing animation, then finalize after delay
+  const triggerComplete = useCallback((lvId, extraUpdates = {}) => {
+    setCompletingId(lvId);
+    completingStartRef.current = performance.now();
+    // show reward pop text
+    const idx = levels.findIndex(l => l.id === lvId);
+    const lv = levels[idx];
+    if (lv && labelsRef.current[idx]) {
+      setRewardPop({ text: lv.rewardShort, x: labelsRef.current[idx].x, y: labelsRef.current[idx].y });
+      setTimeout(() => setRewardPop(null), 2000);
+    }
+    // apply bonus per level
+    if (lvId === 1) {
+      setFreeSpins(prev => prev + 50);
+      setBonuses(prev => ({ ...prev, depositBonus: "150%", freeSpins: prev.freeSpins + 50 }));
+      // bonus stays "pending" until first deposit — override the default "active"
+      extraUpdates = { ...extraUpdates, bonusState: "pending" };
+    } else if (lvId === 2) {
+      setFreeSpins(prev => prev + 50);
+      setBonuses(prev => ({ ...prev, freeSpins: prev.freeSpins + 50 }));
+    } else if (lvId === 3) {
+      setBonuses(prev => ({ ...prev, cashback: "100%" }));
+    } else if (lvId === 4) {
+      setBonuses(prev => ({ ...prev, telegramBonus: "+$20" }));
+    }
+    // fire confetti on every island completion
+    setShowCompletionConfetti(true);
+    setTimeout(() => setShowCompletionConfetti(false), 3000);
+    // after animation duration: finalize completion
+    setTimeout(() => {
+      setCompletingId(null);
+      setLevels(prev => {
+        const next = prev.map(l =>
+          l.id === lvId ? { ...l, complete: true, completing: false, bonusState: "active", ...extraUpdates }
+          : l.id === lvId + 1 ? { ...l, unlocked: true }
+          : l
+        );
+        // auto-complete next island if it was lockedButCompleted (pre-verified externally)
+        const nextLv = next.find(l => l.id === lvId + 1);
+        if (nextLv && nextLv.lockedButCompleted && nextLv.unlocked && !nextLv.complete) {
+          setTimeout(() => triggerComplete(nextLv.id), 2500);
+        }
+        // check if all islands are complete → camera zoom-out + journey complete
+        if (next.every(l => l.complete)) {
+          // smooth scroll to top to reveal all islands
+          const el = scrollRef.current;
+          if (el && el.scrollTop > 0) {
+            const startScroll = el.scrollTop;
+            const duration = 1800;
+            const t0 = performance.now();
+            const ease = (t) => t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+            const animateScroll = (now) => {
+              const p = Math.min(1, (now - t0) / duration);
+              el.scrollTop = startScroll * (1 - ease(p));
+              if (p < 1) requestAnimationFrame(animateScroll);
+              else setTimeout(() => setShowJourneyComplete(true), 600);
+            };
+            requestAnimationFrame(animateScroll);
+          } else {
+            setTimeout(() => setShowJourneyComplete(true), 500);
+          }
+        }
+        return next;
+      });
+    }, 2000);
+    // immediately set completing flag on level
+    setLevels(prev => prev.map(l =>
+      l.id === lvId ? { ...l, completing: true } : l
+    ));
+  }, [levels]);
+
   // handle clicking a level
   const handleLevelClick = useCallback((lv) => {
-    if (lv.id === 1 && !lv.complete) {
-      setShowWheel(true);
-    } else {
-      setSelected(lv);
-    }
+    if (lv.complete || lv.completing) return;
+    if (!lv.unlocked) { setSelected(lv); return; }
+    if (lv.id === 1) setShowRegister(true);
+    else if (lv.id === 2) setShowKYC(true);
+    else if (lv.id === 3) { setPhoneStep(0); setPhoneNumber(""); setPhoneOtp(["","","",""]); setShowPhone(true); }
+    else if (lv.id === 4) setShowTelegram(true);
+    else if (lv.id === 5) { setDepositAmount("$50"); setShowDeposit(true); }
+    else if (lv.id === 6) setShowFinalCeremony(true);
+    else setSelected(lv);
+  }, [triggerComplete]);
+
+  // after registration, show wheel
+  const handleRegisterDone = useCallback(() => {
+    setShowRegister(false);
+    setShowWheel(true);
   }, []);
 
-  // handle wheel win
+  // handle wheel win (Welcome Spin)
   const handleWheelWin = useCallback((prize) => {
     setShowWheel(false);
-    setFreeSpins(prev => prev + 50);
-    setLevels(prev => prev.map(l =>
-      l.id === 1 ? { ...l, complete: true, reward: prize.label.replace("\n", " "), rewardShort: prize.label.replace("\n", " ") }
-      : l.id === 2 ? { ...l, unlocked: true }
-      : l
-    ));
+    triggerComplete(1, { reward: prize.label.replace("\n", " "), rewardShort: prize.label.replace("\n", " ") });
+  }, [triggerComplete]);
+
+  // handle KYC verification done (Island 2)
+  const handleKYCDone = useCallback(() => {
+    setShowKYC(false);
+    triggerComplete(2);
+  }, [triggerComplete]);
+
+  // handle Phone verification done (Island 3)
+  const handlePhoneDone = useCallback(() => {
+    setShowPhone(false);
+    triggerComplete(3);
+  }, [triggerComplete]);
+
+  // handle telegram verification done (Island 4)
+  const handleTelegramDone = useCallback(() => {
+    setShowTelegram(false);
+    triggerComplete(4);
+  }, [triggerComplete]);
+
+  // handle deposit confirmed → show mega wheel (Island 5)
+  const handleDepositDone = useCallback(() => {
+    setShowDeposit(false);
+    setShowMegaWheel(true);
   }, []);
 
-  // complete a level and unlock next
+  // handle mega wheel win (Island 5)
+  const handleMegaWheelWin = useCallback((prize) => {
+    setShowMegaWheel(false);
+    setBonuses(prev => ({ ...prev, megaSpinPrize: prize.label.replace("\n", " ") }));
+    triggerComplete(5, { reward: prize.label.replace("\n", " "), rewardShort: prize.label.replace("\n", " ") });
+  }, [triggerComplete]);
+
+  // complete a level from detail modal
   const handleComplete = useCallback((lvId) => {
-    if (lvId === 2) setFreeSpins(prev => prev + 50);
-    setLevels(prev => prev.map(l =>
-      l.id === lvId ? { ...l, complete: true }
-      : l.id === lvId + 1 ? { ...l, unlocked: true }
-      : l
-    ));
     setSelected(null);
-  }, []);
+    triggerComplete(lvId);
+  }, [triggerComplete]);
 
   // keep selected synced with levels state
   useEffect(() => {
@@ -1234,9 +1694,11 @@ export default function CosmicCasino() {
   }, []);
 
   const totalH = levels.length * NODE_GAP + PAD_TOP + 180;
+  const isDesktop = dim.w > 768;
+  const sortedLevels = [...levels].sort((a, b) => a.id - b.id);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif" }}>
+    <div ref={containerRef} style={{ width: "100%", maxWidth: 1200, height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif", margin: "0 auto" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@200;300;400;500;600;700;800;900&display=swap');
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -1255,18 +1717,170 @@ export default function CosmicCasino() {
         @keyframes prizeTextPop { 0%{transform:scale(0) translateY(20px);opacity:0} 100%{transform:scale(1) translateY(0);opacity:1} }
         @keyframes prizeGlowLine { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
         @keyframes dotPulse { 0%,100%{opacity:0.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
+        @keyframes rewardFloat { 0%{transform:translate(-50%,-50%) scale(0.5);opacity:0} 15%{transform:translate(-50%,-80%) scale(1.2);opacity:1} 60%{transform:translate(-50%,-180%) scale(1);opacity:1} 100%{transform:translate(-50%,-260%) scale(0.8);opacity:0} }
+        @keyframes completionFlash { 0%{opacity:1} 100%{opacity:0} }
         .hideScroll::-webkit-scrollbar{width:0} .hideScroll{scrollbar-width:none}
+        @media(min-width:769px){
+          .mobileOnly{display:none!important}
+          .desktopOnly{display:flex!important}
+        }
+        @media(max-width:768px){
+          .desktopOnly{display:none!important}
+          .mobileOnly{display:flex!important}
+        }
       `}</style>
+
+      {/* ═══ DESKTOP LEFT PANEL ═══ */}
+      <div className="desktopOnly" style={{
+        position: "fixed", top: 0, left: 0, bottom: 0, width: 280, zIndex: 80,
+        flexDirection: "column", padding: "20px 16px",
+        background: "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
+        borderRight: "1px solid rgba(255,255,255,0.04)",
+        overflowY: "auto",
+      }}>
+        {/* Logo */}
+        <div style={{ marginBottom: 24, paddingTop: 8 }}>
+          <svg width="120" height="32" viewBox="0 0 103 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="58.2705" height="26.22" rx="5" fill="#FBCE04"/>
+            <path d="M21.718 8.21L19.996 18.01H17.504L18.428 12.718L15.362 16.666H15.11L13.444 12.648L12.506 18.01H10L11.722 8.21H14.228L15.824 12.438L19.058 8.21H21.718Z" fill="#000514"/>
+            <path d="M31.3387 8.21L27.2087 13.74L26.4527 18.01H23.9467L24.7027 13.74L22.5047 8.21H25.1647L26.2147 11.36L28.3707 8.21H31.3387Z" fill="#000514"/>
+            <path d="M38.7008 11.094C38.5514 11.934 38.1314 12.5733 37.4408 13.012C38.1314 13.5347 38.4114 14.2767 38.2808 15.238C38.1688 16.0687 37.7768 16.7407 37.1048 17.254C36.4421 17.758 35.5554 18.01 34.4448 18.01H30.3848L32.1068 8.21H35.8308C36.8014 8.21 37.5574 8.48067 38.0988 9.022C38.6401 9.56333 38.8408 10.254 38.7008 11.094ZM35.4668 10.45H34.2208L33.9548 11.99H35.1868C35.4388 11.99 35.6534 11.9247 35.8308 11.794C36.0174 11.654 36.1294 11.4627 36.1668 11.22C36.2041 10.9867 36.1574 10.8 36.0268 10.66C35.9054 10.52 35.7188 10.45 35.4668 10.45ZM35.8308 14.944C35.8774 14.692 35.8354 14.4913 35.7048 14.342C35.5834 14.1927 35.3828 14.118 35.1028 14.118H33.5768L33.2828 15.77H34.7948C35.0654 15.77 35.2941 15.6953 35.4808 15.546C35.6674 15.3873 35.7841 15.1867 35.8308 14.944Z" fill="#000514"/>
+            <path d="M43.6103 18.22C42.1076 18.22 40.9409 17.716 40.1103 16.708C39.2889 15.7 38.9996 14.454 39.2423 12.97C39.4756 11.5233 40.1336 10.3333 41.2163 9.4C42.3083 8.46667 43.5776 8 45.0243 8C45.9856 8 46.8023 8.21 47.4743 8.63C48.1556 9.04067 48.6736 9.61 49.0283 10.338L46.7323 11.556C46.3589 10.8187 45.7103 10.45 44.7863 10.45C44.0209 10.45 43.3536 10.6973 42.7843 11.192C42.2243 11.6773 41.8743 12.3167 41.7343 13.11C41.6036 13.8847 41.7249 14.524 42.0983 15.028C42.4716 15.5227 43.0316 15.77 43.7783 15.77C44.7209 15.77 45.4863 15.378 46.0743 14.594L48.1323 15.924C47.6096 16.652 46.9516 17.2167 46.1583 17.618C45.3743 18.0193 44.5249 18.22 43.6103 18.22Z" fill="#000514"/>
+            <path d="M74.3915 12.5497V13.3897C74.3915 14.855 73.9342 16.0263 73.0195 16.9037C72.1142 17.7717 70.9615 18.2057 69.5615 18.2057C68.0402 18.2057 66.7755 17.7157 65.7675 16.7357C64.7689 15.7557 64.2695 14.5517 64.2695 13.1237C64.2695 11.6957 64.7642 10.487 65.7535 9.49767C66.7522 8.50834 67.9702 8.01367 69.4075 8.01367C70.3222 8.01367 71.1575 8.21901 71.9135 8.62967C72.6789 9.04034 73.2715 9.58167 73.6915 10.2537L71.7875 11.3457C71.5729 11.0097 71.2509 10.7343 70.8215 10.5197C70.4015 10.305 69.9255 10.1977 69.3935 10.1977C68.5629 10.1977 67.8722 10.473 67.3215 11.0237C66.7802 11.5743 66.5095 12.279 66.5095 13.1377C66.5095 13.987 66.7895 14.6823 67.3495 15.2237C67.9095 15.7557 68.6562 16.0217 69.5895 16.0217C70.8869 16.0217 71.7222 15.5177 72.0955 14.5097H69.4775V12.5497H74.3915Z" fill="white"/>
+            <path d="M81.5289 18.0097L81.0389 16.4697H77.3989L76.9089 18.0097H74.4589L77.7909 8.20967H80.6469L83.9789 18.0097H81.5289ZM78.0709 14.3697H80.3669L79.2189 10.7717L78.0709 14.3697Z" fill="white"/>
+            <path d="M94.6145 8.20967V18.0097H92.3745V12.3117L89.8405 16.4697H89.5885L87.0545 12.3117V18.0097H84.8145V8.20967H87.0545L89.7145 12.5637L92.3745 8.20967H94.6145Z" fill="white"/>
+            <path d="M98.5389 15.8537H102.459V18.0097H96.2989V8.20967H102.389V10.3657H98.5389V11.9897H102.039V14.1177H98.5389V15.8537Z" fill="white"/>
+          </svg>
+        </div>
+
+        {/* Level Progress List */}
+        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 12, textTransform: "uppercase" }}>Quest Progress</div>
+        {sortedLevels.map((lv, i) => {
+          const done = lv.complete;
+          const active = lv.unlocked && !done;
+          const locked = !lv.unlocked;
+          return (
+            <div key={lv.id} onClick={() => handleLevelClick(lv)} style={{
+              display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 12, marginBottom: 6,
+              cursor: "pointer",
+              background: active ? `rgba(${lv.r},${lv.g},${lv.b},0.08)` : done ? "rgba(0,230,118,0.04)" : "rgba(255,255,255,0.01)",
+              border: active ? `1px solid rgba(${lv.r},${lv.g},${lv.b},0.15)` : done ? "1px solid rgba(0,230,118,0.1)" : "1px solid rgba(255,255,255,0.03)",
+              transition: "all 0.3s ease",
+            }}>
+              {/* Step number / check */}
+              <div style={{
+                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: done ? "linear-gradient(135deg, #00e676, #00c853)" : active ? `rgba(${lv.r},${lv.g},${lv.b},0.15)` : "rgba(255,255,255,0.03)",
+                border: done ? "none" : active ? `1.5px solid ${lv.accent}` : "1px solid rgba(255,255,255,0.06)",
+              }}>
+                {done ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                ) : (
+                  <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 900, color: active ? lv.accent : "rgba(255,255,255,0.12)" }}>{lv.id}</span>
+                )}
+              </div>
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800,
+                  color: done ? "#00e676" : active ? "#fff" : "rgba(255,255,255,0.2)",
+                  marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>{lv.name}</div>
+                <div style={{
+                  fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 600,
+                  color: done ? "rgba(0,230,118,0.5)" : active ? `rgba(${lv.r},${lv.g},${lv.b},0.6)` : "rgba(255,255,255,0.12)",
+                }}>{done ? "Completed" : locked ? "Locked" : lv.task}</div>
+              </div>
+              {/* Reward badge */}
+              <div style={{
+                padding: "3px 8px", borderRadius: 6, flexShrink: 0,
+                background: done ? "rgba(0,230,118,0.08)" : `rgba(${lv.r},${lv.g},${lv.b},0.06)`,
+                border: done ? "1px solid rgba(0,230,118,0.15)" : `1px solid rgba(${lv.r},${lv.g},${lv.b},0.1)`,
+              }}>
+                <span style={{
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800,
+                  color: done ? "#00e676" : active ? lv.accent : "rgba(255,255,255,0.15)",
+                }}>{lv.rewardShort}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ═══ DESKTOP RIGHT PANEL ═══ */}
+      <div className="desktopOnly" style={{
+        position: "fixed", top: 0, right: 0, bottom: 0, width: 260, zIndex: 80,
+        flexDirection: "column", padding: "20px 16px",
+        background: "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
+        borderLeft: "1px solid rgba(255,255,255,0.04)",
+        overflowY: "auto",
+      }}>
+        {/* Free Spins counter */}
+        <div style={{
+          padding: "16px", borderRadius: 16, marginBottom: 16, textAlign: "center",
+          background: "linear-gradient(135deg, rgba(255,215,64,0.06), rgba(255,180,0,0.02))",
+          border: "1px solid rgba(255,215,64,0.12)",
+        }}>
+          <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.2em", marginBottom: 8, textTransform: "uppercase" }}>Free Spins</div>
+          <div style={{
+            fontFamily: "'Orbitron',sans-serif", fontSize: 32, fontWeight: 900, color: "#ffd740",
+            textShadow: "0 0 20px rgba(255,215,64,0.3)",
+          }}>{freeSpins}</div>
+        </div>
+
+        {/* Active Bonuses */}
+        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 12, textTransform: "uppercase" }}>Active Bonuses</div>
+        {[
+          bonuses.depositBonus && { label: "Deposit Bonus", value: bonuses.depositBonus, color: "#ffd232", rgb: "255,210,50" },
+          bonuses.cashback && { label: "Cashback", value: bonuses.cashback, color: "#ff3278", rgb: "255,50,120" },
+          bonuses.telegramBonus && { label: "Telegram Bonus", value: bonuses.telegramBonus, color: "#00b4ff", rgb: "0,180,255" },
+          bonuses.megaSpinPrize && { label: "Mega Spin Prize", value: bonuses.megaSpinPrize, color: "#ffa028", rgb: "255,160,40" },
+        ].filter(Boolean).map((b, idx) => (
+          <div key={idx} style={{
+            padding: "12px 14px", borderRadius: 12, marginBottom: 8,
+            background: `rgba(${b.rgb},0.05)`,
+            border: `1px solid rgba(${b.rgb},0.12)`,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>{b.label}</span>
+            <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: b.color }}>{b.value}</span>
+          </div>
+        ))}
+        {!(bonuses.depositBonus || bonuses.cashback || bonuses.telegramBonus || bonuses.megaSpinPrize) && (
+          <div style={{
+            padding: "20px 14px", borderRadius: 12, textAlign: "center",
+            background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.03)",
+          }}>
+            <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.15)" }}>Complete quests to earn bonuses</div>
+          </div>
+        )}
+
+        {/* Rewards preview */}
+        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginTop: 20, marginBottom: 12, textTransform: "uppercase" }}>Journey Rewards</div>
+        {sortedLevels.map(lv => (
+          <div key={lv.id} style={{
+            display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, marginBottom: 4,
+            opacity: lv.complete ? 0.5 : 1,
+          }}>
+            <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: lv.complete ? "#00e676" : "rgba(255,255,255,0.2)", width: 14 }}>{lv.id}</span>
+            <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 600, color: lv.complete ? "rgba(0,230,118,0.4)" : "rgba(255,255,255,0.3)", flex: 1 }}>{lv.reward}</span>
+            {lv.complete && <span style={{ color: "#00e676", fontSize: 12 }}>&#10003;</span>}
+          </div>
+        ))}
+      </div>
 
       {/* Single scroll container — canvas (sticky) + labels scroll together */}
       <div ref={scrollRef} className="hideScroll" style={{
         position: "absolute", inset: 0, zIndex: 20, overflowY: "auto", overflowX: "hidden",
+        ...(isDesktop ? { left: 280, right: 260 } : {}),
       }}>
         {/* Canvas stays in viewport via sticky, negative margin so it doesn't push labels */}
-        <SceneCanvas scrollElRef={scrollRef} width={dim.w} height={dim.h} onNodePositions={onNodePositions} levels={levels} islandElsRef={islandElsRef} />
+        <SceneCanvas scrollElRef={scrollRef} width={isDesktop ? dim.w - 540 : dim.w} height={dim.h} onNodePositions={onNodePositions} levels={levels} islandElsRef={islandElsRef} completingId={completingId} completingStartRef={completingStartRef} allComplete={levels.every(l => l.complete)} />
         <div style={{ height: totalH, position: "relative", marginTop: -dim.h }}>
           {levels.map((lv, i) => {
-            const sx = SIDES[i] * dim.w;
+            const canvasW = isDesktop ? dim.w - 540 : dim.w;
+            const sx = SIDES[i] * canvasW;
             const sy = PAD_TOP + i * NODE_GAP;
             const jp = lv.id === 6;
             const locked = !lv.unlocked;
@@ -1284,7 +1898,8 @@ export default function CosmicCasino() {
                   filter: locked
                     ? "grayscale(1) brightness(0.3)"
                     : `drop-shadow(0 0 14px rgba(${iconR},${iconG},${iconB},0.9)) drop-shadow(0 2px 6px rgba(0,0,0,0.7))`,
-                  transition: "filter 0.3s",
+                  opacity: locked ? 0.4 : 1,
+                  transition: "filter 0.8s ease, opacity 0.8s ease",
                 }}>
                   <svg width={jp ? 40 : 28} height={jp ? 40 : 28} viewBox="0 0 40 40" fill="none">
                     {lv.icon === "wheel" && <>
@@ -1332,15 +1947,20 @@ export default function CosmicCasino() {
                   border: lv.complete
                     ? "1px solid rgba(0,230,118,0.2)"
                     : locked ? "1px solid rgba(255,255,255,0.04)" : `1px solid rgba(${lv.r},${lv.g},${lv.b},0.2)`,
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+                  boxShadow: lv.complete
+                    ? "0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(0,230,118,0.1)"
+                    : "0 4px 16px rgba(0,0,0,0.4)",
+                  opacity: locked ? 0.5 : 1,
+                  transition: "background 0.8s ease, border 0.8s ease, box-shadow 0.8s ease, opacity 0.8s ease",
                 }}>
                   {/* level name */}
                   <div style={{
                     fontFamily: "'Orbitron', sans-serif",
                     fontSize: 14, fontWeight: 900,
-                    color: locked ? "rgba(255,255,255,0.25)" : lv.complete ? "#fff" : "#fff",
+                    color: locked ? "rgba(255,255,255,0.25)" : "#fff",
                     letterSpacing: "0.1em", textTransform: "uppercase",
-                    textShadow: "0 1px 6px rgba(0,0,0,0.8)",
+                    textShadow: lv.complete ? "0 0 12px rgba(0,230,118,0.5), 0 1px 6px rgba(0,0,0,0.8)" : "0 1px 6px rgba(0,0,0,0.8)",
+                    transition: "color 0.8s ease, text-shadow 0.8s ease",
                   }}>{lv.name}</div>
 
                   {/* status row */}
@@ -1362,6 +1982,19 @@ export default function CosmicCasino() {
                           }}>COMPLETED</span>
                         </span>
                       </>
+                    ) : locked && lv.lockedButCompleted ? (
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        padding: "5px 14px", borderRadius: 10,
+                        background: "rgba(0,230,118,0.08)",
+                        border: "1px solid rgba(0,230,118,0.2)",
+                      }}>
+                        <span style={{ color: "rgba(0,230,118,0.6)", fontSize: 11, lineHeight: 1 }}>&#10003;</span>
+                        <span style={{
+                          fontFamily: "'Orbitron', sans-serif", fontSize: 11, fontWeight: 800,
+                          color: "rgba(0,230,118,0.5)", letterSpacing: "0.05em",
+                        }}>VERIFIED</span>
+                      </span>
                     ) : locked ? (
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
@@ -1396,13 +2029,68 @@ export default function CosmicCasino() {
         </div>
       </div>
 
-      {/* ── HUD ── */}
-      <div style={{
+      {/* ── DESKTOP HUD (top bar spanning between panels) ── */}
+      <div className="desktopOnly" style={{
+        position: "fixed", top: 0, left: 280, right: 260, zIndex: 90,
+        padding: "12px 24px", animation: "slideDown 0.5s ease-out",
+        background: "linear-gradient(to bottom, rgba(1,0,14,0.95) 0%, rgba(1,0,14,0.7) 60%, transparent 100%)",
+        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+        alignItems: "center", justifyContent: "center", gap: 20,
+      }}>
+        {/* progress dots */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {sortedLevels.map((lv, i) => {
+            const done = lv.complete;
+            const active = lv.unlocked && !done;
+            return (
+              <div key={lv.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {i > 0 && <div style={{ width: 20, height: 2, borderRadius: 1, background: levels.find(l => l.id === lv.id - 1)?.complete ? "#00e676" : "rgba(255,255,255,0.06)" }} />}
+                <div style={{
+                  width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
+                  background: done ? "linear-gradient(135deg,#00e676,#00c853)" : active ? `rgba(${lv.r},${lv.g},${lv.b},0.15)` : "rgba(255,255,255,0.03)",
+                  border: done ? "none" : active ? `1.5px solid ${lv.accent}` : "1px solid rgba(255,255,255,0.06)",
+                  boxShadow: done ? "0 0 10px rgba(0,230,118,0.3)" : "none",
+                }}>
+                  {done ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  ) : (
+                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 900, color: active ? "#fff" : "rgba(255,255,255,0.12)" }}>{lv.id}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* FS counter */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8, padding: "6px 14px", borderRadius: 20,
+          background: "rgba(255,215,64,0.06)", border: "1px solid rgba(255,215,64,0.12)",
+        }}>
+          <div style={{
+            width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+            background: "linear-gradient(135deg,#ffd740,#ffab00)", fontSize: 8, fontWeight: 900, color: "rgba(0,0,0,0.7)",
+            fontFamily: "'Orbitron',sans-serif",
+          }}>&#x25CF;</div>
+          <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 800, color: "#ffd740" }}>{freeSpins} FS</span>
+        </div>
+        {/* countdown */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 16,
+          background: "rgba(255,160,40,0.04)", border: "1px solid rgba(255,160,40,0.1)",
+        }}>
+          <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 900, color: "#ffa028" }}>{countdownStr}</span>
+          <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 8, color: "rgba(255,160,40,0.5)", letterSpacing: "0.06em" }}>REMAINING</span>
+        </div>
+      </div>
+
+      {/* ── MOBILE HUD ── */}
+      <div className="mobileOnly" style={{
         position: "fixed", top: 0, left: 0, right: 0,
         zIndex: 100, animation: "slideDown 0.5s ease-out",
         background: "linear-gradient(to bottom, rgba(1,0,14,0.98) 0%, rgba(1,0,14,0.85) 50%, rgba(1,0,14,0.6) 75%, rgba(1,0,14,0.2) 90%, transparent 100%)",
         backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
         padding: "12px 16px 16px",
+        flexDirection: "column",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
@@ -1436,6 +2124,32 @@ export default function CosmicCasino() {
             <span style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 17, fontWeight: 800, color: "#ffd740", textShadow: "0 0 14px rgba(255,215,64,0.25)" }}>{freeSpins} FS</span>
           </div>
         </div>
+
+        {/* ── ACTIVE BONUSES ── */}
+        {(bonuses.depositBonus || bonuses.cashback || bonuses.telegramBonus || bonuses.megaSpinPrize) && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, padding: "6px 22px 0", justifyContent: "center" }}>
+            {bonuses.depositBonus && (
+              <span style={{ padding: "3px 10px", borderRadius: 8, background: "rgba(255,210,50,0.08)", border: "1px solid rgba(255,210,50,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#ffd232" }}>
+                {bonuses.depositBonus} DEP
+              </span>
+            )}
+            {bonuses.cashback && (
+              <span style={{ padding: "3px 10px", borderRadius: 8, background: "rgba(255,50,120,0.08)", border: "1px solid rgba(255,50,120,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#ff3278" }}>
+                {bonuses.cashback} CB
+              </span>
+            )}
+            {bonuses.telegramBonus && (
+              <span style={{ padding: "3px 10px", borderRadius: 8, background: "rgba(0,180,255,0.08)", border: "1px solid rgba(0,180,255,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#00b4ff" }}>
+                {bonuses.telegramBonus}
+              </span>
+            )}
+            {bonuses.megaSpinPrize && (
+              <span style={{ padding: "3px 10px", borderRadius: 8, background: "rgba(255,160,40,0.08)", border: "1px solid rgba(255,160,40,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#ffa028" }}>
+                {bonuses.megaSpinPrize}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* ── QUEST PROGRESS TRACK ── */}
         {(() => {
@@ -1531,8 +2245,8 @@ export default function CosmicCasino() {
         })()}
       </div>
 
-      {/* bottom nav */}
-      <div style={{
+      {/* bottom nav — mobile only */}
+      <div className="mobileOnly" style={{
         position: "fixed", bottom: 0, left: 0, right: 0,
         zIndex: 100, padding: "0 14px 14px",
         background: "linear-gradient(to top, rgba(1,0,14,0.99) 0%, rgba(1,0,14,0.7) 40%, rgba(1,0,14,0.2) 75%, transparent 100%)",
@@ -1709,7 +2423,623 @@ export default function CosmicCasino() {
         <WheelOfFortune
           onClose={() => setShowWheel(false)}
           onWin={handleWheelWin}
+          countdownStr={countdownStr}
         />
+      )}
+
+      {/* ── MEGA WHEEL MODAL (Island 5) ── */}
+      {showMegaWheel && (
+        <WheelOfFortune
+          onClose={() => setShowMegaWheel(false)}
+          onWin={handleMegaWheelWin}
+          prizes={MEGA_WHEEL_PRIZES}
+          title="MEGA SPIN"
+        />
+      )}
+
+      {/* ── REGISTRATION MODAL (Island 1) ── */}
+      {showRegister && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 550,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+          animation: "fadeIn 0.3s ease-out",
+        }}>
+          <div style={{
+            width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
+            background: "linear-gradient(165deg, #0a0a1a 0%, #0d0620 50%, #0a0a1a 100%)",
+            border: "1px solid rgba(255,210,50,0.15)",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,210,50,0.05)",
+            animation: "modalPop 0.4s ease-out",
+          }}>
+            <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, #ffd232 50%, transparent 90%)" }} />
+            <div style={{ padding: "30px 24px", textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>🚀</div>
+              <div style={{
+                fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#fff",
+                marginBottom: 8,
+              }}>JOIN THE ADVENTURE</div>
+              <div style={{
+                fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
+                marginBottom: 24, lineHeight: 1.5,
+              }}>Create your account to spin the wheel and claim your welcome bonus!</div>
+
+              <div style={{
+                padding: "16px", borderRadius: 16, marginBottom: 16,
+                background: "rgba(255,210,50,0.05)", border: "1px solid rgba(255,210,50,0.12)",
+              }}>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "0.15em", marginBottom: 8 }}>YOUR WELCOME REWARD</div>
+                <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+                  <div style={{ padding: "8px 16px", borderRadius: 10, background: "rgba(255,210,50,0.1)", border: "1px solid rgba(255,210,50,0.2)" }}>
+                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#ffd232" }}>150%</span>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>DEPOSIT BONUS</div>
+                  </div>
+                  <div style={{ padding: "8px 16px", borderRadius: 10, background: "rgba(0,230,255,0.06)", border: "1px solid rgba(0,230,255,0.15)" }}>
+                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#78c8ff" }}>+50 FS</span>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>FREE SPINS</div>
+                  </div>
+                </div>
+              </div>
+
+              <button onClick={handleRegisterDone} style={{
+                width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
+                fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, letterSpacing: "0.08em",
+                color: "rgba(0,0,0,0.85)",
+                background: "linear-gradient(135deg, #ffd740, #ffab00)",
+                boxShadow: "0 8px 30px rgba(255,210,50,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
+              }}>REGISTER NOW</button>
+
+              <button onClick={() => setShowRegister(false)} style={{
+                width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
+                cursor: "pointer", background: "transparent",
+                fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
+                color: "rgba(255,255,255,0.2)",
+              }}>Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TELEGRAM VERIFICATION MODAL (Island 4) ── */}
+      {showTelegram && (
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 550,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+            animation: "fadeIn 0.3s ease-out",
+          }}>
+            <div style={{
+              width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
+              background: "linear-gradient(165deg, #0a0a1a 0%, #061520 50%, #0a0a1a 100%)",
+              border: "1px solid rgba(0,180,255,0.15)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,180,255,0.05)",
+              animation: "modalPop 0.4s ease-out",
+            }}>
+              <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, #00b4ff 50%, transparent 90%)" }} />
+              <div style={{ padding: "30px 24px", textAlign: "center" }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>📱</div>
+                <div style={{
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#fff",
+                  marginBottom: 20,
+                }}>TELEGRAM VERIFY</div>
+
+                {/* Step 1 */}
+                <div style={{
+                  padding: "14px 16px", borderRadius: 14, marginBottom: 12, textAlign: "left",
+                  background: "rgba(0,180,255,0.05)", border: "1px solid rgba(0,180,255,0.1)",
+                }}>
+                  <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", marginBottom: 6 }}>STEP 1 — COPY YOUR CODE</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{
+                      flex: 1, padding: "10px 14px", borderRadius: 10,
+                      background: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,180,255,0.15)",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 800, color: "#00b4ff",
+                      letterSpacing: "0.08em",
+                    }}>{telegramCode}</div>
+                    <button onClick={(e) => { navigator.clipboard.writeText(telegramCode); e.target.textContent = "COPIED!"; setTimeout(() => { if (e.target) e.target.textContent = "COPY"; }, 1500); }} style={{
+                      padding: "10px 16px", borderRadius: 10, border: "1px solid rgba(0,180,255,0.3)",
+                      background: "rgba(0,180,255,0.1)", cursor: "pointer",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#00b4ff",
+                    }}>COPY</button>
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div style={{
+                  padding: "14px 16px", borderRadius: 14, marginBottom: 12, textAlign: "left",
+                  background: "rgba(0,180,255,0.03)", border: "1px solid rgba(0,180,255,0.06)",
+                }}>
+                  <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", marginBottom: 6 }}>STEP 2 — OPEN TELEGRAM BOT</div>
+                  <button onClick={() => window.open("https://t.me/MYBCGameBot", "_blank")} style={{
+                    width: "100%", padding: "12px", borderRadius: 10, border: "1px solid rgba(0,180,255,0.2)",
+                    background: "rgba(0,180,255,0.08)", cursor: "pointer",
+                    fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800, color: "#00b4ff",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  }}>
+                    <span>OPEN @MYBCGameBot</span>
+                    <span style={{ fontSize: 14 }}>→</span>
+                  </button>
+                </div>
+
+                {/* Step 3 */}
+                <div style={{
+                  padding: "14px 16px", borderRadius: 14, marginBottom: 20, textAlign: "left",
+                  background: "rgba(0,180,255,0.03)", border: "1px solid rgba(0,180,255,0.06)",
+                }}>
+                  <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em" }}>STEP 3 — SEND THE CODE TO THE BOT</div>
+                </div>
+
+                {/* Reward preview */}
+                <div style={{
+                  padding: "10px", borderRadius: 12, marginBottom: 16,
+                  background: "rgba(0,230,118,0.05)", border: "1px solid rgba(0,230,118,0.12)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}>
+                  <span style={{ fontSize: 16 }}>🎁</span>
+                  <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 800, color: "#00e676" }}>REWARD: +$20 BONUS</span>
+                </div>
+
+                <button onClick={handleTelegramDone} style={{
+                  width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.08em",
+                  color: "#fff",
+                  background: "linear-gradient(135deg, #0088cc, #00b4ff)",
+                  boxShadow: "0 8px 30px rgba(0,180,255,0.25), 0 2px 0 rgba(255,255,255,0.1) inset",
+                }}>I'VE SENT THE CODE</button>
+
+                <button onClick={() => setShowTelegram(false)} style={{
+                  width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
+                  cursor: "pointer", background: "transparent",
+                  fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
+                  color: "rgba(255,255,255,0.2)",
+                }}>Close</button>
+              </div>
+            </div>
+          </div>
+      )}
+
+      {/* ── KYC VERIFICATION MODAL (Island 2) ── */}
+      {showKYC && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 550,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+          animation: "fadeIn 0.3s ease-out",
+        }}>
+          <div style={{
+            width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
+            background: "linear-gradient(165deg, #0a0a1a 0%, #060d20 50%, #0a0a1a 100%)",
+            border: "1px solid rgba(120,200,255,0.15)",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(120,200,255,0.05)",
+            animation: "modalPop 0.4s ease-out",
+          }}>
+            <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, #78c8ff 50%, transparent 90%)" }} />
+            <div style={{ padding: "30px 24px", textAlign: "center" }}>
+              <div style={{ marginBottom: 16 }}>
+                <svg width="56" height="56" viewBox="0 0 40 40" fill="none">
+                  <rect x="8" y="6" width="24" height="28" rx="3" stroke="#78c8ff" strokeWidth="2" fill="none" />
+                  <circle cx="20" cy="17" r="5" stroke="#78c8ff" strokeWidth="1.5" fill="none" />
+                  <path d="M12 30 Q20 24 28 30" stroke="#78c8ff" strokeWidth="1.5" fill="none" />
+                </svg>
+              </div>
+              <div style={{
+                fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#fff",
+                marginBottom: 8,
+              }}>KYC VERIFICATION</div>
+              <div style={{
+                fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
+                marginBottom: 24, lineHeight: 1.5,
+              }}>Verify your identity to unlock +50 Free Spins and continue your journey.</div>
+
+              <div style={{
+                padding: "16px", borderRadius: 16, marginBottom: 12, textAlign: "left",
+                background: "rgba(120,200,255,0.04)", border: "1px solid rgba(120,200,255,0.1)",
+              }}>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 10 }}>WHAT YOU NEED</div>
+                {["Valid government ID (passport, driver's license)", "Proof of address (utility bill, bank statement)", "A clear selfie for face matching"].map((item, idx) => (
+                  <div key={idx} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(120,200,255,0.1)", border: "1px solid rgba(120,200,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#78c8ff" }}>{idx + 1}</span>
+                    </div>
+                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.6)" }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                padding: "10px", borderRadius: 12, marginBottom: 16,
+                background: "rgba(0,230,118,0.05)", border: "1px solid rgba(0,230,118,0.12)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              }}>
+                <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 800, color: "#00e676" }}>REWARD: +50 FREE SPINS</span>
+              </div>
+
+              <button onClick={handleKYCDone} style={{
+                width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
+                fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.08em",
+                color: "rgba(0,0,0,0.85)",
+                background: "linear-gradient(135deg, #78c8ff, #4da6ff)",
+                boxShadow: "0 8px 30px rgba(120,200,255,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
+              }}>START KYC VERIFICATION</button>
+
+              <button onClick={() => setShowKYC(false)} style={{
+                width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
+                cursor: "pointer", background: "transparent",
+                fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
+                color: "rgba(255,255,255,0.2)",
+              }}>Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── PHONE VERIFICATION MODAL (Island 3) ── */}
+      {showPhone && (
+          <div style={{
+            position: "fixed", inset: 0, zIndex: 550,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+            animation: "fadeIn 0.3s ease-out",
+          }}>
+            <div style={{
+              width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
+              background: "linear-gradient(165deg, #0a0a1a 0%, #200818 50%, #0a0a1a 100%)",
+              border: "1px solid rgba(255,50,120,0.15)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,50,120,0.05)",
+              animation: "modalPop 0.4s ease-out",
+            }}>
+              <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, #ff3278 50%, transparent 90%)" }} />
+              <div style={{ padding: "30px 24px", textAlign: "center" }}>
+                <div style={{ marginBottom: 16 }}>
+                  <svg width="56" height="56" viewBox="0 0 40 40" fill="none">
+                    <rect x="12" y="4" width="16" height="32" rx="4" stroke="#ff3278" strokeWidth="2" fill="none" />
+                    <line x1="17" y1="30" x2="23" y2="30" stroke="#ff3278" strokeWidth="1.5" />
+                    <circle cx="20" cy="30" r="1.5" fill="#ff3278" />
+                  </svg>
+                </div>
+                <div style={{
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#fff",
+                  marginBottom: 8,
+                }}>PHONE VERIFICATION</div>
+                <div style={{
+                  fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
+                  marginBottom: 24, lineHeight: 1.5,
+                }}>{phoneStep === 0 ? "Enter your phone number to receive a verification code." : "Enter the 4-digit code sent to your phone."}</div>
+
+                {phoneStep === 0 ? (
+                  <>
+                    {/* Phone input */}
+                    <div style={{
+                      padding: "14px 16px", borderRadius: 14, marginBottom: 16, textAlign: "left",
+                      background: "rgba(255,50,120,0.04)", border: "1px solid rgba(255,50,120,0.1)",
+                    }}>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 8 }}>ENTER PHONE NUMBER</div>
+                      <input type="tel" placeholder="+1 (555) 123-4567" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} style={{
+                        width: "100%", padding: "12px 14px", borderRadius: 10, boxSizing: "border-box",
+                        background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,50,120,0.2)",
+                        fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 700, color: "#ff3278",
+                        outline: "none", letterSpacing: "0.05em",
+                      }} />
+                    </div>
+
+                    <button onClick={() => { if (phoneNumber.length >= 6) setPhoneStep(1); }} style={{
+                      width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: phoneNumber.length >= 6 ? "pointer" : "not-allowed",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.08em",
+                      color: "#fff", opacity: phoneNumber.length >= 6 ? 1 : 0.4,
+                      background: "linear-gradient(135deg, #ff3278, #ff5e9e)",
+                      boxShadow: "0 8px 30px rgba(255,50,120,0.25), 0 2px 0 rgba(255,255,255,0.1) inset",
+                    }}>SEND CODE</button>
+                  </>
+                ) : (
+                  <>
+                    {/* OTP input */}
+                    <div style={{
+                      padding: "14px 16px", borderRadius: 14, marginBottom: 12, textAlign: "left",
+                      background: "rgba(255,50,120,0.04)", border: "1px solid rgba(255,50,120,0.1)",
+                    }}>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 8 }}>VERIFICATION CODE</div>
+                      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                        {[0,1,2,3].map(idx => (
+                          <input key={idx} ref={el => { otpRefs.current[idx] = el; }} type="text" inputMode="numeric" maxLength="1"
+                            value={phoneOtp[idx]}
+                            onChange={e => {
+                              const v = e.target.value.replace(/\D/g, "").slice(0, 1);
+                              setPhoneOtp(prev => { const n = [...prev]; n[idx] = v; return n; });
+                              if (v && idx < 3 && otpRefs.current[idx + 1]) otpRefs.current[idx + 1].focus();
+                            }}
+                            onKeyDown={e => {
+                              if (e.key === "Backspace" && !phoneOtp[idx] && idx > 0 && otpRefs.current[idx - 1]) otpRefs.current[idx - 1].focus();
+                            }}
+                            style={{
+                              width: 48, height: 52, textAlign: "center", borderRadius: 10,
+                              background: "rgba(0,0,0,0.3)", border: phoneOtp[idx] ? "1.5px solid rgba(255,50,120,0.5)" : "1px solid rgba(255,50,120,0.2)",
+                              fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#ff3278",
+                              outline: "none", transition: "border 0.2s ease",
+                            }} />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div style={{
+                      padding: "10px", borderRadius: 12, marginBottom: 16,
+                      background: "rgba(0,230,118,0.05)", border: "1px solid rgba(0,230,118,0.12)",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    }}>
+                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 800, color: "#00e676" }}>REWARD: 100% CASHBACK</span>
+                    </div>
+
+                    <button onClick={() => { if (phoneOtp.every(d => d)) handlePhoneDone(); }} style={{
+                      width: "100%", padding: "16px", borderRadius: 16, border: "none",
+                      cursor: phoneOtp.every(d => d) ? "pointer" : "not-allowed",
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.08em",
+                      color: "#fff", opacity: phoneOtp.every(d => d) ? 1 : 0.4,
+                      background: "linear-gradient(135deg, #ff3278, #ff5e9e)",
+                      boxShadow: "0 8px 30px rgba(255,50,120,0.25), 0 2px 0 rgba(255,255,255,0.1) inset",
+                    }}>VERIFY PHONE</button>
+                  </>
+                )}
+
+                <button onClick={() => setShowPhone(false)} style={{
+                  width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
+                  cursor: "pointer", background: "transparent",
+                  fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
+                  color: "rgba(255,255,255,0.2)",
+                }}>Close</button>
+              </div>
+            </div>
+          </div>
+      )}
+
+      {/* ── DEPOSIT PROMPT MODAL (Island 5 — before Mega Wheel) ── */}
+      {showDeposit && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 550,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+          animation: "fadeIn 0.3s ease-out",
+        }}>
+          <div style={{
+            width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
+            background: "linear-gradient(165deg, #0a0a1a 0%, #1a0d08 50%, #0a0a1a 100%)",
+            border: "1px solid rgba(255,160,40,0.15)",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,160,40,0.05)",
+            animation: "modalPop 0.4s ease-out",
+          }}>
+            <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, #ffa028 50%, transparent 90%)" }} />
+            <div style={{ padding: "30px 24px", textAlign: "center" }}>
+              <div style={{ marginBottom: 16 }}>
+                <svg width="56" height="56" viewBox="0 0 40 40" fill="none">
+                  <polygon points="20,4 26,16 38,16 28,24 32,36 20,28 8,36 12,24 2,16 14,16" stroke="#ffa028" strokeWidth="1.8" fill="none" />
+                </svg>
+              </div>
+              <div style={{
+                fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#fff",
+                marginBottom: 8,
+              }}>MEGA SPIN</div>
+              <div style={{
+                fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
+                marginBottom: 20, lineHeight: 1.5,
+              }}>Make a deposit of at least $50 to unlock the Mega Spin wheel with prizes up to $500!</div>
+
+              <div style={{
+                display: "flex", gap: 10, marginBottom: 20,
+              }}>
+                {["$50", "$100", "$200"].map((amt, idx) => (
+                  <div key={idx} onClick={() => setDepositAmount(amt)} style={{
+                    flex: 1, padding: "14px 8px", borderRadius: 14, textAlign: "center", cursor: "pointer",
+                    background: depositAmount === amt ? "rgba(255,160,40,0.12)" : "rgba(255,160,40,0.04)",
+                    border: depositAmount === amt ? "2px solid rgba(255,160,40,0.4)" : "1px solid rgba(255,160,40,0.12)",
+                    transition: "all 0.2s ease",
+                  }}>
+                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#ffa028" }}>{amt}</div>
+                    {idx === 0 && <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 8, color: "rgba(255,160,40,0.5)", marginTop: 3, letterSpacing: "0.15em" }}>MINIMUM</div>}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                padding: "12px", borderRadius: 14, marginBottom: 16,
+                background: "rgba(255,210,50,0.05)", border: "1px solid rgba(255,210,50,0.12)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+              }}>
+                <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#ffd232" }}>$50 — $500</span>
+                <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em" }}>PRIZE RANGE</span>
+              </div>
+
+              <button onClick={handleDepositDone} style={{
+                width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
+                fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.08em",
+                color: "rgba(0,0,0,0.85)",
+                background: "linear-gradient(135deg, #ffa028, #ffd232)",
+                boxShadow: "0 8px 30px rgba(255,160,40,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
+              }}>DEPOSIT & SPIN</button>
+
+              <button onClick={() => setShowDeposit(false)} style={{
+                width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
+                cursor: "pointer", background: "transparent",
+                fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
+                color: "rgba(255,255,255,0.2)",
+              }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ISLAND 6 FINAL CEREMONY MODAL ── */}
+      {showFinalCeremony && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 550,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+          animation: "fadeIn 0.3s ease-out",
+        }}>
+          <div style={{
+            width: "min(92vw, 400px)", borderRadius: 28, overflow: "hidden",
+            background: "linear-gradient(165deg, #0d0620 0%, #1a0d08 50%, #0d0620 100%)",
+            border: "2px solid rgba(255,210,50,0.25)",
+            boxShadow: "0 0 60px rgba(255,210,50,0.1), 0 30px 80px rgba(0,0,0,0.5)",
+            animation: "modalPop 0.5s ease-out",
+          }}>
+            <div style={{ height: 3, background: "linear-gradient(90deg, transparent 5%, #ffd232 30%, #00e676 50%, #ffd232 70%, transparent 95%)" }} />
+            <div style={{ padding: "30px 24px", textAlign: "center" }}>
+              <div style={{ fontSize: 56, marginBottom: 12, animation: "dotPulse 1.5s ease-in-out infinite" }}>👑</div>
+              <div style={{
+                fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900,
+                background: "linear-gradient(135deg,#ffd740,#ffa028,#ffd740)",
+                backgroundSize: "300% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                animation: "shimmer 3s linear infinite", marginBottom: 8,
+              }}>FINAL STEP</div>
+              <div style={{
+                fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
+                marginBottom: 24, lineHeight: 1.6,
+              }}>You've completed all challenges! Claim your final reward and unlock the next world.</div>
+
+              {/* Summary of earned rewards */}
+              <div style={{
+                padding: "16px", borderRadius: 16, marginBottom: 20,
+                background: "rgba(255,210,50,0.04)", border: "1px solid rgba(255,210,50,0.12)",
+              }}>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 10 }}>YOUR JOURNEY SO FAR</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" }}>
+                  {freeSpins > 0 && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(120,200,255,0.08)", border: "1px solid rgba(120,200,255,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#78c8ff" }}>{freeSpins} FS</span>}
+                  {bonuses.depositBonus && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(255,210,50,0.08)", border: "1px solid rgba(255,210,50,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#ffd232" }}>{bonuses.depositBonus} DEP</span>}
+                  {bonuses.cashback && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(255,50,120,0.08)", border: "1px solid rgba(255,50,120,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#ff3278" }}>{bonuses.cashback} CB</span>}
+                  {bonuses.telegramBonus && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(0,180,255,0.08)", border: "1px solid rgba(0,180,255,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#00b4ff" }}>{bonuses.telegramBonus}</span>}
+                  {bonuses.megaSpinPrize && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(255,160,40,0.08)", border: "1px solid rgba(255,160,40,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#ffa028" }}>{bonuses.megaSpinPrize}</span>}
+                </div>
+              </div>
+
+              <div style={{
+                padding: "14px", borderRadius: 14, marginBottom: 20,
+                background: "linear-gradient(135deg, rgba(0,230,118,0.08), rgba(255,210,50,0.04))",
+                border: "1.5px solid rgba(0,230,118,0.2)",
+              }}>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 28, fontWeight: 900, color: "#00e676", textShadow: "0 0 16px rgba(0,230,118,0.4)" }}>$500</div>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "rgba(0,230,118,0.6)", letterSpacing: "0.2em", marginTop: 4 }}>GUARANTEED CASH PRIZE AWAITS</div>
+              </div>
+
+              <button onClick={() => { setShowFinalCeremony(false); triggerComplete(6); }} style={{
+                width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
+                fontFamily: "'Orbitron',sans-serif", fontSize: 15, fontWeight: 900, letterSpacing: "0.1em",
+                color: "rgba(0,0,0,0.85)",
+                background: "linear-gradient(135deg, #ffd740, #ffab00)",
+                boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
+              }}>COMPLETE JOURNEY</button>
+
+              <button onClick={() => setShowFinalCeremony(false)} style={{
+                width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
+                cursor: "pointer", background: "transparent",
+                fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
+                color: "rgba(255,255,255,0.2)",
+              }}>Not yet</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── JOURNEY COMPLETE OVERLAY (All 6 islands done) ── */}
+      {showJourneyComplete && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 700,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(0,0,10,0.92)", backdropFilter: "blur(20px)",
+          animation: "fadeIn 0.5s ease-out",
+        }}>
+          <ConfettiCanvas />
+          <div style={{
+            width: "min(92vw, 400px)", borderRadius: 28, overflow: "hidden",
+            background: "linear-gradient(165deg, #0d0620 0%, #0a0a1a 50%, #0d0620 100%)",
+            border: "2px solid rgba(0,230,118,0.3)",
+            boxShadow: "0 0 80px rgba(0,230,118,0.15), 0 30px 80px rgba(0,0,0,0.5)",
+            animation: "modalPop 0.5s ease-out",
+            position: "relative", zIndex: 701,
+          }}>
+            <div style={{ height: 3, background: "linear-gradient(90deg, transparent 5%, #00e676 30%, #ffd232 50%, #00e676 70%, transparent 95%)" }} />
+            <div style={{ padding: "30px 24px", textAlign: "center" }}>
+              <div style={{ fontSize: 56, marginBottom: 12, animation: "dotPulse 1.5s ease-in-out infinite" }}>🏆</div>
+              <div style={{
+                fontFamily: "'Orbitron',sans-serif", fontSize: 24, fontWeight: 900,
+                background: "linear-gradient(135deg,#ffd740,#00e676,#ffd740)",
+                backgroundSize: "300% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                animation: "shimmer 3s linear infinite", marginBottom: 6,
+              }}>JOURNEY COMPLETE!</div>
+              <div style={{
+                fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)",
+                letterSpacing: "0.2em", marginBottom: 24,
+              }}>ALL MISSIONS CLEARED</div>
+
+              {/* Reward summary */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+                {[
+                  { label: "Free Spins", value: `${freeSpins} FS`, color: "#78c8ff" },
+                  { label: "Deposit Bonus", value: bonuses.depositBonus || "—", color: "#ffd232" },
+                  { label: "Cashback", value: bonuses.cashback || "—", color: "#ff3278" },
+                  { label: "Telegram", value: bonuses.telegramBonus || "—", color: "#00b4ff" },
+                  { label: "Mega Spin", value: bonuses.megaSpinPrize || "—", color: "#ffa028" },
+                ].map((b, idx) => (
+                  <div key={idx} style={{
+                    flex: "1 1 45%", padding: "10px 8px", borderRadius: 12, textAlign: "center",
+                    background: `rgba(${b.color === "#78c8ff" ? "120,200,255" : b.color === "#ffd232" ? "255,210,50" : b.color === "#ff3278" ? "255,50,120" : b.color === "#00b4ff" ? "0,180,255" : "255,160,40"},0.06)`,
+                    border: `1px solid ${b.color}30`,
+                  }}>
+                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: b.color }}>{b.value}</div>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 8, color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em", marginTop: 3, textTransform: "uppercase" }}>{b.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* $500 guaranteed */}
+              <div style={{
+                padding: "16px", borderRadius: 16, marginBottom: 20,
+                background: "linear-gradient(135deg, rgba(0,230,118,0.1), rgba(255,210,50,0.05))",
+                border: "2px solid rgba(0,230,118,0.3)",
+                boxShadow: "0 0 30px rgba(0,230,118,0.08)",
+              }}>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 32, fontWeight: 900, color: "#00e676", textShadow: "0 0 20px rgba(0,230,118,0.5)" }}>$500</div>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(0,230,118,0.7)", letterSpacing: "0.2em", marginTop: 4 }}>GUARANTEED CASH PRIZE UNLOCKED</div>
+              </div>
+
+              <button onClick={() => setShowJourneyComplete(false)} style={{
+                width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
+                fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.1em",
+                color: "rgba(0,0,0,0.85)",
+                background: "linear-gradient(135deg, #00e676, #00c853)",
+                boxShadow: "0 8px 30px rgba(0,230,118,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
+              }}>CLAIM YOUR $500</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── COMPLETION CONFETTI ── */}
+      {showCompletionConfetti && <ConfettiCanvas />}
+
+      {/* ── REWARD POP OVERLAY ── */}
+      {rewardPop && (
+        <div style={{
+          position: "fixed", left: 0, right: 0, top: 0, bottom: 0,
+          zIndex: 200, pointerEvents: "none",
+        }}>
+          <div style={{
+            position: "absolute",
+            left: rewardPop.x, top: rewardPop.y,
+            transform: "translate(-50%, -50%)",
+            fontFamily: "'Orbitron',sans-serif", fontSize: 28, fontWeight: 900,
+            color: "#00e676",
+            textShadow: "0 0 20px rgba(0,230,118,0.8), 0 0 40px rgba(0,230,118,0.4), 0 2px 4px rgba(0,0,0,0.8)",
+            animation: "rewardFloat 2s ease-out forwards",
+            whiteSpace: "nowrap",
+          }}>{rewardPop.text}</div>
+        </div>
+      )}
+
+      {/* ── COMPLETION FLASH OVERLAY ── */}
+      {completingId && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 150, pointerEvents: "none",
+          background: "rgba(255,255,255,0.15)",
+          animation: "completionFlash 0.4s ease-out forwards",
+        }} />
       )}
 
     </div>
