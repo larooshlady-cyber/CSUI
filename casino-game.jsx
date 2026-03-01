@@ -63,6 +63,46 @@ const INITIAL_LEVELS = [
   { id: 1, name: "Welcome Spin", icon: "wheel", r: 255, g: 210, b: 50, accent: "#ffd232", reward: "+50 FS / 150% Dep", rewardShort: "+50FS / 150%", task: "Spin the Wheel", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
 ];
 
+// Stage complete modal config per level
+const STAGE_COMPLETE_DATA = {
+  1: { // Welcome Spin
+    title: "Stage 1 Complete", subtitle: "Rewards Unlocked!",
+    prize: "150% DEP +50 FS", prizeNote: "Unlocks after registration & KYC",
+    secondaryCta: null,
+  },
+  2: { // KYC
+    title: "Stage 2 Complete", subtitle: "Rewards Unlocked!",
+    prize: "150% + 100 FS", prizeNote: "Activated — deposit to use bonus",
+    secondaryCta: "USE NOW 100 FREESPINS",
+  },
+  3: { // Phone
+    title: "Stage 3 Complete", subtitle: "Reward Claimed!",
+    prize: "100% Cashback", prizeNote: "Applied to your next deposit",
+    secondaryCta: null,
+  },
+  4: { // Telegram
+    title: "Stage 4 Complete", subtitle: "Reward Claimed!",
+    prize: "+$20 Bonus", prizeNote: "Added to your balance",
+    primaryCta: "CONTINUE TO MEGA SPIN",
+    secondaryCta: null,
+  },
+  5: { // Mega Spin
+    title: "Stage 5 Complete", subtitle: "Jackpot!",
+    prize: null, // dynamic from wheel
+    prizeNote: "10x wager required in slots",
+    primaryCta: "UNLOCK NEXT JOURNEY",
+    secondaryCta: null,
+  },
+};
+
+const ALL_STEPS = [
+  { id: 1, name: "Register", reward: "150% + 50 FS" },
+  { id: 2, name: "KYC Verification", reward: "+50 FS" },
+  { id: 3, name: "Phone Verify", reward: "100% CB" },
+  { id: 4, name: "Telegram", reward: "+$20" },
+  { id: 5, name: "Mega Spin", reward: "$50–$500" },
+];
+
 const WHEEL_PRIZES = [
   { label: "150% DEP\n+50 FS", color: "#ffe8a0", bg1: "#7a3500", bg2: "#c45800", jackpot: true },
   { label: "20 Free\nSpins", color: "#c8e8ff", bg1: "#0a1848", bg2: "#1a3070" },
@@ -72,15 +112,48 @@ const WHEEL_PRIZES = [
 const JACKPOT_INDEX = 0; // always land here
 
 const MEGA_WHEEL_PRIZES = [
-  { label: "$500\nJackpot", color: "#ffd780", bg1: "#4a3010", bg2: "#6a4c1a", jackpot: true },
-  { label: "$200\nBonus", color: "#ffd780", bg1: "#3e1c14", bg2: "#5a2e20" },
-  { label: "$100\nCash", color: "#ffd780", bg1: "#141838", bg2: "#1e2850" },
-  { label: "$50\nBonus", color: "#ffd780", bg1: "#3e1c14", bg2: "#5a2e20" },
+  { label: "$100\nCash", color: "#c8e8ff", bg1: "#0a1848", bg2: "#1a3070", jackpot: true },
+  { label: "$200\nBonus", color: "#ffc8c8", bg1: "#6a0828", bg2: "#a01040" },
+  { label: "$500\nJackpot", color: "#ffe8a0", bg1: "#7a3500", bg2: "#c45800" },
+  { label: "$50\nBonus", color: "#d4ffc8", bg1: "#0a4020", bg2: "#1a6838" },
+];
+
+// ── CHAPTER 2: Road to VIP Level 2 ──
+const INITIAL_LEVELS_CH2 = [
+  { id: 6, name: "VIP Level 2", icon: "crown", r: 180, g: 120, b: 255, accent: "#b478ff", reward: "VIP Status Unlocked", rewardShort: "VIP LV2", task: "Complete All Steps", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 5, name: "VIP Spin", icon: "deposit", r: 180, g: 120, b: 255, accent: "#b478ff", reward: "Wheel Ticket $100-1000", rewardShort: "$100-1K", task: "Exclusive VIP Wheel", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 4, name: "Weekly Challenge", icon: "trophy", r: 255, g: 180, b: 50, accent: "#ffb432", reward: "200% Reload Bonus", rewardShort: "200% RLD", task: "Complete Mission", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 3, name: "Refer a Friend", icon: "refer", r: 0, g: 200, b: 150, accent: "#00c896", reward: "+$50 Each", rewardShort: "+$50", task: "Share Referral Link", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 2, name: "Play 50 Rounds", icon: "play", r: 255, g: 100, b: 100, accent: "#ff6464", reward: "+100 Free Spins", rewardShort: "+100 FS", task: "Play 50 Slot Rounds", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 1, name: "First Deposit", icon: "wallet", r: 0, g: 230, b: 118, accent: "#00e676", reward: "200% + 100 FS", rewardShort: "200%+100FS", task: "Make Your First Deposit", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+];
+
+const STAGE_COMPLETE_DATA_CH2 = {
+  1: { title: "Stage 1 Complete", subtitle: "Deposit Activated!", prize: "200% + 100 FS", prizeNote: "Applied to your first deposit", secondaryCta: null },
+  2: { title: "Stage 2 Complete", subtitle: "Challenge Cleared!", prize: "+100 Free Spins", prizeNote: "Added to your account", secondaryCta: "PLAY NOW 100 FS" },
+  3: { title: "Stage 3 Complete", subtitle: "Referral Sent!", prize: "+$50 Bonus", prizeNote: "Credited when friend signs up", secondaryCta: null },
+  4: { title: "Stage 4 Complete", subtitle: "Mission Complete!", prize: "200% Reload", prizeNote: "Use on your next deposit", primaryCta: "CONTINUE TO VIP SPIN", secondaryCta: null },
+  5: { title: "Stage 5 Complete", subtitle: "VIP Jackpot!", prize: null, prizeNote: "10x wager required in slots", primaryCta: "UNLOCK VIP LEVEL 2", secondaryCta: null },
+};
+
+const ALL_STEPS_CH2 = [
+  { id: 1, name: "First Deposit", reward: "200% + 100 FS" },
+  { id: 2, name: "Play 50 Rounds", reward: "+100 FS" },
+  { id: 3, name: "Refer a Friend", reward: "+$50" },
+  { id: 4, name: "Weekly Challenge", reward: "200% RLD" },
+  { id: 5, name: "VIP Spin", reward: "$100–$1K" },
+];
+
+const VIP_WHEEL_PRIZES = [
+  { label: "$250\nCash", color: "#e0c8ff", bg1: "#2a0848", bg2: "#4a1870", jackpot: true },
+  { label: "$500\nBonus", color: "#ffc8c8", bg1: "#6a0828", bg2: "#a01040" },
+  { label: "$1000\nJackpot", color: "#ffe8a0", bg1: "#7a3500", bg2: "#c45800" },
+  { label: "$100\nBonus", color: "#d4ffc8", bg1: "#0a4020", bg2: "#1a6838" },
 ];
 
 const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.7];
 const NODE_GAP = 170;
-const PAD_TOP = 130;
+const PAD_TOP = 160;
 
 /* ═══════════════════════════════════════════════════
    CONFETTI CANVAS — timed, self-contained
@@ -468,7 +541,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
               </div>
 
               {/* JACKPOT overlay — appears on top of wheel during celebration */}
-              {phase === "celebrating" && (
+              {phase === "celebrating" && title !== "MEGA SPIN" && title !== "VIP SPIN" && (
                 <div style={{
                   position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
@@ -504,27 +577,27 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
               {/* ── MISSION CLEARED header ── */}
               <div style={{ textAlign: "center", padding: "22px 20px 0" }}>
                 <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
-                  {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : "You Won a Bonus!"}
+                  {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : title === "VIP SPIN" ? "VIP SPIN COMPLETE" : "You Won a Bonus!"}
                 </div>
                 <div style={{
                   fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, letterSpacing: "0.04em",
                   color: "#ffffff", lineHeight: 1.2,
-                }}>Stage 1 Complete</div>
+                }}>{(title === "MEGA SPIN" || title === "VIP SPIN") ? "Stage 5 Complete" : "Stage 1 Complete"}</div>
               </div>
 
-              {title === "MEGA SPIN" ? (
+              {(title === "MEGA SPIN" || title === "VIP SPIN") ? (
                 <>
                   {/* ── Mega Spin prize display ── */}
                   <div style={{ display: "flex", justifyContent: "center", margin: "20px 16px 0" }}>
                     <div style={{ padding: "20px 32px", borderRadius: 20, textAlign: "center",
                       background: "linear-gradient(145deg,rgba(255,210,50,0.12),rgba(255,160,40,0.04))",
                       border: "2px solid rgba(255,210,50,0.3)",
-                      boxShadow: "0 0 40px rgba(255,210,50,0.1)",
                     }}>
-                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 36, fontWeight: 900, color: "#ffd232", textShadow: "0 0 30px rgba(255,210,50,0.6)", lineHeight: 1.1 }}>
+                      <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 36, fontWeight: 900, color: "#ffd232", lineHeight: 1.1 }}>
                         {prizes[JACKPOT_INDEX].label.replace("\n", " ")}
                       </div>
                       <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,210,50,0.55)", letterSpacing: "0.2em", marginTop: 8, textTransform: "uppercase" }}>YOUR PRIZE</div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.35)", marginTop: 6 }}>10x wager required in slots</div>
                     </div>
                   </div>
 
@@ -1324,8 +1397,13 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
    MAIN APP
    ═══════════════════════════════════════════════════ */
 export default function CosmicCasino() {
+  const [currentChapter, setCurrentChapter] = useState(1);
   const [levels, setLevels] = useState(INITIAL_LEVELS);
   const [freeSpins, setFreeSpins] = useState(0);
+  // Chapter-aware data selectors
+  const chapterStageData = currentChapter === 1 ? STAGE_COMPLETE_DATA : STAGE_COMPLETE_DATA_CH2;
+  const chapterSteps = currentChapter === 1 ? ALL_STEPS : ALL_STEPS_CH2;
+  const chapterTitle = currentChapter === 1 ? "CHAPTER 1" : "ROAD TO VIP LEVEL 2";
   const [selected, setSelected] = useState(null);
   const [showWheel, setShowWheel] = useState(false);
   const [showMegaWheel, setShowMegaWheel] = useState(false);
@@ -1342,10 +1420,15 @@ export default function CosmicCasino() {
   const islandElsRef = useRef([]);
   const [introPlayed, setIntroPlayed] = useState(false);
   // telegram promo code — stable across re-renders
-  const [telegramCode] = useState(() => "MYBC-" + Math.random().toString(36).substring(2, 6).toUpperCase() + "-" + Math.random().toString(36).substring(2, 6).toUpperCase());
+  const [telegramCode] = useState(() => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  });
   // phone modal state
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneOtp, setPhoneOtp] = useState(["", "", "", ""]);
+  const [phoneOtp, setPhoneOtp] = useState("");
   const [phoneStep, setPhoneStep] = useState(0); // 0=phone, 1=otp
   const otpRefs = useRef([]);
   // deposit amount selection
@@ -1429,19 +1512,32 @@ export default function CosmicCasino() {
       setRewardPop({ text: lv.rewardShort, x: labelsRef.current[idx].x, y: labelsRef.current[idx].y });
       setTimeout(() => setRewardPop(null), 2000);
     }
-    // apply bonus per level
-    if (lvId === 1) {
-      setFreeSpins(prev => prev + 50);
-      setBonuses(prev => ({ ...prev, depositBonus: "150%", freeSpins: prev.freeSpins + 50 }));
-      // bonus stays "pending" until first deposit — override the default "active"
-      extraUpdates = { ...extraUpdates, bonusState: "pending" };
-    } else if (lvId === 2) {
-      setFreeSpins(prev => prev + 50);
-      setBonuses(prev => ({ ...prev, freeSpins: prev.freeSpins + 50 }));
-    } else if (lvId === 3) {
-      setBonuses(prev => ({ ...prev, cashback: "100%" }));
-    } else if (lvId === 4) {
-      setBonuses(prev => ({ ...prev, telegramBonus: "+$20" }));
+    // apply bonus per level (chapter-specific)
+    if (currentChapter === 1) {
+      if (lvId === 1) {
+        setFreeSpins(prev => prev + 50);
+        setBonuses(prev => ({ ...prev, depositBonus: "150%", freeSpins: prev.freeSpins + 50 }));
+        extraUpdates = { ...extraUpdates, bonusState: "pending" };
+      } else if (lvId === 2) {
+        setFreeSpins(prev => prev + 50);
+        setBonuses(prev => ({ ...prev, freeSpins: prev.freeSpins + 50 }));
+      } else if (lvId === 3) {
+        setBonuses(prev => ({ ...prev, cashback: "100%" }));
+      } else if (lvId === 4) {
+        setBonuses(prev => ({ ...prev, telegramBonus: "+$20" }));
+      }
+    } else {
+      if (lvId === 1) {
+        setFreeSpins(prev => prev + 100);
+        setBonuses(prev => ({ ...prev, depositBonus: "200%", freeSpins: prev.freeSpins + 100 }));
+      } else if (lvId === 2) {
+        setFreeSpins(prev => prev + 100);
+        setBonuses(prev => ({ ...prev, freeSpins: prev.freeSpins + 100 }));
+      } else if (lvId === 3) {
+        setBonuses(prev => ({ ...prev, referralBonus: "+$50" }));
+      } else if (lvId === 4) {
+        setBonuses(prev => ({ ...prev, reloadBonus: "200%" }));
+      }
     }
     // fire confetti on every island completion
     setShowCompletionConfetti(true);
@@ -1487,20 +1583,27 @@ export default function CosmicCasino() {
     setLevels(prev => prev.map(l =>
       l.id === lvId ? { ...l, completing: true } : l
     ));
-  }, [levels]);
+  }, [levels, currentChapter]);
 
   // handle clicking a level
   const handleLevelClick = useCallback((lv) => {
     if (lv.complete || lv.completing) return;
     if (!lv.unlocked) { setSelected(lv); return; }
-    if (lv.id === 1) setShowWheel(true);
-    else if (lv.id === 2) setShowKYC(true);
-    else if (lv.id === 3) { setPhoneStep(0); setPhoneNumber(""); setPhoneOtp(["","","",""]); setShowPhone(true); }
-    else if (lv.id === 4) setShowTelegram(true);
-    else if (lv.id === 5) { setDepositAmount("$50"); setShowDeposit(true); }
-    else if (lv.id === 6) setShowFinalCeremony(true);
-    else setSelected(lv);
-  }, [triggerComplete]);
+    if (currentChapter === 1) {
+      if (lv.id === 1) setShowWheel(true);
+      else if (lv.id === 2) setShowKYC(true);
+      else if (lv.id === 3) { setPhoneStep(0); setPhoneNumber(""); setPhoneOtp(""); setShowPhone(true); }
+      else if (lv.id === 4) setShowTelegram(true);
+      else if (lv.id === 5) { setDepositAmount("$50"); setShowDeposit(true); }
+      else if (lv.id === 6) setShowFinalCeremony(true);
+      else setSelected(lv);
+    } else {
+      // Chapter 2 interactions — simple click-to-complete for demo
+      if (lv.id === 1) { setShowDeposit(true); } // First Deposit
+      else if (lv.id === 5) { setShowMegaWheel(true); } // VIP Spin
+      else { triggerComplete(lv.id); setTimeout(() => setShowStageComplete({ levelId: lv.id }), 2200); }
+    }
+  }, [triggerComplete, currentChapter]);
 
 
   // handle wheel win (Welcome Spin)
@@ -1509,39 +1612,50 @@ export default function CosmicCasino() {
     triggerComplete(1, { reward: prize.label.replace("\n", " "), rewardShort: prize.label.replace("\n", " ") });
   }, [triggerComplete]);
 
-  // handle KYC verification done (Island 2) → show stage 1 complete modal
+  // handle KYC verification done (Island 2)
   const handleKYCDone = useCallback(() => {
     setShowKYC(false);
     triggerComplete(2);
-    // Show stage complete modal after a brief delay for the completion animation
-    setTimeout(() => {
-      setShowStageComplete({ stage: 1 });
-    }, 2200);
+    setTimeout(() => setShowStageComplete({ levelId: 2 }), 2200);
   }, [triggerComplete]);
 
   // handle Phone verification done (Island 3)
   const handlePhoneDone = useCallback(() => {
     setShowPhone(false);
     triggerComplete(3);
+    setTimeout(() => setShowStageComplete({ levelId: 3 }), 2200);
   }, [triggerComplete]);
 
   // handle telegram verification done (Island 4)
   const handleTelegramDone = useCallback(() => {
     setShowTelegram(false);
     triggerComplete(4);
+    setTimeout(() => setShowStageComplete({ levelId: 4 }), 2200);
   }, [triggerComplete]);
 
-  // handle deposit confirmed → show mega wheel (Island 5)
+  // handle deposit confirmed → show mega wheel (Ch1) or complete level 1 (Ch2)
   const handleDepositDone = useCallback(() => {
     setShowDeposit(false);
-    setShowMegaWheel(true);
-  }, []);
+    if (currentChapter === 1) {
+      setShowMegaWheel(true);
+    } else {
+      // Chapter 2: First Deposit completes level 1
+      triggerComplete(1);
+      setTimeout(() => setShowStageComplete({ levelId: 1 }), 2200);
+    }
+  }, [currentChapter, triggerComplete]);
 
-  // handle mega wheel win (Island 5)
+  // handle mega wheel win (Island 5 — both chapters)
   const handleMegaWheelWin = useCallback((prize) => {
     setShowMegaWheel(false);
-    setBonuses(prev => ({ ...prev, megaSpinPrize: prize.label.replace("\n", " ") }));
-    triggerComplete(5, { reward: prize.label.replace("\n", " "), rewardShort: prize.label.replace("\n", " ") });
+    const prizeText = prize.label.replace("\n", " ");
+    setBonuses(prev => ({ ...prev, megaSpinPrize: prizeText }));
+    triggerComplete(5, { reward: prizeText, rewardShort: prizeText });
+    // After island 5 completes, also mark island 6 done and show Journey Complete
+    setTimeout(() => {
+      setLevels(prev => prev.map(l => l.id === 6 ? { ...l, complete: true, unlocked: true } : l));
+      setShowJourneyComplete(true);
+    }, 2400);
   }, [triggerComplete]);
 
   // complete a level from detail modal
@@ -1582,7 +1696,7 @@ export default function CosmicCasino() {
   const sortedLevels = useMemo(() => [...levels].sort((a, b) => a.id - b.id), [levels]);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", maxWidth: 1200, height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif", margin: "0 auto" }}>
+    <div ref={containerRef} style={{ width: "100%", maxWidth: 1400, height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif", margin: "0 auto" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@200;300;400;500;600;700;800;900&display=swap');
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -1642,6 +1756,15 @@ export default function CosmicCasino() {
             <path d="M98.5389 15.8537H102.459V18.0097H96.2989V8.20967H102.389V10.3657H98.5389V11.9897H102.039V14.1177H98.5389V15.8537Z" fill="white"/>
           </svg>
         </div>
+
+        {/* Chapter Title */}
+        <div style={{
+          fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 900, letterSpacing: "0.15em",
+          color: currentChapter === 1 ? "#ffd232" : "#b478ff", marginBottom: 16,
+          padding: "8px 12px", borderRadius: 10,
+          background: currentChapter === 1 ? "rgba(255,210,50,0.06)" : "rgba(180,120,255,0.06)",
+          border: currentChapter === 1 ? "1px solid rgba(255,210,50,0.12)" : "1px solid rgba(180,120,255,0.12)",
+        }}>{chapterTitle}</div>
 
         {/* Level Progress List */}
         <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 12, textTransform: "uppercase" }}>Quest Progress</div>
@@ -1708,15 +1831,17 @@ export default function CosmicCasino() {
       }}>
         {/* Free Spins counter */}
         <div style={{
-          padding: "16px", borderRadius: 16, marginBottom: 16, textAlign: "center",
-          background: "linear-gradient(135deg, rgba(255,215,64,0.06), rgba(255,180,0,0.02))",
-          border: "1px solid rgba(255,215,64,0.12)",
+          padding: "20px 16px", borderRadius: 16, marginBottom: 20, textAlign: "center",
+          background: "linear-gradient(135deg, rgba(255,215,64,0.08), rgba(255,180,0,0.03))",
+          border: "1px solid rgba(255,215,64,0.15)",
         }}>
-          <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.2em", marginBottom: 8, textTransform: "uppercase" }}>Free Spins</div>
+          <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 10, textTransform: "uppercase" }}>Free Spins Balance</div>
           <div style={{
-            fontFamily: "'Orbitron',sans-serif", fontSize: 32, fontWeight: 900, color: "#ffd740",
-            textShadow: "0 0 20px rgba(255,215,64,0.3)",
+            fontFamily: "'Orbitron',sans-serif", fontSize: 36, fontWeight: 900, color: "#ffd740",
+            textShadow: "0 0 24px rgba(255,215,64,0.3)",
+            lineHeight: 1,
           }}>{freeSpins}</div>
+          <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,215,64,0.3)", marginTop: 6 }}>spins available</div>
         </div>
 
         {/* Active Bonuses */}
@@ -1726,15 +1851,17 @@ export default function CosmicCasino() {
           bonuses.cashback && { label: "Cashback", value: bonuses.cashback, color: "#ff3278", rgb: "255,50,120" },
           bonuses.telegramBonus && { label: "Telegram Bonus", value: bonuses.telegramBonus, color: "#00b4ff", rgb: "0,180,255" },
           bonuses.megaSpinPrize && { label: "Mega Spin Prize", value: bonuses.megaSpinPrize, color: "#ffa028", rgb: "255,160,40" },
+          bonuses.referralBonus && { label: "Referral Bonus", value: bonuses.referralBonus, color: "#00c896", rgb: "0,200,150" },
+          bonuses.reloadBonus && { label: "Reload Bonus", value: bonuses.reloadBonus, color: "#ffb432", rgb: "255,180,50" },
         ].filter(Boolean).map((b, idx) => (
           <div key={idx} style={{
-            padding: "12px 14px", borderRadius: 12, marginBottom: 8,
+            padding: "10px 12px", borderRadius: 10, marginBottom: 6,
             background: `rgba(${b.rgb},0.05)`,
-            border: `1px solid rgba(${b.rgb},0.12)`,
+            border: `1px solid rgba(${b.rgb},0.1)`,
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}>
-            <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)" }}>{b.label}</span>
-            <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, color: b.color }}>{b.value}</span>
+            <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.35)" }}>{b.label}</span>
+            <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, color: b.color }}>{b.value}</span>
           </div>
         ))}
         {!(bonuses.depositBonus || bonuses.cashback || bonuses.telegramBonus || bonuses.megaSpinPrize) && (
@@ -1742,22 +1869,53 @@ export default function CosmicCasino() {
             padding: "20px 14px", borderRadius: 12, textAlign: "center",
             background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.03)",
           }}>
-            <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.15)" }}>Complete quests to earn bonuses</div>
+            <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.15)", lineHeight: 1.5 }}>Complete quests to earn bonuses</div>
           </div>
         )}
 
-        {/* Rewards preview */}
-        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginTop: 20, marginBottom: 12, textTransform: "uppercase" }}>Journey Rewards</div>
-        {sortedLevels.map(lv => (
-          <div key={lv.id} style={{
-            display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, marginBottom: 4,
-            opacity: lv.complete ? 0.5 : 1,
-          }}>
-            <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: lv.complete ? "#00e676" : "rgba(255,255,255,0.2)", width: 14 }}>{lv.id}</span>
-            <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 600, color: lv.complete ? "rgba(0,230,118,0.4)" : "rgba(255,255,255,0.3)", flex: 1 }}>{lv.reward}</span>
-            {lv.complete && <span style={{ color: "#00e676", fontSize: 12 }}>&#10003;</span>}
-          </div>
-        ))}
+        {/* Journey Rewards — timeline style */}
+        <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginTop: 24, marginBottom: 14, textTransform: "uppercase" }}>Journey Rewards</div>
+        <div style={{ position: "relative", paddingLeft: 22 }}>
+          {/* Vertical line */}
+          <div style={{ position: "absolute", left: 6, top: 8, bottom: 8, width: 1.5, borderRadius: 1, background: "rgba(255,255,255,0.04)" }} />
+          {/* Green progress line */}
+          {(() => {
+            const completedCount = sortedLevels.filter(l => l.complete).length;
+            if (completedCount === 0) return null;
+            const h = Math.min(100, (completedCount / sortedLevels.length) * 100);
+            return <div style={{ position: "absolute", left: 6, top: 8, width: 1.5, borderRadius: 1, background: "linear-gradient(180deg, #00e676, rgba(0,230,118,0.3))", height: `calc(${h}% - 16px)` }} />;
+          })()}
+          {sortedLevels.map((lv, idx) => {
+            const done = lv.complete;
+            const active = lv.unlocked && !done;
+            return (
+              <div key={lv.id} style={{
+                display: "flex", alignItems: "center", gap: 10, padding: "6px 0", position: "relative",
+              }}>
+                {/* Dot */}
+                <div style={{
+                  position: "absolute", left: done ? -19 : -18, top: "50%", transform: "translateY(-50%)",
+                  width: done ? 10 : 8, height: done ? 10 : 8, borderRadius: "50%",
+                  background: done ? "#00e676" : active ? lv.accent : "rgba(255,255,255,0.08)",
+                  boxShadow: done ? "0 0 6px rgba(0,230,118,0.4)" : active ? `0 0 6px ${lv.accent}40` : "none",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {done && <svg width="6" height="6" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                </div>
+                {/* Name + reward */}
+                <span style={{
+                  fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: done ? 700 : 500,
+                  color: done ? "rgba(0,230,118,0.6)" : active ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.18)",
+                  flex: 1,
+                }}>{lv.name}</span>
+                <span style={{
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800,
+                  color: done ? "rgba(0,230,118,0.5)" : active ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)",
+                }}>{lv.rewardShort}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Single scroll container — canvas (sticky) + labels scroll together */}
@@ -1820,6 +1978,28 @@ export default function CosmicCasino() {
                       <path d="M6 30 L6 16 L14 24 L20 10 L26 24 L34 16 L34 30 Z" stroke={iconColor} strokeWidth="2.5" fill={`${iconColor}33`} />
                       <line x1="6" y1="30" x2="34" y2="30" stroke={iconColor} strokeWidth="2.5" />
                     </>}
+                    {lv.icon === "wallet" && <>
+                      <rect x="6" y="10" width="28" height="20" rx="3" stroke={iconColor} strokeWidth="2.5" fill="none" />
+                      <path d="M6 16 L34 16" stroke={iconColor} strokeWidth="2" />
+                      <circle cx="28" cy="22" r="2.5" fill={iconColor} />
+                    </>}
+                    {lv.icon === "play" && <>
+                      <circle cx="20" cy="20" r="15" stroke={iconColor} strokeWidth="2.5" fill="none" />
+                      <polygon points="16,12 30,20 16,28" fill={iconColor} />
+                    </>}
+                    {lv.icon === "refer" && <>
+                      <circle cx="15" cy="14" r="6" stroke={iconColor} strokeWidth="2" fill="none" />
+                      <circle cx="28" cy="14" r="4" stroke={iconColor} strokeWidth="2" fill="none" />
+                      <path d="M5 32 Q15 22 25 32" stroke={iconColor} strokeWidth="2" fill="none" />
+                      <path d="M22 30 Q28 24 34 30" stroke={iconColor} strokeWidth="2" fill="none" />
+                    </>}
+                    {lv.icon === "trophy" && <>
+                      <path d="M12 8 L28 8 L26 20 Q20 26 14 20 Z" stroke={iconColor} strokeWidth="2.5" fill="none" />
+                      <path d="M12 10 Q6 10 6 16 Q6 20 12 18" stroke={iconColor} strokeWidth="2" fill="none" />
+                      <path d="M28 10 Q34 10 34 16 Q34 20 28 18" stroke={iconColor} strokeWidth="2" fill="none" />
+                      <line x1="20" y1="24" x2="20" y2="30" stroke={iconColor} strokeWidth="2" />
+                      <line x1="14" y1="30" x2="26" y2="30" stroke={iconColor} strokeWidth="2.5" />
+                    </>}
                   </svg>
                 </div>
 
@@ -1828,13 +2008,44 @@ export default function CosmicCasino() {
                   <div style={{
                     position: "absolute", top: jp ? 75 : 90, left: "50%", transform: "translateX(-50%)",
                     zIndex: 31, pointerEvents: "none",
-                    padding: "4px 12px", borderRadius: 20,
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "5px 12px", borderRadius: 20,
                     background: "rgba(0,230,118,0.12)",
                     border: "1px solid rgba(0,230,118,0.3)",
                     boxShadow: "0 0 12px rgba(0,230,118,0.15)",
                     whiteSpace: "nowrap",
                     animation: "fadeIn 0.5s ease-out",
                   }}>
+                    {/* Reward icon */}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      {(lv.rewardShort.includes("FS") || lv.rewardShort.includes("Spin")) ? (
+                        /* Free Spins — slot machine / spinning circle */
+                        <>
+                          <circle cx="12" cy="12" r="9" stroke="#00e676" strokeWidth="2" fill="none" />
+                          <path d="M12 3 C12 3 16 8 16 12 C16 16 12 21 12 21" stroke="#00e676" strokeWidth="1.5" fill="none" />
+                          <path d="M12 3 C12 3 8 8 8 12 C8 16 12 21 12 21" stroke="#00e676" strokeWidth="1.5" fill="none" />
+                          <line x1="3" y1="12" x2="21" y2="12" stroke="#00e676" strokeWidth="1.5" />
+                        </>
+                      ) : lv.rewardShort.includes("CB") || lv.rewardShort.includes("%") ? (
+                        /* Cashback / Percentage — percentage symbol */
+                        <>
+                          <circle cx="8" cy="8" r="3" stroke="#00e676" strokeWidth="2" fill="none" />
+                          <circle cx="16" cy="16" r="3" stroke="#00e676" strokeWidth="2" fill="none" />
+                          <line x1="18" y1="6" x2="6" y2="18" stroke="#00e676" strokeWidth="2" strokeLinecap="round" />
+                        </>
+                      ) : lv.rewardShort.includes("$") ? (
+                        /* Cash — dollar sign */
+                        <>
+                          <circle cx="12" cy="12" r="9" stroke="#00e676" strokeWidth="2" fill="none" />
+                          <path d="M12 6 L12 18 M9 9 C9 7.5 15 7.5 15 9.5 C15 11.5 9 11.5 9 14 C9 16 15 16.5 15 15" stroke="#00e676" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+                        </>
+                      ) : (
+                        /* Default — star / trophy */
+                        <>
+                          <polygon points="12,3 14.5,9 21,9 16,13.5 18,20 12,16 6,20 8,13.5 3,9 9.5,9" stroke="#00e676" strokeWidth="1.5" fill="rgba(0,230,118,0.15)" />
+                        </>
+                      )}
+                    </svg>
                     <span style={{
                       fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800,
                       color: "#00e676", letterSpacing: "0.05em",
@@ -1938,30 +2149,36 @@ export default function CosmicCasino() {
       {/* ── DESKTOP HUD (top bar spanning between panels) ── */}
       <div className="desktopOnly" style={{
         position: "fixed", top: 0, left: 280, right: 260, zIndex: 90,
-        padding: "12px 24px", animation: "slideDown 0.5s ease-out",
-        background: "linear-gradient(to bottom, rgba(1,0,14,0.95) 0%, rgba(1,0,14,0.7) 60%, transparent 100%)",
-        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-        alignItems: "center", justifyContent: "center", gap: 20,
+        padding: "14px 28px", animation: "slideDown 0.5s ease-out",
+        background: "linear-gradient(to bottom, rgba(1,0,14,0.97) 0%, rgba(1,0,14,0.8) 50%, rgba(1,0,14,0.4) 80%, transparent 100%)",
+        alignItems: "center", justifyContent: "center", gap: 24,
       }}>
-        {/* progress dots */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        {/* progress dots with reward labels */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 4 }}>
           {sortedLevels.map((lv, i) => {
             const done = lv.complete;
             const active = lv.unlocked && !done;
             return (
-              <div key={lv.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                {i > 0 && <div style={{ width: 20, height: 2, borderRadius: 1, background: levels.find(l => l.id === lv.id - 1)?.complete ? "#00e676" : "rgba(255,255,255,0.06)" }} />}
-                <div style={{
-                  width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
-                  background: done ? "linear-gradient(135deg,#00e676,#00c853)" : active ? `rgba(${lv.r},${lv.g},${lv.b},0.15)` : "rgba(255,255,255,0.03)",
-                  border: done ? "none" : active ? `1.5px solid ${lv.accent}` : "1px solid rgba(255,255,255,0.06)",
-                  boxShadow: done ? "0 0 10px rgba(0,230,118,0.3)" : "none",
-                }}>
-                  {done ? (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  ) : (
-                    <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 900, color: active ? "#fff" : "rgba(255,255,255,0.12)" }}>{lv.id}</span>
-                  )}
+              <div key={lv.id} style={{ display: "flex", alignItems: "flex-start", gap: 4 }}>
+                {i > 0 && <div style={{ width: 24, height: 2, borderRadius: 1, marginTop: 15, background: levels.find(l => l.id === lv.id - 1)?.complete ? "#00e676" : "rgba(255,255,255,0.06)" }} />}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 32 }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
+                    background: done ? "linear-gradient(135deg,#00e676,#00c853)" : active ? `rgba(${lv.r},${lv.g},${lv.b},0.15)` : "rgba(255,255,255,0.03)",
+                    border: done ? "none" : active ? `1.5px solid ${lv.accent}` : "1px solid rgba(255,255,255,0.06)",
+                    boxShadow: done ? "0 0 12px rgba(0,230,118,0.3)" : active ? `0 0 8px rgba(${lv.r},${lv.g},${lv.b},0.2)` : "none",
+                  }}>
+                    {done ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    ) : (
+                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 900, color: active ? "#fff" : "rgba(255,255,255,0.12)" }}>{lv.id}</span>
+                    )}
+                  </div>
+                  <span style={{
+                    fontFamily: "'Exo 2',sans-serif", fontSize: 8, fontWeight: 700,
+                    color: done ? "rgba(0,230,118,0.5)" : active ? `rgba(${lv.r},${lv.g},${lv.b},0.6)` : "rgba(255,255,255,0.1)",
+                    whiteSpace: "nowrap",
+                  }}>{lv.rewardShort}</span>
                 </div>
               </div>
             );
@@ -2212,6 +2429,28 @@ export default function CosmicCasino() {
                     <path d="M6 30 L6 16 L14 24 L20 10 L26 24 L34 16 L34 30 Z" stroke={selected.accent} strokeWidth="2" fill={`${selected.accent}33`} />
                     <line x1="6" y1="30" x2="34" y2="30" stroke={selected.accent} strokeWidth="2" />
                   </>}
+                  {selected.icon === "wallet" && <>
+                    <rect x="6" y="10" width="28" height="20" rx="3" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <path d="M6 16 L34 16" stroke={selected.accent} strokeWidth="1.5" />
+                    <circle cx="28" cy="22" r="2.5" fill={selected.accent} />
+                  </>}
+                  {selected.icon === "play" && <>
+                    <circle cx="20" cy="20" r="15" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <polygon points="16,12 30,20 16,28" fill={selected.accent} />
+                  </>}
+                  {selected.icon === "refer" && <>
+                    <circle cx="15" cy="14" r="6" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <circle cx="28" cy="14" r="4" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <path d="M5 32 Q15 22 25 32" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <path d="M22 30 Q28 24 34 30" stroke={selected.accent} strokeWidth="2" fill="none" />
+                  </>}
+                  {selected.icon === "trophy" && <>
+                    <path d="M12 8 L28 8 L26 20 Q20 26 14 20 Z" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <path d="M12 10 Q6 10 6 16 Q6 20 12 18" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <path d="M28 10 Q34 10 34 16 Q34 20 28 18" stroke={selected.accent} strokeWidth="2" fill="none" />
+                    <line x1="20" y1="24" x2="20" y2="30" stroke={selected.accent} strokeWidth="2" />
+                    <line x1="14" y1="30" x2="26" y2="30" stroke={selected.accent} strokeWidth="2" />
+                  </>}
                 </svg>
               </div>
               <div>
@@ -2222,7 +2461,7 @@ export default function CosmicCasino() {
                   fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700,
                   color: `rgba(${selected.r},${selected.g},${selected.b},0.6)`,
                   letterSpacing: "0.15em", textTransform: "uppercase",
-                }}>STEP {selected.id} / {INITIAL_LEVELS.length}</span>
+                }}>STEP {selected.id} / {levels.length}</span>
                 <div style={{
                   fontFamily: "'Orbitron', sans-serif", fontSize: 18, fontWeight: 900,
                   color: selected.accent,
@@ -2255,7 +2494,7 @@ export default function CosmicCasino() {
               {/* status row */}
               <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
                 <div style={{ flex: 1, padding: "10px", borderRadius: 12, textAlign: "center", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
-                  <div style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 14, fontWeight: 900, color: "#fff" }}>{selected.id} / {INITIAL_LEVELS.length}</div>
+                  <div style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 14, fontWeight: 900, color: "#fff" }}>{selected.id} / {levels.length}</div>
                   <div style={{ fontFamily: "'Exo 2', sans-serif", fontSize: 9, color: "rgba(255,255,255,0.22)", textTransform: "uppercase", letterSpacing: "0.12em", marginTop: 3, fontWeight: 600 }}>Step</div>
                 </div>
                 <div style={{ flex: 1, padding: "10px", borderRadius: 12, textAlign: "center", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}>
@@ -2297,8 +2536,8 @@ export default function CosmicCasino() {
         <WheelOfFortune
           onClose={() => setShowMegaWheel(false)}
           onWin={handleMegaWheelWin}
-          prizes={MEGA_WHEEL_PRIZES}
-          title="MEGA SPIN"
+          prizes={currentChapter === 1 ? MEGA_WHEEL_PRIZES : VIP_WHEEL_PRIZES}
+          title={currentChapter === 1 ? "MEGA SPIN" : "VIP SPIN"}
         />
       )}
 
@@ -2476,8 +2715,20 @@ export default function CosmicCasino() {
         </div>
       )}
 
-      {/* ── STAGE COMPLETE MODAL ── */}
-      {showStageComplete && (
+      {/* ── STAGE COMPLETE MODAL (dynamic per level) ── */}
+      {showStageComplete && (() => {
+        const lvId = showStageComplete.levelId;
+        const sd = chapterStageData[lvId];
+        if (!sd) return null;
+        const prizeText = showStageComplete.prize || sd.prize;
+        // Build timeline: mark steps up to lvId as complete, next one as "next", rest dim
+        const completedIds = chapterSteps.filter(s => s.id <= lvId).map(s => s.id);
+        const nextStep = chapterSteps.find(s => s.id > lvId);
+        // Count how many completed steps for green line height
+        const completedCount = completedIds.length;
+        const greenLineH = Math.max(0, (completedCount - 1) * 40 + 20);
+
+        return (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -2486,7 +2737,7 @@ export default function CosmicCasino() {
           <ConfettiCanvas />
           <div onClick={e => e.stopPropagation()} style={{
             position: "relative",
-            width: "min(92vw, 380px)", maxHeight: "92vh", overflow: "hidden", borderRadius: 24,
+            width: "min(92vw, 380px)", maxHeight: "92vh", overflow: "hidden auto", borderRadius: 24,
             background: "linear-gradient(170deg, rgba(28,22,52,0.98), rgba(8,4,20,0.99))",
             boxShadow: "0 0 0 1px rgba(0,230,118,0.1), 0 0 120px rgba(0,230,118,0.08), 0 50px 100px rgba(0,0,0,0.5)",
             animation: "modalPop 0.4s cubic-bezier(0.22,1,0.36,1)",
@@ -2496,12 +2747,12 @@ export default function CosmicCasino() {
             {/* Header */}
             <div style={{ textAlign: "center", padding: "22px 20px 0" }}>
               <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
-                Rewards Unlocked!
+                {sd.subtitle}
               </div>
               <div style={{
                 fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, letterSpacing: "0.04em",
                 color: "#ffffff", lineHeight: 1.2,
-              }}>Stage 2 Complete</div>
+              }}>{sd.title}</div>
             </div>
 
             {/* Prize hero */}
@@ -2510,83 +2761,53 @@ export default function CosmicCasino() {
                 textAlign: "center", margin: "18px 0 10px", padding: "16px 20px",
                 borderRadius: 14, background: "rgba(0,230,118,0.06)", border: "1px solid rgba(0,230,118,0.15)",
               }}>
-                <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "baseline" }}>
-                  <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 30, fontWeight: 900, color: "#00e676" }}>150%</span>
-                  <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, color: "rgba(0,230,118,0.3)" }}>+</span>
-                  <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 30, fontWeight: 900, color: "#00e676" }}>100 FS</span>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 28, fontWeight: 900, color: "#00e676", lineHeight: 1.2 }}>
+                  {prizeText}
                 </div>
-                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(0,230,118,0.5)", marginTop: 6, letterSpacing: "0.08em" }}>Activated — deposit to use bonus</div>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(0,230,118,0.5)", marginTop: 6, letterSpacing: "0.08em" }}>{sd.prizeNote}</div>
               </div>
 
               {/* Timeline */}
               <div style={{ position: "relative", paddingLeft: 34, margin: "16px 0" }}>
-                {/* Vertical line */}
-                <div style={{ position: "absolute", left: 10, top: 28, bottom: 18, width: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
-                {/* Green segment — covers completed stage 1 steps */}
-                <div style={{ position: "absolute", left: 10, top: 28, height: 56, width: 2, background: "linear-gradient(180deg, #00e676, rgba(0,230,118,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.5s ease-out 0.3s both" }} />
+                {/* Vertical dim line */}
+                <div style={{ position: "absolute", left: 10, top: 14, bottom: 18, width: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
+                {/* Green segment for completed steps */}
+                {greenLineH > 0 && <div style={{ position: "absolute", left: 10, top: 14, height: greenLineH, width: 2, background: "linear-gradient(180deg, #00e676, rgba(0,230,118,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.5s ease-out 0.3s both" }} />}
 
-                {/* Stage 1 label */}
-                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(0,230,118,0.4)", letterSpacing: "0.15em", padding: "2px 0 0", animation: "tlSlideIn 0.4s ease-out 0.2s both" }}>STAGE 1 & 2 — COMPLETE</div>
-
-                {/* Stage 1 steps: Register + KYC — both complete */}
-                {[
-                  { name: "Register", reward: "150% + 50 FS" },
-                  { name: "KYC Verification", reward: "+50 FS" },
-                ].map((r, idx) => (
-                  <div key={`sc-${idx}`} style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
-                    animation: `tlSlideIn 0.4s ease-out ${0.25 + idx * 0.12}s both`,
-                  }}>
-                    <div style={{
-                      position: "absolute", left: -31, top: "50%", transform: "translateY(-50%)",
-                      width: 16, height: 16, borderRadius: "50%",
-                      background: "#00e676",
-                      border: "2px solid rgba(0,230,118,0.3)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: "0 0 10px rgba(0,230,118,0.4)",
+                {chapterSteps.map((step, idx) => {
+                  const isDone = completedIds.includes(step.id);
+                  const isNext = nextStep && step.id === nextStep.id;
+                  const isFuture = !isDone && !isNext;
+                  return (
+                    <div key={step.id} style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
+                      animation: `tlSlideIn 0.4s ease-out ${0.2 + idx * 0.1}s both`,
                     }}>
-                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </div>
-                    <div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
-                        {r.name}
-                        <span style={{ fontSize: 11, color: "rgba(0,230,118,0.5)", marginLeft: 6 }}>done</span>
+                      {/* Dot */}
+                      <div style={{
+                        position: "absolute", left: isDone || isNext ? -31 : -28, top: "50%", transform: "translateY(-50%)",
+                        width: isDone || isNext ? 16 : 10, height: isDone || isNext ? 16 : 10, borderRadius: "50%",
+                        background: isDone ? "#00e676" : isNext ? "#ffd232" : "rgba(255,255,255,0.1)",
+                        border: isDone ? "2px solid rgba(0,230,118,0.3)" : isNext ? "2px solid rgba(255,210,50,0.3)" : "none",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        boxShadow: isDone ? "0 0 10px rgba(0,230,118,0.4)" : isNext ? "0 0 10px rgba(255,210,50,0.5), 0 0 20px rgba(255,210,50,0.15)" : "none",
+                        animation: isNext ? "tlBeepGold 1.5s ease-in-out infinite" : "none",
+                      }}>
+                        {isDone && <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                       </div>
-                    </div>
-                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: "rgba(0,230,118,0.7)" }}>{r.reward}</span>
-                  </div>
-                ))}
-
-                {/* Separator */}
-                <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "4px 0" }} />
-
-                {/* Remaining steps — Phone Verify is next */}
-                {[
-                  { name: "Phone Verify", reward: "100% CB", next: true },
-                  { name: "Telegram", reward: "+$20" },
-                  { name: "Mega Spin", reward: "$50–$500" },
-                ].map((r, idx) => (
-                  <div key={idx} style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
-                    animation: `tlSlideIn 0.4s ease-out ${0.44 + idx * 0.12}s both`,
-                  }}>
-                    <div style={{
-                      position: "absolute", left: r.next ? -31 : -28, top: "50%", transform: "translateY(-50%)",
-                      width: r.next ? 16 : 10, height: r.next ? 16 : 10, borderRadius: "50%",
-                      background: r.next ? "#ffd232" : "rgba(255,255,255,0.1)",
-                      border: r.next ? "2px solid rgba(255,210,50,0.3)" : "none",
-                      boxShadow: r.next ? "0 0 10px rgba(255,210,50,0.5), 0 0 20px rgba(255,210,50,0.15)" : "none",
-                      animation: r.next ? "tlBeepGold 1.5s ease-in-out infinite" : "none",
-                    }} />
-                    <div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: r.next ? 600 : 400, color: r.next ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)" }}>
-                        {r.name}
-                        {r.next && <span style={{ fontSize: 12, color: "rgba(255,210,50,0.6)", marginLeft: 6 }}>next</span>}
+                      {/* Name */}
+                      <div>
+                        <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: isDone || isNext ? 600 : 400, color: isDone ? "rgba(255,255,255,0.9)" : isNext ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)" }}>
+                          {step.name}
+                          {isDone && <span style={{ fontSize: 11, color: "rgba(0,230,118,0.5)", marginLeft: 6 }}>done</span>}
+                          {isNext && <span style={{ fontSize: 12, color: "rgba(255,210,50,0.6)", marginLeft: 6 }}>next</span>}
+                        </div>
                       </div>
+                      {/* Reward */}
+                      <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: isDone ? "rgba(0,230,118,0.7)" : isNext ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.3)" }}>{step.reward}</span>
                     </div>
-                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: r.next ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.3)" }}>{r.reward}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -2599,7 +2820,7 @@ export default function CosmicCasino() {
                 boxShadow: "0 6px 24px rgba(255,210,50,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
                 position: "relative", overflow: "hidden",
               }}>
-                CONTINUE JOURNEY
+                {sd.primaryCta || "CONTINUE JOURNEY"}
                 <div style={{
                   position: "absolute", top: 0, width: "40%", height: "100%",
                   background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
@@ -2607,15 +2828,18 @@ export default function CosmicCasino() {
                   pointerEvents: "none",
                 }} />
               </button>
-              <button onClick={() => setShowStageComplete(null)} style={{
-                width: "100%", marginTop: 8, padding: 15, borderRadius: 14, border: "none",
-                fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.1em",
-                cursor: "pointer", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)",
-              }}>USE NOW 100 FREESPINS</button>
+              {sd.secondaryCta && (
+                <button onClick={() => setShowStageComplete(null)} style={{
+                  width: "100%", marginTop: 8, padding: 15, borderRadius: 14, border: "none",
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.1em",
+                  cursor: "pointer", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)",
+                }}>{sd.secondaryCta}</button>
+              )}
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* ── PHONE VERIFICATION MODAL (Island 3) ── */}
       {showPhone && (
@@ -2648,7 +2872,7 @@ export default function CosmicCasino() {
                 <div style={{
                   fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
                   marginBottom: 24, lineHeight: 1.5,
-                }}>{phoneStep === 0 ? "Enter your phone number to receive a verification code." : "Enter the 4-digit code sent to your phone."}</div>
+                }}>{phoneStep === 0 ? "Enter your phone number to receive a verification code." : "Enter the 6-digit code sent to your phone."}</div>
 
                 {phoneStep === 0 ? (
                   <>
@@ -2682,26 +2906,15 @@ export default function CosmicCasino() {
                       background: "rgba(255,50,120,0.04)", border: "1px solid rgba(255,50,120,0.1)",
                     }}>
                       <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 8 }}>VERIFICATION CODE</div>
-                      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                        {[0,1,2,3].map(idx => (
-                          <input key={idx} ref={el => { otpRefs.current[idx] = el; }} type="text" inputMode="numeric" maxLength="1"
-                            value={phoneOtp[idx]}
-                            onChange={e => {
-                              const v = e.target.value.replace(/\D/g, "").slice(0, 1);
-                              setPhoneOtp(prev => { const n = [...prev]; n[idx] = v; return n; });
-                              if (v && idx < 3 && otpRefs.current[idx + 1]) otpRefs.current[idx + 1].focus();
-                            }}
-                            onKeyDown={e => {
-                              if (e.key === "Backspace" && !phoneOtp[idx] && idx > 0 && otpRefs.current[idx - 1]) otpRefs.current[idx - 1].focus();
-                            }}
-                            style={{
-                              width: 48, height: 52, textAlign: "center", borderRadius: 10,
-                              background: "rgba(0,0,0,0.3)", border: phoneOtp[idx] ? "1.5px solid rgba(255,50,120,0.5)" : "1px solid rgba(255,50,120,0.2)",
-                              fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#ff3278",
-                              outline: "none", transition: "border 0.2s ease",
-                            }} />
-                        ))}
-                      </div>
+                      <input type="text" inputMode="numeric" maxLength="6" placeholder="Enter 6-digit code"
+                        value={phoneOtp}
+                        onChange={e => setPhoneOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        style={{
+                          width: "100%", padding: "14px 16px", borderRadius: 12, boxSizing: "border-box",
+                          background: "rgba(0,0,0,0.3)", border: phoneOtp.length > 0 ? "1.5px solid rgba(255,50,120,0.5)" : "1px solid rgba(255,50,120,0.2)",
+                          fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 800, color: "#ff3278",
+                          outline: "none", transition: "border 0.2s ease", letterSpacing: "0.15em", textAlign: "center",
+                        }} />
                     </div>
 
                     <div style={{
@@ -2712,11 +2925,11 @@ export default function CosmicCasino() {
                       <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 12, fontWeight: 800, color: "#00e676" }}>REWARD: 100% CASHBACK</span>
                     </div>
 
-                    <button onClick={() => { if (phoneOtp.every(d => d)) handlePhoneDone(); }} style={{
+                    <button onClick={() => { if (phoneOtp.length === 6) handlePhoneDone(); }} style={{
                       width: "100%", padding: "16px", borderRadius: 16, border: "none",
-                      cursor: phoneOtp.every(d => d) ? "pointer" : "not-allowed",
+                      cursor: phoneOtp.length === 6 ? "pointer" : "not-allowed",
                       fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.08em",
-                      color: "#fff", opacity: phoneOtp.every(d => d) ? 1 : 0.4,
+                      color: "#fff", opacity: phoneOtp.length === 6 ? 1 : 0.4,
                       background: "linear-gradient(135deg, #ff3278, #ff5e9e)",
                       boxShadow: "0 8px 30px rgba(255,50,120,0.25), 0 2px 0 rgba(255,255,255,0.1) inset",
                     }}>VERIFY PHONE</button>
@@ -2766,17 +2979,16 @@ export default function CosmicCasino() {
               }}>Make a deposit of at least $50 to unlock the Mega Spin wheel with prizes up to $500!</div>
 
               <div style={{
-                display: "flex", gap: 10, marginBottom: 20,
+                display: "flex", gap: 8, marginBottom: 20,
               }}>
-                {["$50", "$100", "$200"].map((amt, idx) => (
-                  <div key={idx} onClick={() => setDepositAmount(amt)} style={{
-                    flex: 1, padding: "14px 8px", borderRadius: 14, textAlign: "center", cursor: "pointer",
-                    background: depositAmount === amt ? "rgba(255,160,40,0.12)" : "rgba(255,160,40,0.04)",
-                    border: depositAmount === amt ? "2px solid rgba(255,160,40,0.4)" : "1px solid rgba(255,160,40,0.12)",
-                    transition: "all 0.2s ease",
+                {["$50", "$100", "$200", "$500"].map((amt, idx) => (
+                  <div key={idx} style={{
+                    flex: 1, padding: "14px 4px", borderRadius: 14, textAlign: "center",
+                    background: "rgba(255,160,40,0.04)",
+                    border: "1px solid rgba(255,160,40,0.12)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, color: "#ffa028" }}>{amt}</div>
-                    {idx === 0 && <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 8, color: "rgba(255,160,40,0.5)", marginTop: 3, letterSpacing: "0.15em" }}>MINIMUM</div>}
+                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, color: "#ffa028" }}>{amt}</div>
                   </div>
                 ))}
               </div>
@@ -2826,40 +3038,56 @@ export default function CosmicCasino() {
           }}>
             <div style={{ height: 3, background: "linear-gradient(90deg, transparent 5%, #00e676 30%, #00c853 50%, #00e676 70%, transparent 95%)" }} />
             <div style={{ padding: "30px 24px", textAlign: "center" }}>
-              <div style={{ fontSize: 56, marginBottom: 12, animation: "dotPulse 1.5s ease-in-out infinite" }}>👑</div>
+              {/* Crown icon — SVG instead of emoji */}
+              <div style={{ marginBottom: 16 }}>
+                <svg width="56" height="56" viewBox="0 0 40 40" fill="none">
+                  <path d="M6 30 L6 16 L14 24 L20 10 L26 24 L34 16 L34 30 Z" stroke="#ffd232" strokeWidth="2.5" fill="rgba(255,210,50,0.15)" />
+                  <line x1="6" y1="30" x2="34" y2="30" stroke="#ffd232" strokeWidth="2.5" />
+                </svg>
+              </div>
+              <div style={{
+                fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.35)",
+                letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6,
+              }}>Chapter 1</div>
               <div style={{
                 fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900,
                 background: "linear-gradient(135deg,#ffd740,#ffa028,#ffd740)",
                 backgroundSize: "300% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
                 animation: "shimmer 3s linear infinite", marginBottom: 8,
-              }}>FINAL STEP</div>
+              }}>UNLOCK NEXT JOURNEY</div>
               <div style={{
                 fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.5)",
                 marginBottom: 24, lineHeight: 1.6,
-              }}>You've completed all challenges! Claim your final reward and unlock the next world.</div>
+              }}>You've completed all challenges! Complete Chapter 1 to unlock the next world.</div>
 
-              {/* Summary of earned rewards */}
-              <div style={{
-                padding: "16px", borderRadius: 16, marginBottom: 20,
-                background: "rgba(255,210,50,0.04)", border: "1px solid rgba(255,210,50,0.12)",
-              }}>
-                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 10 }}>YOUR JOURNEY SO FAR</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center" }}>
-                  {freeSpins > 0 && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(120,200,255,0.08)", border: "1px solid rgba(120,200,255,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#78c8ff" }}>{freeSpins} FS</span>}
-                  {bonuses.depositBonus && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(255,210,50,0.08)", border: "1px solid rgba(255,210,50,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#ffd232" }}>{bonuses.depositBonus} DEP</span>}
-                  {bonuses.cashback && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(255,50,120,0.08)", border: "1px solid rgba(255,50,120,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#ff3278" }}>{bonuses.cashback} CB</span>}
-                  {bonuses.telegramBonus && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(0,180,255,0.08)", border: "1px solid rgba(0,180,255,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#00b4ff" }}>{bonuses.telegramBonus}</span>}
-                  {bonuses.megaSpinPrize && <span style={{ padding: "4px 10px", borderRadius: 8, background: "rgba(255,160,40,0.08)", border: "1px solid rgba(255,160,40,0.15)", fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "#ffa028" }}>{bonuses.megaSpinPrize}</span>}
-                </div>
-              </div>
+              {/* Timeline — all steps complete */}
+              <div style={{ position: "relative", paddingLeft: 34, margin: "0 0 20px", textAlign: "left" }}>
+                {/* Vertical green line */}
+                <div style={{ position: "absolute", left: 10, top: 14, bottom: 18, width: 2, background: "linear-gradient(180deg, #00e676, rgba(0,230,118,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
 
-              <div style={{
-                padding: "14px", borderRadius: 14, marginBottom: 20,
-                background: "linear-gradient(135deg, rgba(0,230,118,0.08), rgba(255,210,50,0.04))",
-                border: "1.5px solid rgba(0,230,118,0.2)",
-              }}>
-                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 28, fontWeight: 900, color: "#00e676", textShadow: "0 0 16px rgba(0,230,118,0.4)" }}>$500</div>
-                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "rgba(0,230,118,0.6)", letterSpacing: "0.2em", marginTop: 4 }}>GUARANTEED CASH PRIZE AWAITS</div>
+                {chapterSteps.map((step, idx) => (
+                  <div key={step.id} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
+                    animation: `tlSlideIn 0.4s ease-out ${0.2 + idx * 0.1}s both`,
+                  }}>
+                    <div style={{
+                      position: "absolute", left: -31, top: "50%", transform: "translateY(-50%)",
+                      width: 16, height: 16, borderRadius: "50%",
+                      background: "#00e676", border: "2px solid rgba(0,230,118,0.3)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: "0 0 10px rgba(0,230,118,0.4)",
+                    }}>
+                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
+                        {step.name}
+                        <span style={{ fontSize: 11, color: "rgba(0,230,118,0.5)", marginLeft: 6 }}>done</span>
+                      </div>
+                    </div>
+                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: "rgba(0,230,118,0.7)" }}>{step.reward}</span>
+                  </div>
+                ))}
               </div>
 
               <button onClick={() => { setShowFinalCeremony(false); triggerComplete(6); }} style={{
@@ -2868,7 +3096,7 @@ export default function CosmicCasino() {
                 color: "rgba(0,0,0,0.85)",
                 background: "linear-gradient(135deg, #ffd740, #ffab00)",
                 boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
-              }}>COMPLETE JOURNEY</button>
+              }}>COMPLETE CHAPTER 1</button>
 
               <button onClick={() => setShowFinalCeremony(false)} style={{
                 width: "100%", padding: "12px", marginTop: 10, borderRadius: 12, border: "none",
@@ -2900,56 +3128,81 @@ export default function CosmicCasino() {
           }}>
             <div style={{ height: 3, background: "linear-gradient(90deg, transparent 5%, #00e676 30%, #ffd232 50%, #00e676 70%, transparent 95%)" }} />
             <div style={{ padding: "30px 24px", textAlign: "center" }}>
-              <div style={{ fontSize: 56, marginBottom: 12, animation: "dotPulse 1.5s ease-in-out infinite" }}>🏆</div>
+              <div style={{ marginBottom: 12 }}>
+                <svg width="56" height="56" viewBox="0 0 40 40" fill="none">
+                  <path d="M12 8 L28 8 L26 20 Q20 26 14 20 Z" stroke="#ffd232" strokeWidth="2.5" fill="rgba(255,210,50,0.15)" />
+                  <path d="M12 10 Q6 10 6 16 Q6 20 12 18" stroke="#ffd232" strokeWidth="2" fill="none" />
+                  <path d="M28 10 Q34 10 34 16 Q34 20 28 18" stroke="#ffd232" strokeWidth="2" fill="none" />
+                  <line x1="20" y1="24" x2="20" y2="30" stroke="#ffd232" strokeWidth="2" />
+                  <line x1="14" y1="30" x2="26" y2="30" stroke="#ffd232" strokeWidth="2.5" />
+                </svg>
+              </div>
               <div style={{
                 fontFamily: "'Orbitron',sans-serif", fontSize: 24, fontWeight: 900,
-                background: "linear-gradient(135deg,#ffd740,#00e676,#ffd740)",
+                background: currentChapter === 1 ? "linear-gradient(135deg,#ffd740,#00e676,#ffd740)" : "linear-gradient(135deg,#b478ff,#00e676,#b478ff)",
                 backgroundSize: "300% auto", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
                 animation: "shimmer 3s linear infinite", marginBottom: 6,
-              }}>JOURNEY COMPLETE!</div>
+              }}>{currentChapter === 1 ? "JOURNEY COMPLETE!" : "VIP LEVEL 2 UNLOCKED!"}</div>
               <div style={{
                 fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)",
                 letterSpacing: "0.2em", marginBottom: 24,
-              }}>ALL MISSIONS CLEARED</div>
+              }}>{currentChapter === 1 ? "READY FOR NEXT JOURNEY?" : "CONGRATULATIONS, VIP!"}</div>
 
-              {/* Reward summary */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
-                {[
-                  { label: "Free Spins", value: `${freeSpins} FS`, color: "#78c8ff" },
-                  { label: "Deposit Bonus", value: bonuses.depositBonus || "—", color: "#ffd232" },
-                  { label: "Cashback", value: bonuses.cashback || "—", color: "#ff3278" },
-                  { label: "Telegram", value: bonuses.telegramBonus || "—", color: "#00b4ff" },
-                  { label: "Mega Spin", value: bonuses.megaSpinPrize || "—", color: "#ffa028" },
-                ].map((b, idx) => (
-                  <div key={idx} style={{
-                    flex: "1 1 45%", padding: "10px 8px", borderRadius: 12, textAlign: "center",
-                    background: `rgba(${b.color === "#78c8ff" ? "120,200,255" : b.color === "#ffd232" ? "255,210,50" : b.color === "#ff3278" ? "255,50,120" : b.color === "#00b4ff" ? "0,180,255" : "255,160,40"},0.06)`,
-                    border: `1px solid ${b.color}30`,
+              {/* Timeline — all steps complete */}
+              <div style={{ position: "relative", paddingLeft: 34, margin: "0 0 20px", textAlign: "left" }}>
+                <div style={{ position: "absolute", left: 10, top: 14, bottom: 18, width: 2, background: "linear-gradient(180deg, #00e676, rgba(0,230,118,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
+                {chapterSteps.map((step, idx) => (
+                  <div key={step.id} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
+                    animation: `tlSlideIn 0.4s ease-out ${0.2 + idx * 0.1}s both`,
                   }}>
-                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 16, fontWeight: 900, color: b.color }}>{b.value}</div>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 8, color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em", marginTop: 3, textTransform: "uppercase" }}>{b.label}</div>
+                    <div style={{
+                      position: "absolute", left: -31, top: "50%", transform: "translateY(-50%)",
+                      width: 16, height: 16, borderRadius: "50%",
+                      background: "#00e676", border: "2px solid rgba(0,230,118,0.3)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: "0 0 10px rgba(0,230,118,0.4)",
+                    }}>
+                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
+                        {step.name}
+                        <span style={{ fontSize: 11, color: "rgba(0,230,118,0.5)", marginLeft: 6 }}>done</span>
+                      </div>
+                    </div>
+                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: "rgba(0,230,118,0.7)" }}>{step.reward}</span>
                   </div>
                 ))}
               </div>
 
-              {/* $500 guaranteed */}
-              <div style={{
-                padding: "16px", borderRadius: 16, marginBottom: 20,
-                background: "linear-gradient(135deg, rgba(0,230,118,0.1), rgba(255,210,50,0.05))",
-                border: "2px solid rgba(0,230,118,0.3)",
-                boxShadow: "0 0 30px rgba(0,230,118,0.08)",
-              }}>
-                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 32, fontWeight: 900, color: "#00e676", textShadow: "0 0 20px rgba(0,230,118,0.5)" }}>$500</div>
-                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 800, color: "rgba(0,230,118,0.7)", letterSpacing: "0.2em", marginTop: 4 }}>GUARANTEED CASH PRIZE UNLOCKED</div>
-              </div>
-
-              <button onClick={() => setShowJourneyComplete(false)} style={{
+              <button onClick={() => {
+                setShowJourneyComplete(false);
+                if (currentChapter === 1) {
+                  // Transition to Chapter 2
+                  setCurrentChapter(2);
+                  setLevels(INITIAL_LEVELS_CH2);
+                  setIntroPlayed(false);
+                  setSelected(null);
+                  setShowStageComplete(null);
+                  setShowFinalCeremony(false);
+                }
+              }} style={{
                 width: "100%", padding: "16px", borderRadius: 16, border: "none", cursor: "pointer",
                 fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900, letterSpacing: "0.1em",
                 color: "rgba(0,0,0,0.85)",
-                background: "linear-gradient(135deg, #00e676, #00c853)",
-                boxShadow: "0 8px 30px rgba(0,230,118,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
-              }}>CLAIM YOUR $500</button>
+                background: "linear-gradient(135deg, #ffd740, #ffab00)",
+                boxShadow: "0 8px 30px rgba(255,210,50,0.3), 0 2px 0 rgba(255,255,255,0.2) inset",
+                position: "relative", overflow: "hidden",
+              }}>
+                {currentChapter === 1 ? "UNLOCK NEXT JOURNEY" : "COMING SOON"}
+                <div style={{
+                  position: "absolute", top: 0, width: "40%", height: "100%",
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
+                  animation: "ctaShine 2.5s ease-in-out infinite",
+                  pointerEvents: "none",
+                }} />
+              </button>
             </div>
           </div>
         </div>
