@@ -64,10 +64,10 @@ const INITIAL_LEVELS = [
 ];
 
 const WHEEL_PRIZES = [
-  { label: "150% DEP\n+50 FS", color: "#ffd780", bg1: "#4a3010", bg2: "#6a4c1a", jackpot: true },
-  { label: "20 Free\nSpins", color: "#ffd780", bg1: "#141838", bg2: "#1e2850" },
-  { label: "75% DEP\nBonus", color: "#ffd780", bg1: "#3e1c14", bg2: "#5a2e20" },
-  { label: "10 Free\nSpins", color: "#ffd780", bg1: "#141838", bg2: "#1e2850" },
+  { label: "150% DEP\n+50 FS", color: "#ffe8a0", bg1: "#7a3500", bg2: "#c45800", jackpot: true },
+  { label: "20 Free\nSpins", color: "#c8e8ff", bg1: "#0a1848", bg2: "#1a3070" },
+  { label: "75% DEP\nBonus", color: "#ffc8c8", bg1: "#6a0828", bg2: "#a01040" },
+  { label: "10 Free\nSpins", color: "#c8e8ff", bg1: "#0a1848", bg2: "#1a3070" },
 ];
 const JACKPOT_INDEX = 0; // always land here
 
@@ -562,10 +562,10 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
 
                     {/* Timeline */}
                     <div style={{ position: "relative", paddingLeft: 34 }}>
-                      {/* Vertical line — animated grow */}
-                      <div style={{ position: "absolute", left: 10, top: 18, bottom: 18, width: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
+                      {/* Vertical line — animated grow, starts at first dot center */}
+                      <div style={{ position: "absolute", left: 10, top: 28, bottom: 18, width: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
                       {/* Gold segment — covers stage 1 steps */}
-                      <div style={{ position: "absolute", left: 10, top: 18, height: 56, width: 2, background: "linear-gradient(180deg, #ffd232, rgba(255,210,50,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.5s ease-out 0.3s both" }} />
+                      <div style={{ position: "absolute", left: 10, top: 28, height: 56, width: 2, background: "linear-gradient(180deg, #ffd232, rgba(255,210,50,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.5s ease-out 0.3s both" }} />
 
                       {/* Stage 1 label */}
                       <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(255,210,50,0.35)", letterSpacing: "0.15em", padding: "2px 0 0", animation: "tlSlideIn 0.4s ease-out 0.2s both" }}>STAGE 1</div>
@@ -1336,6 +1336,7 @@ export default function CosmicCasino() {
   const [showFinalCeremony, setShowFinalCeremony] = useState(false);
   const [showJourneyComplete, setShowJourneyComplete] = useState(false);
   const [showCompletionConfetti, setShowCompletionConfetti] = useState(false);
+  const [showStageComplete, setShowStageComplete] = useState(null); // null or { stage: 1, ... }
   const [dim, setDim] = useState({ w: 400, h: 700 });
   const labelsRef = useRef([]);
   const islandElsRef = useRef([]);
@@ -1508,10 +1509,14 @@ export default function CosmicCasino() {
     triggerComplete(1, { reward: prize.label.replace("\n", " "), rewardShort: prize.label.replace("\n", " ") });
   }, [triggerComplete]);
 
-  // handle KYC verification done (Island 2)
+  // handle KYC verification done (Island 2) → show stage 1 complete modal
   const handleKYCDone = useCallback(() => {
     setShowKYC(false);
     triggerComplete(2);
+    // Show stage complete modal after a brief delay for the completion animation
+    setTimeout(() => {
+      setShowStageComplete({ stage: 1 });
+    }, 2200);
   }, [triggerComplete]);
 
   // handle Phone verification done (Island 3)
@@ -1818,6 +1823,25 @@ export default function CosmicCasino() {
                   </svg>
                 </div>
 
+                {/* Prize bubble — shown when completed */}
+                {lv.complete && (
+                  <div style={{
+                    position: "absolute", top: jp ? 75 : 90, left: "50%", transform: "translateX(-50%)",
+                    zIndex: 31, pointerEvents: "none",
+                    padding: "4px 12px", borderRadius: 20,
+                    background: "rgba(0,230,118,0.12)",
+                    border: "1px solid rgba(0,230,118,0.3)",
+                    boxShadow: "0 0 12px rgba(0,230,118,0.15)",
+                    whiteSpace: "nowrap",
+                    animation: "fadeIn 0.5s ease-out",
+                  }}>
+                    <span style={{
+                      fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800,
+                      color: "#00e676", letterSpacing: "0.05em",
+                    }}>{lv.rewardShort}</span>
+                  </div>
+                )}
+
                 {/* label card below island */}
                 <div style={{
                   position: "absolute", bottom: -16, left: "50%", transform: "translateX(-50%)",
@@ -1860,8 +1884,8 @@ export default function CosmicCasino() {
                           <span style={{ color: "#00e676", fontSize: 13, lineHeight: 1 }}>&#10003;</span>
                           <span style={{
                             fontFamily: "'Orbitron', sans-serif", fontSize: 13, fontWeight: 800,
-                            color: "#00e676", letterSpacing: "0.1em",
-                          }}>COMPLETED</span>
+                            color: "#00e676", letterSpacing: "0.05em",
+                          }}>{lv.rewardShort}</span>
                         </span>
                       </>
                     ) : locked && lv.lockedButCompleted ? (
@@ -2414,13 +2438,13 @@ export default function CosmicCasino() {
                 padding: "16px", borderRadius: 16, marginBottom: 12, textAlign: "left",
                 background: "rgba(120,200,255,0.04)", border: "1px solid rgba(120,200,255,0.1)",
               }}>
-                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 10 }}>WHAT YOU NEED</div>
-                {["Valid government ID (passport, driver's license)", "Proof of address (utility bill, bank statement)", "A clear selfie for face matching"].map((item, idx) => (
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 10 }}>WHY DO WE NEED IT</div>
+                {["Faster & guaranteed withdrawals", "Exclusive no-wagering bonuses", "Higher deposit & withdrawal limits"].map((item, idx) => (
                   <div key={idx} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                     <div style={{ width: 20, height: 20, borderRadius: 6, background: "rgba(120,200,255,0.1)", border: "1px solid rgba(120,200,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 9, fontWeight: 800, color: "#78c8ff" }}>{idx + 1}</span>
                     </div>
-                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.6)" }}>{item}</span>
+                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 14, color: "rgba(255,255,255,0.7)" }}>{item}</span>
                   </div>
                 ))}
               </div>
@@ -2447,6 +2471,147 @@ export default function CosmicCasino() {
                 fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 600,
                 color: "rgba(255,255,255,0.2)",
               }}>Maybe Later</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── STAGE COMPLETE MODAL ── */}
+      {showStageComplete && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 600, background: "rgba(1,0,8,0.92)", backdropFilter: "blur(30px)", animation: "fadeIn 0.2s ease",
+        }}>
+          <ConfettiCanvas />
+          <div onClick={e => e.stopPropagation()} style={{
+            position: "relative",
+            width: "min(92vw, 380px)", maxHeight: "92vh", overflow: "hidden", borderRadius: 24,
+            background: "linear-gradient(170deg, rgba(28,22,52,0.98), rgba(8,4,20,0.99))",
+            boxShadow: "0 0 0 1px rgba(0,230,118,0.1), 0 0 120px rgba(0,230,118,0.08), 0 50px 100px rgba(0,0,0,0.5)",
+            animation: "modalPop 0.4s cubic-bezier(0.22,1,0.36,1)",
+          }}>
+            <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, rgba(0,230,118,0.5) 50%, transparent 90%)" }} />
+
+            {/* Header */}
+            <div style={{ textAlign: "center", padding: "22px 20px 0" }}>
+              <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
+                Rewards Unlocked!
+              </div>
+              <div style={{
+                fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, letterSpacing: "0.04em",
+                color: "#ffffff", lineHeight: 1.2,
+              }}>Stage 2 Complete</div>
+            </div>
+
+            {/* Prize hero */}
+            <div style={{ padding: "0 20px" }}>
+              <div style={{
+                textAlign: "center", margin: "18px 0 10px", padding: "16px 20px",
+                borderRadius: 14, background: "rgba(0,230,118,0.06)", border: "1px solid rgba(0,230,118,0.15)",
+              }}>
+                <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "baseline" }}>
+                  <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 30, fontWeight: 900, color: "#00e676" }}>150%</span>
+                  <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, color: "rgba(0,230,118,0.3)" }}>+</span>
+                  <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 30, fontWeight: 900, color: "#00e676" }}>100 FS</span>
+                </div>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(0,230,118,0.5)", marginTop: 6, letterSpacing: "0.08em" }}>Activated — deposit to use bonus</div>
+              </div>
+
+              {/* Timeline */}
+              <div style={{ position: "relative", paddingLeft: 34, margin: "16px 0" }}>
+                {/* Vertical line */}
+                <div style={{ position: "absolute", left: 10, top: 28, bottom: 18, width: 2, background: "rgba(255,255,255,0.06)", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.8s ease-out forwards" }} />
+                {/* Green segment — covers completed stage 1 steps */}
+                <div style={{ position: "absolute", left: 10, top: 28, height: 56, width: 2, background: "linear-gradient(180deg, #00e676, rgba(0,230,118,0.3))", borderRadius: 1, transformOrigin: "top", animation: "tlLineGrow 0.5s ease-out 0.3s both" }} />
+
+                {/* Stage 1 label */}
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(0,230,118,0.4)", letterSpacing: "0.15em", padding: "2px 0 0", animation: "tlSlideIn 0.4s ease-out 0.2s both" }}>STAGE 1 & 2 — COMPLETE</div>
+
+                {/* Stage 1 steps: Register + KYC — both complete */}
+                {[
+                  { name: "Register", reward: "150% + 50 FS" },
+                  { name: "KYC Verification", reward: "+50 FS" },
+                ].map((r, idx) => (
+                  <div key={`sc-${idx}`} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
+                    animation: `tlSlideIn 0.4s ease-out ${0.25 + idx * 0.12}s both`,
+                  }}>
+                    <div style={{
+                      position: "absolute", left: -31, top: "50%", transform: "translateY(-50%)",
+                      width: 16, height: 16, borderRadius: "50%",
+                      background: "#00e676",
+                      border: "2px solid rgba(0,230,118,0.3)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: "0 0 10px rgba(0,230,118,0.4)",
+                    }}>
+                      <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
+                        {r.name}
+                        <span style={{ fontSize: 11, color: "rgba(0,230,118,0.5)", marginLeft: 6 }}>done</span>
+                      </div>
+                    </div>
+                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: "rgba(0,230,118,0.7)" }}>{r.reward}</span>
+                  </div>
+                ))}
+
+                {/* Separator */}
+                <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "4px 0" }} />
+
+                {/* Remaining steps — Phone Verify is next */}
+                {[
+                  { name: "Phone Verify", reward: "100% CB", next: true },
+                  { name: "Telegram", reward: "+$20" },
+                  { name: "Mega Spin", reward: "$50–$500" },
+                ].map((r, idx) => (
+                  <div key={idx} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", position: "relative",
+                    animation: `tlSlideIn 0.4s ease-out ${0.44 + idx * 0.12}s both`,
+                  }}>
+                    <div style={{
+                      position: "absolute", left: r.next ? -31 : -28, top: "50%", transform: "translateY(-50%)",
+                      width: r.next ? 16 : 10, height: r.next ? 16 : 10, borderRadius: "50%",
+                      background: r.next ? "#ffd232" : "rgba(255,255,255,0.1)",
+                      border: r.next ? "2px solid rgba(255,210,50,0.3)" : "none",
+                      boxShadow: r.next ? "0 0 10px rgba(255,210,50,0.5), 0 0 20px rgba(255,210,50,0.15)" : "none",
+                      animation: r.next ? "tlBeepGold 1.5s ease-in-out infinite" : "none",
+                    }} />
+                    <div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 16, fontWeight: r.next ? 600 : 400, color: r.next ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.35)" }}>
+                        {r.name}
+                        {r.next && <span style={{ fontSize: 12, color: "rgba(255,210,50,0.6)", marginLeft: 6 }}>next</span>}
+                      </div>
+                    </div>
+                    <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 15, fontWeight: 600, color: r.next ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.3)" }}>{r.reward}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div style={{ padding: "16px 20px 18px" }}>
+              <button onClick={() => setShowStageComplete(null)} style={{
+                width: "100%", padding: 15, borderRadius: 14, border: "none",
+                fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.1em",
+                cursor: "pointer", background: "linear-gradient(135deg,#ffd232,#ffab00)", color: "rgba(0,0,0,0.85)",
+                boxShadow: "0 6px 24px rgba(255,210,50,0.25), 0 2px 0 rgba(255,255,255,0.2) inset",
+                position: "relative", overflow: "hidden",
+              }}>
+                CONTINUE JOURNEY
+                <div style={{
+                  position: "absolute", top: 0, width: "40%", height: "100%",
+                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
+                  animation: "ctaShine 2.5s ease-in-out infinite",
+                  pointerEvents: "none",
+                }} />
+              </button>
+              <button onClick={() => setShowStageComplete(null)} style={{
+                width: "100%", marginTop: 8, padding: 15, borderRadius: 14, border: "none",
+                fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 900, letterSpacing: "0.1em",
+                cursor: "pointer", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)",
+              }}>USE NOW 100 FREESPINS</button>
             </div>
           </div>
         </div>
