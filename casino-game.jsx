@@ -2063,47 +2063,6 @@ export default function CosmicCasino() {
         })()}
       </div>
 
-      {/* bottom nav — mobile only */}
-      <div className="mobileOnly" style={{
-        position: "fixed", bottom: 0, left: 0, right: 0,
-        zIndex: 100, padding: "0 14px 14px",
-        background: "linear-gradient(to top, rgba(1,0,14,0.99) 0%, rgba(1,0,14,0.7) 40%, rgba(1,0,14,0.2) 75%, transparent 100%)",
-      }}>
-        <div style={{
-          display: "flex", justifyContent: "space-around", padding: "12px 8px 10px",
-          background: "linear-gradient(135deg, rgba(255,255,255,0.018), rgba(255,255,255,0.008))",
-          border: "1px solid rgba(255,255,255,0.035)",
-          borderRadius: 22, backdropFilter: "blur(16px)",
-          boxShadow: "0 -4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.025)",
-        }}>
-          {[
-            { icon: "MAP", label: "Map", active: true },
-            { icon: "GIFT", label: "Rewards" },
-            { icon: "TOP", label: "Ranks" },
-            { icon: "SET", label: "Settings" },
-          ].map((n, i) => (
-            <div key={i} style={{
-              display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer",
-              opacity: n.active ? 1 : 0.22, transition: "opacity 0.3s", padding: "4px 16px",
-              position: "relative",
-            }}>
-              {n.active && <div style={{
-                position: "absolute", top: -1, left: "50%", transform: "translateX(-50%)",
-                width: 30, height: 2, borderRadius: 2,
-                background: "linear-gradient(90deg, transparent, #ffd740, transparent)",
-              }} />}
-              <span style={{ fontSize: 14, fontFamily: "'Orbitron', sans-serif", fontWeight: 900, color: n.active ? "#ffd740" : "rgba(255,255,255,0.3)", filter: n.active ? "drop-shadow(0 0 8px rgba(255,215,64,0.35))" : "none" }}>{n.icon}</span>
-              <span style={{
-                fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700,
-                color: n.active ? "#ffd740" : "rgba(255,255,255,0.3)",
-                letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 4,
-                textShadow: n.active ? "0 0 10px rgba(255,215,64,0.3)" : "none",
-              }}>{n.label}</span>
-              {n.active && <div style={{ width: 5, height: 5, borderRadius: "50%", marginTop: 4, background: "#ffd740", boxShadow: "0 0 10px #ffd740, 0 0 20px rgba(255,215,64,0.2)", animation: "dotPulse 2s ease-in-out infinite" }} />}
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* ── MODAL ── */}
       {selected && (
