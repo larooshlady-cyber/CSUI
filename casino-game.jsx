@@ -475,8 +475,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                   background: "rgba(1,0,8,0.6)", borderRadius: 24, zIndex: 2,
                   animation: "fadeIn 0.3s ease",
                 }}>
-                  <div style={{ fontSize: 48, marginBottom: 8, animation: "dotPulse 1s ease-in-out infinite" }}>🎉</div>
-                  <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232", textShadow: "0 0 24px rgba(255,210,50,0.5)", letterSpacing: "0.05em" }}>MAX WIN!</div>
+                  <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232", textShadow: "0 0 24px rgba(255,210,50,0.5)", letterSpacing: "0.05em", marginBottom: 4 }}>MAX WIN!</div>
                   <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", marginTop: 6, letterSpacing: "0.15em", fontWeight: 600 }}>PREPARING YOUR PRIZE...</div>
                 </div>
               )}
