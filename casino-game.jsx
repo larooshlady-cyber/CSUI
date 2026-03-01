@@ -64,18 +64,18 @@ const INITIAL_LEVELS = [
 ];
 
 const WHEEL_PRIZES = [
-  { label: "150% DEP\n+50 FS", color: "#ffd232", bg1: "#3a2d08", bg2: "#5c4a0a", jackpot: true },
-  { label: "20 Free\nSpins", color: "#78c8ff", bg1: "#0d1a2e", bg2: "#142840" },
-  { label: "75% DEP\nBonus", color: "#ff3278", bg1: "#2a0c18", bg2: "#3d1225" },
-  { label: "10 Free\nSpins", color: "#00e676", bg1: "#0a2a15", bg2: "#103d20" },
+  { label: "150% DEP\n+50 FS", color: "#ffe8a0", bg1: "#2a1a08", bg2: "#3d2a0c", jackpot: true },
+  { label: "20 Free\nSpins", color: "#c8b080", bg1: "#0c0e18", bg2: "#14182a" },
+  { label: "75% DEP\nBonus", color: "#ffe8a0", bg1: "#1e1210", bg2: "#2c1a16" },
+  { label: "10 Free\nSpins", color: "#c8b080", bg1: "#0c0e18", bg2: "#14182a" },
 ];
 const JACKPOT_INDEX = 0; // always land here
 
 const MEGA_WHEEL_PRIZES = [
-  { label: "$500\nJackpot", color: "#ffd232", bg1: "#3a2d08", bg2: "#5c4a0a", jackpot: true },
-  { label: "$200\nBonus", color: "#ff3278", bg1: "#2a0c18", bg2: "#3d1225" },
-  { label: "$100\nCash", color: "#00e676", bg1: "#0a2a15", bg2: "#103d20" },
-  { label: "$50\nBonus", color: "#78c8ff", bg1: "#0d1a2e", bg2: "#142840" },
+  { label: "$500\nJackpot", color: "#ffe8a0", bg1: "#2a1a08", bg2: "#3d2a0c", jackpot: true },
+  { label: "$200\nBonus", color: "#c8b080", bg1: "#1e1210", bg2: "#2c1a16" },
+  { label: "$100\nCash", color: "#ffe8a0", bg1: "#0c0e18", bg2: "#14182a" },
+  { label: "$50\nBonus", color: "#c8b080", bg1: "#1e1210", bg2: "#2c1a16" },
 ];
 
 const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.7];
@@ -234,31 +234,45 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
       const prize = prizes[i];
       const sA = i * segAngle, eA = sA + segAngle;
 
-      // segment fill — darker base with subtle radial shading
+      // segment fill — rich gradient from center outward
       ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 1, sA, eA); ctx.closePath();
-      const g = ctx.createRadialGradient(0, 0, r * 0.15, 0, 0, r);
-      g.addColorStop(0, prize.bg1);
-      g.addColorStop(0.5, prize.bg2);
+      const g = ctx.createRadialGradient(0, 0, r * 0.1, 0, 0, r);
+      g.addColorStop(0, prize.bg2);
+      g.addColorStop(0.6, prize.bg2);
       g.addColorStop(1, prize.bg1);
       ctx.fillStyle = g;
       ctx.fill();
 
-      // subtle inner sheen on each segment
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r * 0.85, sA + 0.04, eA - 0.04); ctx.closePath();
-      ctx.fillStyle = "rgba(255,255,255,0.02)";
+      // outer edge highlight — light catching the rim
+      ctx.beginPath(); ctx.arc(0, 0, r - 3, sA + 0.06, eA - 0.06);
+      ctx.strokeStyle = "rgba(255,240,200,0.06)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // subtle top sheen (upper half of segment)
+      const sheenMid = sA + segAngle / 2;
+      const sheenX = Math.cos(sheenMid) * r * 0.5;
+      const sheenY = Math.sin(sheenMid) * r * 0.5;
+      const sg = ctx.createRadialGradient(sheenX, sheenY, 0, sheenX, sheenY, r * 0.4);
+      sg.addColorStop(0, "rgba(255,255,255,0.035)");
+      sg.addColorStop(1, "transparent");
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 1, sA, eA); ctx.closePath();
+      ctx.fillStyle = sg;
       ctx.fill();
 
-      // divider lines — metallic gold
-      ctx.strokeStyle = "rgba(200,170,50,0.35)";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(sA) * r, Math.sin(sA) * r); ctx.stroke();
+      // divider lines — thin gold
+      ctx.strokeStyle = "rgba(180,150,60,0.5)";
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(sA) * (r - 1), Math.sin(sA) * (r - 1)); ctx.stroke();
 
-      // jackpot subtle edge glow
+      // jackpot segment — subtle warm inner glow
       if (prize.jackpot) {
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 1, sA + 0.02, eA - 0.02); ctx.closePath();
-        ctx.strokeStyle = "rgba(255,210,50,0.12)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        const jg = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r * 0.8);
+        jg.addColorStop(0, "rgba(255,200,50,0.05)");
+        jg.addColorStop(1, "transparent");
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 1, sA, eA); ctx.closePath();
+        ctx.fillStyle = jg;
+        ctx.fill();
       }
 
       // ── text — positioned along radius, always horizontal ──
@@ -271,8 +285,8 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
       // counter-rotate to keep text horizontal despite wheel rotation
       ctx.rotate(-angleRef.current);
       ctx.fillStyle = prize.color;
-      ctx.globalAlpha = prize.jackpot ? 1 : 0.85;
-      ctx.font = `bold ${prize.jackpot ? 15 : 13}px 'Orbitron',sans-serif`;
+      ctx.globalAlpha = prize.jackpot ? 1 : 0.7;
+      ctx.font = `bold ${prize.jackpot ? 14 : 12}px 'Orbitron',sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       const lines = prize.label.split("\n");
@@ -480,7 +494,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                 <button onClick={onClose} style={{
                   width: "100%", marginTop: 8, padding: 12, borderRadius: 14,
                   border: "1px solid rgba(255,255,255,0.04)", background: "transparent",
-                  fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)", cursor: "pointer", letterSpacing: "0.1em", fontWeight: 600,
+                  fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.2)", cursor: "pointer", letterSpacing: "0.1em", fontWeight: 600,
                   opacity: spinning ? 0.3 : 1, pointerEvents: spinning ? "none" : "auto",
                   transition: "opacity 0.3s ease",
                 }}>CLOSE</button>
@@ -490,11 +504,11 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
             <>
               {/* ── MISSION CLEARED header ── */}
               <div style={{ textAlign: "center", padding: "20px 20px 0" }}>
-                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
+                <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.25)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 6 }}>
                   {title === "MEGA SPIN" ? "MEGA SPIN COMPLETE" : "CONGRATULATIONS"}
                 </div>
                 <div style={{
-                  fontFamily: "'Orbitron',sans-serif", fontSize: 18, fontWeight: 900, letterSpacing: "0.04em",
+                  fontFamily: "'Orbitron',sans-serif", fontSize: 20, fontWeight: 900, letterSpacing: "0.04em",
                   color: "#ffd740", lineHeight: 1.2,
                 }}>You Won a Bonus!</div>
               </div>
@@ -511,7 +525,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                       <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 36, fontWeight: 900, color: "#ffd232", textShadow: "0 0 30px rgba(255,210,50,0.6)", lineHeight: 1.1 }}>
                         {prizes[JACKPOT_INDEX].label.replace("\n", " ")}
                       </div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 700, color: "rgba(255,210,50,0.55)", letterSpacing: "0.2em", marginTop: 8, textTransform: "uppercase" }}>YOUR PRIZE</div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,210,50,0.55)", letterSpacing: "0.2em", marginTop: 8, textTransform: "uppercase" }}>YOUR PRIZE</div>
                     </div>
                   </div>
 
@@ -533,13 +547,13 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                     background: "rgba(255,210,50,0.04)", border: "1px solid rgba(255,210,50,0.12)",
                     textAlign: "center",
                   }}>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em", marginBottom: 10 }}>YOU WON</div>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "0.2em", marginBottom: 10 }}>YOU WON</div>
                     <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "center" }}>
-                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#ffd232" }}>150%</span>
-                      <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)" }}>+</span>
-                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 22, fontWeight: 900, color: "#00e5ff" }}>50 FS</span>
+                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232" }}>150%</span>
+                      <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 14, color: "rgba(255,255,255,0.2)" }}>+</span>
+                      <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#00e5ff" }}>50 FS</span>
                     </div>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 6 }}>Deposit Bonus + Free Spins</div>
+                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.3)", marginTop: 6 }}>Deposit Bonus + Free Spins</div>
                   </div>
 
                   {/* ── Claim notice ── */}
@@ -550,30 +564,35 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                   }}>
                     <span style={{ fontSize: 16 }}>&#127873;</span>
                     <div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>Prize reserved for <span style={{ color: "#ffa028", fontWeight: 700 }}>{countdownStr}</span></div>
-                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 2 }}>Create an account to claim your rewards</div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>Prize reserved for <span style={{ color: "#ffa028", fontWeight: 700 }}>{countdownStr}</span></div>
+                      <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>Create an account to claim your rewards</div>
                     </div>
                   </div>
 
-                  {/* ── Journey preview (compact) ── */}
+                  {/* ── Journey preview ── */}
                   <div style={{
-                    margin: "10px 16px 0", padding: "10px 14px", borderRadius: 12,
-                    background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)",
+                    margin: "10px 16px 0", padding: "12px 14px", borderRadius: 12,
+                    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
                   }}>
-                    <div style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.2)", letterSpacing: "0.2em", marginBottom: 8 }}>UNLOCK MORE REWARDS</div>
+                    <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.35)", letterSpacing: "0.15em", marginBottom: 10 }}>UNLOCK MORE REWARDS</div>
                     {[
-                      { name: "KYC", reward: "+50 FS", color: "#78c8ff" },
-                      { name: "Phone", reward: "100% CB", color: "#ff3278" },
-                      { name: "Telegram", reward: "+$20", color: "#00b4ff" },
-                      { name: "Mega Spin", reward: "$50–500", color: "#ffa028" },
-                      { name: "Final", reward: "$500 Cash", color: "#00e676" },
+                      { name: "KYC Verification", reward: "+50 FS", color: "#78c8ff", highlight: false },
+                      { name: "Phone Verify", reward: "100% CB", color: "#ff3278", highlight: false },
+                      { name: "Telegram", reward: "+$20", color: "#00b4ff", highlight: false },
+                      { name: "Mega Spin", reward: "$50–500", color: "#ffa028", highlight: false },
+                      { name: "Final Prize", reward: "$500", color: "#00e676", highlight: true },
                     ].map((r, idx) => (
                       <div key={idx} style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: "4px 0", opacity: 0.45,
+                        padding: r.highlight ? "8px 10px" : "5px 0",
+                        marginTop: r.highlight ? 4 : 0,
+                        borderRadius: r.highlight ? 10 : 0,
+                        background: r.highlight ? "rgba(0,230,118,0.06)" : "transparent",
+                        border: r.highlight ? "1px solid rgba(0,230,118,0.15)" : "none",
+                        opacity: r.highlight ? 1 : 0.55,
                       }}>
-                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 10, color: "rgba(255,255,255,0.5)" }}>{r.name}</span>
-                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 10, fontWeight: 700, color: r.color }}>{r.reward}</span>
+                        <span style={{ fontFamily: "'Exo 2',sans-serif", fontSize: 13, color: r.highlight ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.5)" }}>{r.name}</span>
+                        <span style={{ fontFamily: "'Orbitron',sans-serif", fontSize: r.highlight ? 16 : 13, fontWeight: r.highlight ? 900 : 700, color: r.color, textShadow: r.highlight ? `0 0 12px ${r.color}55` : "none" }}>{r.reward}</span>
                       </div>
                     ))}
                   </div>
