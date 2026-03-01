@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 /* Placeholder cartoon character — replace src with your own */
 const CHARACTER_IMG = null; // Set to URL string to replace placeholder
@@ -608,7 +608,7 @@ const ISLAND_MAP = { 1: "Islandio", 2: "IS-CYAN", 3: "IS-RED", 4: "IS-PURPLE", 5
 
 function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, islandElsRef, completingId, completingStartRef, allComplete }) {
   const ref = useRef(null);
-  const state = useRef({ stars: null, dust: null, t: 0, imgReady: false });
+  const state = useRef({ stars: null, dust: null, t: 0, imgReady: false, dpr: 1, bgCache: null, bgW: 0, bgH: 0 });
   const propsRef = useRef({ width, height, levels, completingId, allComplete });
   propsRef.current = { width, height, levels, completingId, allComplete };
   // smooth color/opacity transitions for each island
@@ -618,15 +618,17 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
   })));
 
   useEffect(() => {
-    // init stars
-    state.current.stars = Array.from({ length: 300 }, () => ({
+    state.current.dpr = window.devicePixelRatio || 1;
+    // init stars — reduced count for performance
+    const starCount = 120;
+    state.current.stars = Array.from({ length: starCount }, () => ({
       x: Math.random(), y: Math.random(),
       r: 0.3 + Math.random() * 1.2,
       a: 0.1 + Math.random() * 0.5,
       p: Math.random() * 6.28,
       s: 0.003 + Math.random() * 0.01,
     }));
-    state.current.dust = Array.from({ length: 60 }, () => ({
+    state.current.dust = Array.from({ length: 20 }, () => ({
       x: Math.random(), y: Math.random(),
       r: 1 + Math.random() * 2.5,
       vx: (Math.random() - 0.5) * 0.00008,
@@ -638,7 +640,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
     // Check if all island images are already loaded
     if (allIslandsReady) state.current.imgReady = true;
     else {
-      const check = setInterval(() => { if (allIslandsReady) { state.current.imgReady = true; clearInterval(check); } }, 50);
+      const check = setInterval(() => { if (allIslandsReady) { state.current.imgReady = true; clearInterval(check); } }, 100);
     }
   }, []);
 
@@ -647,18 +649,23 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
     if (!c || !state.current.stars) return;
     const ctx = c.getContext("2d");
     let raf;
+    // cache scrollY via passive listener to avoid forced reflow in rAF
+    let cachedScrollY = scrollElRef.current ? scrollElRef.current.scrollTop : 0;
+    const onScroll = () => { cachedScrollY = scrollElRef.current ? scrollElRef.current.scrollTop : 0; };
+    const scrollEl = scrollElRef.current;
+    if (scrollEl) scrollEl.addEventListener("scroll", onScroll, { passive: true });
     const draw = () => {
       const { width, height, levels, completingId: cId, allComplete: allDone } = propsRef.current;
       const cStart = completingStartRef?.current;
-      const cElapsed = cId != null && cStart ? (performance.now() - cStart) / 1000 : 0; // seconds
-      const scrollY = scrollElRef.current ? scrollElRef.current.scrollTop : 0;
-      const dpr = window.devicePixelRatio || 1;
-      if (c.width !== width * dpr || c.height !== height * dpr) {
-        c.width = width * dpr;
-        c.height = height * dpr;
+      const cElapsed = cId != null && cStart ? (performance.now() - cStart) / 1000 : 0;
+      const scrollY = cachedScrollY;
+      const dpr = state.current.dpr;
+      const newW = width * dpr, newH = height * dpr;
+      if (c.width !== newW || c.height !== newH) {
+        c.width = newW; c.height = newH;
+        state.current.bgCache = null; // invalidate cached bg
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const totalH = levels.length * NODE_GAP + PAD_TOP + 180;
       state.current.t += 0.014;
       const t = state.current.t;
 
@@ -680,29 +687,29 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
 
       ctx.clearRect(0, 0, width, height);
 
-      // ─── BACKGROUND GRADIENT ───
-      const bg = ctx.createRadialGradient(width * 0.5, height * 0.25, 0, width * 0.5, height * 0.5, height * 0.9);
-      bg.addColorStop(0, "#140838");
-      bg.addColorStop(0.35, "#0b0525");
-      bg.addColorStop(0.65, "#06031a");
-      bg.addColorStop(1, "#010010");
-      ctx.fillStyle = bg;
+      // ─── BACKGROUND GRADIENT (cached) ───
+      if (!state.current.bgCache || state.current.bgW !== width || state.current.bgH !== height) {
+        const bg = ctx.createRadialGradient(width * 0.5, height * 0.25, 0, width * 0.5, height * 0.5, height * 0.9);
+        bg.addColorStop(0, "#140838"); bg.addColorStop(0.35, "#0b0525");
+        bg.addColorStop(0.65, "#06031a"); bg.addColorStop(1, "#010010");
+        state.current.bgCache = bg;
+        state.current.bgW = width; state.current.bgH = height;
+      }
+      ctx.fillStyle = state.current.bgCache;
       ctx.fillRect(0, 0, width, height);
 
-      // ─── NEBULA BLOBS (parallax) ───
+      // ─── NEBULA BLOBS (simplified — 2 instead of 4) ───
       const nebOff = scrollY * 0.03;
       const drawNeb = (fx, fy, fr, cr, cg, cb, ca) => {
         const nx = width * fx, ny = height * fy - nebOff;
-        const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, fr * Math.min(width, height));
-        ng.addColorStop(0, `rgba(${cr},${cg},${cb},${ca})`);
-        ng.addColorStop(1, "transparent");
+        const nr = fr * Math.min(width, height);
+        const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+        ng.addColorStop(0, `rgba(${cr},${cg},${cb},${ca})`); ng.addColorStop(1, "transparent");
         ctx.fillStyle = ng;
-        ctx.fillRect(nx - fr * width, ny - fr * height, fr * width * 2, fr * height * 2);
+        ctx.beginPath(); ctx.arc(nx, ny, nr, 0, 6.28); ctx.fill();
       };
       drawNeb(0.25, 0.2, 0.35, 60, 20, 140, 0.08);
       drawNeb(0.78, 0.6, 0.28, 0, 60, 150, 0.06);
-      drawNeb(0.5, 0.85, 0.25, 150, 15, 60, 0.04);
-      drawNeb(0.8, 0.15, 0.2, 120, 100, 10, 0.03);
 
       // ─── STARS ───
       for (const s of state.current.stars) {
@@ -713,7 +720,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, 6.28); ctx.fill();
       }
 
-      // ─── DUST PARTICLES (parallax) ───
+      // ─── DUST PARTICLES (parallax, no glow halo) ───
       for (const d of state.current.dust) {
         d.x += d.vx; d.y += d.vy; d.p += 0.008;
         if (d.x < -0.05) d.x = 1.05; if (d.x > 1.05) d.x = -0.05;
@@ -722,34 +729,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         const da = d.a * (0.4 + 0.6 * Math.sin(d.p));
         ctx.fillStyle = `rgba(${d.col.r},${d.col.g},${d.col.b},${da})`;
         ctx.beginPath(); ctx.arc(dx, dy, d.r, 0, 6.28); ctx.fill();
-        ctx.fillStyle = `rgba(${d.col.r},${d.col.g},${d.col.b},${da * 0.15})`;
-        ctx.beginPath(); ctx.arc(dx, dy, d.r * 4, 0, 6.28); ctx.fill();
       }
-
-      // ─── PERSPECTIVE GRID ───
-      ctx.save();
-      const gridY = height - scrollY * 0.02;
-      ctx.globalAlpha = 0.03;
-      const gridSpacing = 45;
-      const vanishY = height * 0.45;
-      for (let i = 0; i < 20; i++) {
-        const yy = vanishY + (gridY - vanishY) * (i / 20);
-        const spread = ((yy - vanishY) / (gridY - vanishY)) * width * 0.8;
-        ctx.strokeStyle = "#00b0ff";
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(width * 0.5 - spread, yy);
-        ctx.lineTo(width * 0.5 + spread, yy);
-        ctx.stroke();
-      }
-      for (let i = -10; i <= 10; i++) {
-        ctx.beginPath();
-        ctx.moveTo(width * 0.5, vanishY);
-        ctx.lineTo(width * 0.5 + i * gridSpacing * 2.5, gridY);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.restore();
 
       // ─── ENERGY BEAMS between nodes ───
       const nodeScreenPos = [];
@@ -761,47 +741,30 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
 
       for (let i = 0; i < levels.length - 1; i++) {
         const a = nodeScreenPos[i], b = nodeScreenPos[i + 1];
+        // skip beams entirely off-screen
+        const beamTop = Math.min(a.y, b.y) - 30, beamBot = Math.max(a.y, b.y) + 60;
+        if (beamBot < 0 || beamTop > height) continue;
         const ac = animColors.current[i];
-        let lv = { ...levels[i], r: Math.round(ac.r), g: Math.round(ac.g), b: Math.round(ac.b) };
+        const lr = Math.round(ac.r), lg = Math.round(ac.g), lb = Math.round(ac.b);
         const mx = (a.x + b.x) / 2 + (a.x < b.x ? -50 : 50);
         const my = (a.y + b.y) / 2;
 
-        // soft glow (no filter blur — use thicker low-alpha stroke instead)
-        ctx.globalAlpha = 0.06;
-        ctx.strokeStyle = `rgb(${lv.r},${lv.g},${lv.b})`;
-        ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y + 55); ctx.quadraticCurveTo(mx, my, b.x, b.y - 25);
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-
-        // dashed beam — negative offset for bottom-to-top flow
+        // dashed beam
         ctx.setLineDash([5, 6]);
         ctx.lineDashOffset = -t * 40;
-        ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},0.25)`;
+        ctx.strokeStyle = `rgba(${lr},${lg},${lb},0.25)`;
         ctx.lineWidth = 1.2;
         ctx.beginPath(); ctx.moveTo(a.x, a.y + 55); ctx.quadraticCurveTo(mx, my, b.x, b.y - 25);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // white core — negative offset
-        ctx.setLineDash([2, 12]);
-        ctx.lineDashOffset = -t * 35;
-        ctx.strokeStyle = "rgba(255,255,255,0.18)";
-        ctx.lineWidth = 0.5;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y + 55); ctx.quadraticCurveTo(mx, my, b.x, b.y - 25);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // traveling orb — bottom to top (b → a)
+        // traveling orb (simple circle, no gradient)
         const prog = ((t * 0.15 + i * 0.25) % 1);
         const ot = 1 - prog;
         const ox = (1 - ot) * (1 - ot) * a.x + 2 * (1 - ot) * ot * mx + ot * ot * b.x;
         const oy = (1 - ot) * (1 - ot) * (a.y + 55) + 2 * (1 - ot) * ot * my + ot * ot * (b.y - 25);
-        const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, 10);
-        og.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},0.45)`);
-        og.addColorStop(1, "transparent");
-        ctx.fillStyle = og;
-        ctx.fillRect(ox - 10, oy - 10, 20, 20);
+        ctx.fillStyle = `rgba(${lr},${lg},${lb},0.45)`;
+        ctx.beginPath(); ctx.arc(ox, oy, 4, 0, 6.28); ctx.fill();
         ctx.fillStyle = "rgba(255,255,255,0.8)";
         ctx.beginPath(); ctx.arc(ox, oy, 1.8, 0, 6.28); ctx.fill();
       }
@@ -826,7 +789,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
       const labelPos = [];
       for (let i = 0; i < levels.length; i++) {
         const ac = animColors.current[i];
-        let lv = { ...levels[i], r: Math.round(ac.r), g: Math.round(ac.g), b: Math.round(ac.b) };
+        const lv = { ...levels[i], r: Math.round(ac.r), g: Math.round(ac.g), b: Math.round(ac.b) };
         const cx = nodeScreenPos[i].x;
         // subtle levitation — each island has its own phase, boosted during completion
         const baseLevitate = Math.sin(t * 1.5 + i * 1.7) * 4.5;
@@ -841,16 +804,24 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         const sc = jp ? 1.25 : 1.0;
         const seed = lv.id;
 
+        // ── VIEWPORT CULLING — skip islands entirely off-screen ──
+        const margin = 200 * sc;
+        const isOnScreen = cy > -margin && cy < height + margin;
+
         ctx.save();
         ctx.globalAlpha = ac.alpha;
 
-        // ── AMBIENT GLOW ──
-        const ambG = ctx.createRadialGradient(cx, cy + 10, 0, cx, cy + 10, 140 * sc);
-        ambG.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},0.09)`);
-        ambG.addColorStop(0.35, `rgba(${lv.r},${lv.g},${lv.b},0.03)`);
-        ambG.addColorStop(1, "transparent");
-        ctx.fillStyle = ambG;
-        ctx.beginPath(); ctx.arc(cx, cy + 10, 140 * sc, 0, 6.28); ctx.fill();
+        if (!isOnScreen) {
+          // still need labelPos for HTML overlay positioning
+          const rw = 95 * sc, depth = 50 * sc, ry = cy + 28 * sc;
+          ctx.restore();
+          labelPos.push({ x: cx, y: ry + depth + 22 * sc, id: lv.id });
+          continue;
+        }
+
+        // ── AMBIENT GLOW (simplified — single color fill instead of gradient) ──
+        ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.04)`;
+        ctx.beginPath(); ctx.arc(cx, cy + 10, 100 * sc, 0, 6.28); ctx.fill();
 
         // ═══════════════════
         // ═══ ROCK ISLAND ═══  (PNG image)
@@ -859,15 +830,9 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         const depth = 50 * sc;
         const ry = cy + 28 * sc;
 
-        // ── ground shadow ──
-        ctx.save();
-        const shG = ctx.createRadialGradient(cx, ry + depth + 16, 0, cx, ry + depth + 16, rw * 1.3);
-        shG.addColorStop(0, `rgba(${lv.r * 0.1 | 0},${lv.g * 0.1 | 0},${lv.b * 0.1 | 0},0.35)`);
-        shG.addColorStop(0.4, "rgba(0,0,0,0.15)");
-        shG.addColorStop(1, "transparent");
-        ctx.fillStyle = shG;
-        ctx.beginPath(); ctx.ellipse(cx, ry + depth + 16, rw, 18 * sc, 0, 0, 6.28); ctx.fill();
-        ctx.restore();
+        // ── ground shadow (simple ellipse) ──
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.beginPath(); ctx.ellipse(cx, ry + depth + 16, rw * 0.9, 14 * sc, 0, 0, 6.28); ctx.fill();
 
         // ── draw island PNG (color-matched or green if complete) ──
         if (state.current.imgReady) {
@@ -974,13 +939,10 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
           }
         }
 
-        // ── CRYSTAL FORMATIONS growing from rock edges ──
+        // ── CRYSTAL FORMATIONS (reduced to 2) ──
         const crystals = [
-          { a: -0.6, h: 18, w: 4, off: 0 },
-          { a: -0.3, h: 24, w: 5, off: 1 },
-          { a: 0.5, h: 20, w: 4.5, off: 2 },
-          { a: 0.8, h: 14, w: 3.5, off: 3 },
-          { a: 2.4, h: 16, w: 3.5, off: 4 },
+          { a: -0.5, h: 22, w: 4.5, off: 0 },
+          { a: 0.6, h: 18, w: 4, off: 2 },
         ];
         for (const cr of crystals) {
           const baseX = cx + Math.cos(cr.a) * rw * 0.85;
@@ -988,83 +950,38 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
           const ch = cr.h * sc;
           const cw2 = cr.w * sc;
           const sway = Math.sin(t * 0.6 + cr.off * 1.5) * 1.5;
-
-          // crystal body
+          ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.3)`;
           ctx.beginPath();
           ctx.moveTo(baseX - cw2, baseY);
           ctx.lineTo(baseX + sway, baseY - ch);
           ctx.lineTo(baseX + cw2, baseY);
-          ctx.closePath();
-          const crG = ctx.createLinearGradient(baseX, baseY, baseX, baseY - ch);
-          crG.addColorStop(0, `rgba(${lv.r * 0.3 | 0},${lv.g * 0.3 | 0},${lv.b * 0.3 | 0},0.5)`);
-          crG.addColorStop(0.5, `rgba(${lv.r},${lv.g},${lv.b},0.3)`);
-          crG.addColorStop(1, `rgba(${Math.min(255, lv.r + 80)},${Math.min(255, lv.g + 80)},${Math.min(255, lv.b + 80)},0.45)`);
-          ctx.fillStyle = crG;
-          ctx.fill();
-
-          // crystal edge highlight
-          ctx.strokeStyle = `rgba(${Math.min(255, lv.r + 100)},${Math.min(255, lv.g + 100)},${Math.min(255, lv.b + 100)},0.15)`;
-          ctx.lineWidth = 0.6;
-          ctx.beginPath(); ctx.moveTo(baseX - cw2, baseY); ctx.lineTo(baseX + sway, baseY - ch); ctx.stroke();
-
-          // crystal glow
-          const cgG = ctx.createRadialGradient(baseX, baseY - ch * 0.5, 0, baseX, baseY - ch * 0.5, ch * 0.7);
-          cgG.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},${0.06 + 0.03 * Math.sin(t * 2 + cr.off)})`);
-          cgG.addColorStop(1, "transparent");
-          ctx.fillStyle = cgG;
-          ctx.beginPath(); ctx.arc(baseX, baseY - ch * 0.5, ch * 0.7, 0, 6.28); ctx.fill();
+          ctx.closePath(); ctx.fill();
         }
 
-        // ── DEBRIS (varied + crystal shards) ──
-        const drawDebris = (dx, dy, sz, rot, isGem) => {
-          const floatY = Math.sin(t * 0.6 + dx * 0.3 + dy * 0.2) * 5;
-          const floatX = Math.cos(t * 0.4 + dy * 0.5) * 2;
+        // ── DEBRIS (reduced to 3, no gradient glow) ──
+        const drawDebris = (dx, dy, sz, rot) => {
+          const floatY = Math.sin(t * 0.6 + dx * 0.3) * 4;
           ctx.save();
-          ctx.translate(cx + (dx + floatX) * sc, ry + (dy + floatY) * sc);
+          ctx.translate(cx + (dx) * sc, ry + (dy + floatY) * sc);
           ctx.rotate(rot + t * 0.12);
-          if (isGem) {
-            ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.3)`;
-            ctx.beginPath();
-            ctx.moveTo(0, -sz); ctx.lineTo(sz * 0.6, 0); ctx.lineTo(0, sz * 0.7); ctx.lineTo(-sz * 0.6, 0);
-            ctx.closePath(); ctx.fill();
-            const dg = ctx.createRadialGradient(0, 0, 0, 0, 0, sz * 3);
-            dg.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},0.1)`);
-            dg.addColorStop(1, "transparent");
-            ctx.fillStyle = dg;
-            ctx.fillRect(-sz * 3, -sz * 3, sz * 6, sz * 6);
-          } else {
-            ctx.fillStyle = `rgba(${35 + seed * 3},${30 + seed * 2},${55 + seed * 3},0.5)`;
-            ctx.beginPath();
-            ctx.moveTo(-sz * 0.5, -sz * 0.7); ctx.lineTo(sz * 0.6, -sz * 0.4);
-            ctx.lineTo(sz * 0.4, sz * 0.6); ctx.lineTo(-sz * 0.4, sz * 0.5);
-            ctx.closePath(); ctx.fill();
-            ctx.strokeStyle = "rgba(160,150,200,0.06)";
-            ctx.lineWidth = 0.4;
-            ctx.beginPath(); ctx.moveTo(-sz * 0.5, -sz * 0.7); ctx.lineTo(sz * 0.6, -sz * 0.4); ctx.stroke();
-          }
+          ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.25)`;
+          ctx.beginPath();
+          ctx.moveTo(0, -sz); ctx.lineTo(sz * 0.6, 0); ctx.lineTo(0, sz * 0.7); ctx.lineTo(-sz * 0.6, 0);
+          ctx.closePath(); ctx.fill();
           ctx.restore();
         };
-        drawDebris(-rw / sc - 14, 8, 6, 0.4, false);
-        drawDebris(rw / sc + 11, 6, 5.5, -0.3, false);
-        drawDebris(-rw / sc - 5, 32, 4.5, 0.9, true);
-        drawDebris(rw / sc + 5, 28, 4, -0.7, true);
-        drawDebris(-rw / sc + 6, depth / sc + 4, 3.5, 1.2, false);
-        drawDebris(rw / sc - 5, depth / sc + 7, 3, -1.0, false);
-        drawDebris(-rw / sc - 18, 20, 3, 2.1, true);
-        drawDebris(rw / sc + 16, 18, 3.5, -1.8, false);
+        drawDebris(-rw / sc - 10, 10, 5, 0.4);
+        drawDebris(rw / sc + 8, 8, 4.5, -0.3);
+        drawDebris(-rw / sc - 3, 30, 4, 0.9);
 
-        // ── FOG/MIST around island base ──
-        for (let fog = 0; fog < 4; fog++) {
-          const fAngle = (fog / 4) * 6.28 + t * 0.08 + seed;
+        // ── FOG/MIST (reduced to 2, simple fill) ──
+        for (let fog = 0; fog < 2; fog++) {
+          const fAngle = (fog / 2) * 6.28 + t * 0.08 + seed;
           const fDist = rw * (0.7 + 0.25 * Math.sin(t * 0.3 + fog * 2));
           const fx = cx + Math.cos(fAngle) * fDist;
           const fy = ry + depth * 0.6 + Math.sin(fAngle) * rh * 0.4;
-          const fSize = (25 + 12 * Math.sin(t * 0.5 + fog)) * sc;
-          const fA = 0.015 + 0.01 * Math.sin(t * 0.6 + fog * 1.5);
-          const fogG = ctx.createRadialGradient(fx, fy, 0, fx, fy, fSize);
-          fogG.addColorStop(0, `rgba(${lv.r * 0.3 + 40 | 0},${lv.g * 0.3 + 40 | 0},${lv.b * 0.3 + 40 | 0},${fA})`);
-          fogG.addColorStop(1, "transparent");
-          ctx.fillStyle = fogG;
+          const fSize = 25 * sc;
+          ctx.fillStyle = `rgba(${lv.r * 0.3 + 40 | 0},${lv.g * 0.3 + 40 | 0},${lv.b * 0.3 + 40 | 0},0.02)`;
           ctx.beginPath(); ctx.arc(fx, fy, fSize, 0, 6.28); ctx.fill();
         }
 
@@ -1075,34 +992,30 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         const portalRx = 52 * sc;
         const portalRy = 28 * sc;
 
-        // ── outer volumetric bloom ──
-        for (let bl = 0; bl < 4; bl++) {
-          const bsc = 1.5 + bl * 0.4;
-          const ba = (0.07 - bl * 0.012) * (0.7 + 0.3 * Math.sin(t * 1.3 + bl * 0.5));
-          const bG = ctx.createRadialGradient(cx, portalY, portalRx * 0.2, cx, portalY, portalRx * bsc);
-          bG.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},${ba})`);
-          bG.addColorStop(1, "transparent");
-          ctx.fillStyle = bG;
+        // ── outer bloom (reduced: 2 layers, simple fill) ──
+        for (let bl = 0; bl < 2; bl++) {
+          const bsc = 1.5 + bl * 0.6;
+          const ba = (0.06 - bl * 0.02) * (0.7 + 0.3 * Math.sin(t * 1.3 + bl));
+          ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},${ba})`;
           ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * bsc, portalRy * bsc, 0, 0, 6.28); ctx.fill();
         }
 
-        // ── accretion disk (concentric glowing rings inside) ──
-        for (let ring = 0; ring < 6; ring++) {
-          const ringR = portalRx * (0.4 + ring * 0.1);
-          const ringRy = portalRy * (0.4 + ring * 0.1);
-          const ringA = (0.06 - ring * 0.008) * (0.6 + 0.4 * Math.sin(t * 1.5 + ring * 0.8));
+        // ── accretion rings (reduced: 3) ──
+        for (let ring = 0; ring < 3; ring++) {
+          const ringR = portalRx * (0.4 + ring * 0.2);
+          const ringRy = portalRy * (0.4 + ring * 0.2);
+          const ringA = (0.05 - ring * 0.012) * (0.6 + 0.4 * Math.sin(t * 1.5 + ring * 1.2));
           ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},${ringA})`;
-          ctx.lineWidth = 1.5 - ring * 0.15;
+          ctx.lineWidth = 1.2;
           ctx.beginPath(); ctx.ellipse(cx, portalY, ringR, ringRy, 0, 0, 6.28); ctx.stroke();
         }
 
-        // ── vortex swirl arms ──
-        for (let layer = 0; layer < 5; layer++) {
+        // ── vortex swirl arms (reduced: 2 layers, 20 segments) ──
+        for (let layer = 0; layer < 2; layer++) {
           const arms = 4 + layer * 2;
-          const maxDist = portalRx * (0.92 - layer * 0.08);
-          const spin = t * (1.2 + layer * 0.35) * (layer % 2 === 0 ? 1 : -1);
-          const alp = (0.2 - layer * 0.025) * (0.5 + 0.5 * Math.sin(t * 0.8 + layer * 0.7));
-
+          const maxDist = portalRx * (0.9 - layer * 0.12);
+          const spin = t * (1.2 + layer * 0.5) * (layer % 2 === 0 ? 1 : -1);
+          const alp = (0.18 - layer * 0.04) * (0.5 + 0.5 * Math.sin(t * 0.8 + layer));
           ctx.save();
           ctx.translate(cx, portalY);
           ctx.rotate(spin);
@@ -1110,8 +1023,8 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
             const angle = (a / arms) * Math.PI * 2;
             ctx.save(); ctx.rotate(angle);
             ctx.beginPath();
-            for (let s = 0; s < 40; s++) {
-              const frac = s / 40;
+            for (let s = 0; s < 20; s++) {
+              const frac = s / 20;
               const dist = frac * maxDist;
               const twist = frac * 3 + Math.sin(frac * 4.5 + t * 1.6) * 0.35;
               const px = Math.cos(twist) * dist;
@@ -1119,133 +1032,79 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
               if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
             }
             ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},${alp})`;
-            ctx.lineWidth = (2 - layer * 0.2) * sc;
+            ctx.lineWidth = (2 - layer * 0.3) * sc;
             ctx.stroke();
             ctx.restore();
           }
           ctx.restore();
         }
 
-        // ── dark vortex core (event horizon) ──
-        const coreG = ctx.createRadialGradient(cx, portalY, 0, cx, portalY, portalRx * 0.48);
-        coreG.addColorStop(0, `rgba(${lv.r * 0.15 | 0},${lv.g * 0.15 | 0},${lv.b * 0.15 | 0},0.85)`);
-        coreG.addColorStop(0.3, `rgba(${lv.r * 0.25 | 0},${lv.g * 0.25 | 0},${lv.b * 0.25 | 0},0.6)`);
-        coreG.addColorStop(0.6, `rgba(${lv.r * 0.2 | 0},${lv.g * 0.2 | 0},${lv.b * 0.2 | 0},0.3)`);
-        coreG.addColorStop(1, "transparent");
-        ctx.fillStyle = coreG;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * 0.48, portalRy * 0.48, 0, 0, 6.28); ctx.fill();
+        // ── dark vortex core (simple fill) ──
+        ctx.fillStyle = `rgba(${lv.r * 0.15 | 0},${lv.g * 0.15 | 0},${lv.b * 0.15 | 0},0.7)`;
+        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * 0.45, portalRy * 0.45, 0, 0, 6.28); ctx.fill();
 
-        // ── distortion ripple around event horizon ──
+        // ── distortion ripple ──
         const ripR = portalRx * (0.52 + 0.03 * Math.sin(t * 3));
         const ripRy = portalRy * (0.52 + 0.03 * Math.sin(t * 3));
         ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},${0.15 + 0.08 * Math.sin(t * 2.5)})`;
         ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.ellipse(cx, portalY, ripR, ripRy, 0, 0, 6.28); ctx.stroke();
 
-        // ── inner glow pulse ──
-        for (let ig = 0; ig < 2; ig++) {
-          const pulseF = (0.22 + ig * 0.1) + (0.05 + ig * 0.03) * Math.sin(t * (2 + ig));
-          const igG = ctx.createRadialGradient(cx, portalY, 0, cx, portalY, portalRx * pulseF);
-          igG.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},${0.4 - ig * 0.18})`);
-          igG.addColorStop(0.5, `rgba(${lv.r},${lv.g},${lv.b},${0.08 - ig * 0.04})`);
-          igG.addColorStop(1, "transparent");
-          ctx.fillStyle = igG;
-          ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * pulseF, portalRy * pulseF, 0, 0, 6.28); ctx.fill();
-        }
+        // ── inner glow pulse (1 layer, simple fill) ──
+        const pulseF = 0.25 + 0.05 * Math.sin(t * 2);
+        ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.3)`;
+        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * pulseF, portalRy * pulseF, 0, 0, 6.28); ctx.fill();
 
-        // ── TORUS RING ──
-        // soft shadow under ring
-        ctx.lineWidth = 6 * sc;
-        ctx.strokeStyle = `rgba(${lv.r * 0.12 | 0},${lv.g * 0.12 | 0},${lv.b * 0.12 | 0},0.25)`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY + 2.5, portalRx, portalRy, 0, 0, 6.28); ctx.stroke();
-        // outer edge
-        ctx.lineWidth = 5.5 * sc;
+        // ── TORUS RING (no shadowBlur, reduced strokes) ──
+        ctx.lineWidth = 5 * sc;
         ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},0.9)`;
-        ctx.shadowColor = `rgba(${lv.r},${lv.g},${lv.b},0.7)`;
-        ctx.shadowBlur = 25;
         ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx, portalRy, 0, 0, 6.28); ctx.stroke();
-        ctx.shadowBlur = 0;
         // bright inner edge
-        ctx.lineWidth = 1.8 * sc;
-        ctx.strokeStyle = `rgba(${Math.min(255, lv.r + 70)},${Math.min(255, lv.g + 70)},${Math.min(255, lv.b + 70)},0.35)`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx - 3 * sc, portalRy - 2 * sc, 0, 0, 6.28); ctx.stroke();
-        // dim outer outer edge
-        ctx.lineWidth = 0.8;
-        ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},0.15)`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx + 3 * sc, portalRy + 2 * sc, 0, 0, 6.28); ctx.stroke();
-
-        // 3D highlight arcs
-        const hlBase = t * 0.3;
-        ctx.lineWidth = 3.5 * sc;
-        ctx.strokeStyle = `rgba(255,255,255,${0.28 + 0.1 * Math.sin(t * 0.5)})`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx, portalRy, 0, hlBase - 0.6, hlBase + 0.7); ctx.stroke();
         ctx.lineWidth = 1.5 * sc;
-        ctx.strokeStyle = `rgba(255,255,255,${0.08 + 0.04 * Math.sin(t * 0.7 + 1.2)})`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx, portalRy, 0, hlBase + 2.8, hlBase + 3.3); ctx.stroke();
-        ctx.lineWidth = 3.5 * sc;
-        ctx.strokeStyle = `rgba(0,0,0,${0.12 + 0.04 * Math.sin(t * 0.4)})`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx, portalRy, 0, hlBase + Math.PI - 0.4, hlBase + Math.PI + 0.7); ctx.stroke();
+        ctx.strokeStyle = `rgba(${Math.min(255, lv.r + 70)},${Math.min(255, lv.g + 70)},${Math.min(255, lv.b + 70)},0.3)`;
+        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx - 3 * sc, portalRy - 2 * sc, 0, 0, 6.28); ctx.stroke();
 
-        // ── inner dashed rings ──
+        // highlight arc (1 instead of 3)
+        const hlBase = t * 0.3;
+        ctx.lineWidth = 3 * sc;
+        ctx.strokeStyle = `rgba(255,255,255,${0.25 + 0.1 * Math.sin(t * 0.5)})`;
+        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx, portalRy, 0, hlBase - 0.6, hlBase + 0.7); ctx.stroke();
+
+        // ── inner dashed ring (1 instead of 2) ──
         ctx.setLineDash([6 * sc, 8 * sc]);
         ctx.lineDashOffset = -t * 30;
-        ctx.lineWidth = 1.3 * sc;
-        ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},0.2)`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * 0.7, portalRy * 0.7, 0, 0, 6.28); ctx.stroke();
-        ctx.setLineDash([3 * sc, 14 * sc]);
-        ctx.lineDashOffset = t * 22;
-        ctx.lineWidth = 0.6 * sc;
-        ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},0.1)`;
-        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * 0.52, portalRy * 0.52, 0, 0, 6.28); ctx.stroke();
+        ctx.lineWidth = 1 * sc;
+        ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},0.18)`;
+        ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * 0.65, portalRy * 0.65, 0, 0, 6.28); ctx.stroke();
         ctx.setLineDash([]);
 
-        // ── orbiting particles with trails ──
-        const orbCount = jp ? 10 : 6;
+        // ── orbiting particles (reduced: 3, no trails, no gradients) ──
+        const orbCount = jp ? 5 : 3;
         for (let o = 0; o < orbCount; o++) {
-          const oa = t * (0.55 + o * 0.09) + (o / orbCount) * 6.28;
+          const oa = t * (0.55 + o * 0.15) + (o / orbCount) * 6.28;
           const ox = cx + Math.cos(oa) * portalRx;
           const oy = portalY + Math.sin(oa) * portalRy;
-          const opulse = 0.3 + 0.7 * Math.sin(t * 2.2 + o * 1.1);
-          for (let tr = 1; tr <= 4; tr++) {
-            const ta = oa - tr * 0.1;
-            const tx = cx + Math.cos(ta) * portalRx;
-            const ty = portalY + Math.sin(ta) * portalRy;
-            ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},${0.06 * opulse / tr})`;
-            ctx.beginPath(); ctx.arc(tx, ty, 2 - tr * 0.35, 0, 6.28); ctx.fill();
-          }
-          const opG = ctx.createRadialGradient(ox, oy, 0, ox, oy, 14);
-          opG.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},${0.4 * opulse})`);
-          opG.addColorStop(1, "transparent");
-          ctx.fillStyle = opG;
-          ctx.fillRect(ox - 14, oy - 14, 28, 28);
-          ctx.fillStyle = `rgba(255,255,255,${0.8 * opulse})`;
+          const opulse = 0.4 + 0.6 * Math.sin(t * 2.2 + o * 1.5);
+          ctx.fillStyle = `rgba(255,255,255,${0.7 * opulse})`;
           ctx.beginPath(); ctx.arc(ox, oy, 2, 0, 6.28); ctx.fill();
         }
 
-        // ── jackpot effects ──
+        // ── jackpot effects (reduced: 12 rays) ──
         if (jp) {
-          for (let r2 = 0; r2 < 32; r2++) {
-            const ra = (r2 / 32) * 6.28 + t * 0.2;
-            const ral = 0.03 + 0.09 * Math.sin(t * 1.8 + r2 * 0.4);
+          for (let r2 = 0; r2 < 12; r2++) {
+            const ra = (r2 / 12) * 6.28 + t * 0.2;
+            const ral = 0.04 + 0.08 * Math.sin(t * 1.8 + r2 * 0.8);
             ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},${ral})`;
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(cx + Math.cos(ra) * portalRx * 1.05, portalY + Math.sin(ra) * portalRy * 1.05);
-            ctx.lineTo(cx + Math.cos(ra) * portalRx * 1.45, portalY + Math.sin(ra) * portalRy * 1.45);
+            ctx.lineTo(cx + Math.cos(ra) * portalRx * 1.4, portalY + Math.sin(ra) * portalRy * 1.4);
             ctx.stroke();
           }
-          const jpP = 1.2 + 0.08 * Math.sin(t * 1.8);
-          ctx.lineWidth = 1.2;
-          ctx.strokeStyle = `rgba(${lv.r},${lv.g},${lv.b},${0.06 + 0.05 * Math.sin(t * 1.8)})`;
-          ctx.beginPath(); ctx.ellipse(cx, portalY, portalRx * jpP, portalRy * jpP, 0, 0, 6.28); ctx.stroke();
         }
 
-        // ── light cone portal → rock ──
-        const lcG = ctx.createLinearGradient(cx, portalY + portalRy, cx, ry - rh * 0.2);
-        lcG.addColorStop(0, `rgba(${lv.r},${lv.g},${lv.b},0.08)`);
-        lcG.addColorStop(0.5, `rgba(${lv.r},${lv.g},${lv.b},0.02)`);
-        lcG.addColorStop(1, "transparent");
-        ctx.fillStyle = lcG;
+        // ── light cone (simple fill, no gradient) ──
+        ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.04)`;
         ctx.beginPath();
         ctx.moveTo(cx - portalRx * 0.3, portalY + portalRy);
         ctx.lineTo(cx + portalRx * 0.3, portalY + portalRy);
@@ -1253,14 +1112,13 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         ctx.lineTo(cx - portalRx * 0.8, ry - rh * 0.2);
         ctx.closePath(); ctx.fill();
 
-        // ── ambient floating particles ──
-        for (let ap = 0; ap < 8; ap++) {
-          const aAngle = t * (0.25 + ap * 0.06) + (ap / 8) * 6.28;
-          const aRad = (65 + 35 * Math.sin(t * 0.4 + ap * 1.5)) * sc;
+        // ── ambient floating particles (reduced: 3) ──
+        for (let ap = 0; ap < 3; ap++) {
+          const aAngle = t * (0.25 + ap * 0.12) + (ap / 3) * 6.28;
+          const aRad = (65 + 35 * Math.sin(t * 0.4 + ap * 2)) * sc;
           const ax = cx + Math.cos(aAngle) * aRad;
           const ay = cy + Math.sin(aAngle * 0.6 + ap) * aRad * 0.35;
-          const aa = 0.06 + 0.05 * Math.sin(t * 1.8 + ap);
-          ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},${aa})`;
+          ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.08)`;
           ctx.beginPath(); ctx.arc(ax, ay, 1.2, 0, 6.28); ctx.fill();
         }
 
@@ -1268,78 +1126,60 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         if (cId === lv.id && cElapsed > 0 && cElapsed < 2.5) {
           const ce = cElapsed;
 
-          // 1. Portal burst — expanding shockwave ring
+          // 1. Portal burst — shockwave ring
           if (ce < 1.2) {
             const burstP = ce / 1.2;
             const burstR = portalRx * (1 + burstP * 4);
-            const burstA = (1 - burstP) * 0.6;
-            ctx.strokeStyle = `rgba(0,230,118,${burstA})`;
+            ctx.strokeStyle = `rgba(0,230,118,${(1 - burstP) * 0.6})`;
             ctx.lineWidth = 3 * (1 - burstP) + 0.5;
             ctx.beginPath(); ctx.arc(cx, portalY, burstR, 0, 6.28); ctx.stroke();
-            // inner flash
+            // inner flash (simple fill, no gradient)
             if (ce < 0.3) {
-              const flashA = (1 - ce / 0.3) * 0.5;
-              const fg = ctx.createRadialGradient(cx, portalY, 0, cx, portalY, portalRx * 2);
-              fg.addColorStop(0, `rgba(255,255,255,${flashA})`);
-              fg.addColorStop(0.4, `rgba(0,230,118,${flashA * 0.5})`);
-              fg.addColorStop(1, "transparent");
-              ctx.fillStyle = fg;
-              ctx.fillRect(cx - portalRx * 3, portalY - portalRy * 3, portalRx * 6, portalRy * 6);
+              ctx.fillStyle = `rgba(255,255,255,${(1 - ce / 0.3) * 0.3})`;
+              ctx.beginPath(); ctx.arc(cx, portalY, portalRx * 1.5, 0, 6.28); ctx.fill();
             }
           }
 
-          // 2. Explosion particles
+          // 2. Explosion particles (reduced: 10)
           if (ce < 1.8) {
-            const pCount = 20;
-            for (let ep = 0; ep < pCount; ep++) {
-              const eAngle = (ep / pCount) * 6.28 + lv.id * 1.3;
-              const eSpeed = 60 + 40 * Math.sin(ep * 2.7);
+            for (let ep = 0; ep < 10; ep++) {
+              const eAngle = (ep / 10) * 6.28 + lv.id * 1.3;
               const eP = Math.min(1, ce / 1.5);
-              const eDist = eSpeed * eP * (1 - eP * 0.4);
+              const eDist = (60 + 40 * Math.sin(ep * 2.7)) * eP * (1 - eP * 0.4);
               const ex = cx + Math.cos(eAngle) * eDist;
               const ey = portalY + Math.sin(eAngle) * eDist * 0.6;
-              const eA = (1 - eP) * 0.8;
-              const eSize = (1 - eP) * 3 + 0.5;
-              ctx.fillStyle = ep % 3 === 0 ? `rgba(255,255,255,${eA})` : `rgba(0,230,118,${eA})`;
-              ctx.beginPath(); ctx.arc(ex, ey, eSize, 0, 6.28); ctx.fill();
+              ctx.fillStyle = ep % 3 === 0 ? `rgba(255,255,255,${(1 - eP) * 0.8})` : `rgba(0,230,118,${(1 - eP) * 0.8})`;
+              ctx.beginPath(); ctx.arc(ex, ey, (1 - eP) * 3 + 0.5, 0, 6.28); ctx.fill();
             }
           }
 
-          // 3. Green sparkles rising from island
+          // 3. Green sparkles (reduced: 6)
           if (ce > 0.2 && ce < 2.0) {
             const sparkP = (ce - 0.2) / 1.8;
-            for (let sp = 0; sp < 12; sp++) {
-              const sAngle = sp * 0.52 + ce * 2;
+            for (let sp = 0; sp < 6; sp++) {
+              const sAngle = sp * 1.05 + ce * 2;
               const sRise = sparkP * 80 * (0.5 + 0.5 * Math.sin(sp * 1.7));
-              const sx = cx + Math.sin(sAngle) * (15 + sp * 3);
-              const sy = cy - sRise;
-              const sA = (1 - sparkP) * 0.7;
-              ctx.fillStyle = `rgba(0,230,118,${sA})`;
-              ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, 6.28); ctx.fill();
+              ctx.fillStyle = `rgba(0,230,118,${(1 - sparkP) * 0.7})`;
+              ctx.beginPath(); ctx.arc(cx + Math.sin(sAngle) * (15 + sp * 5), cy - sRise, 1.5, 0, 6.28); ctx.fill();
             }
           }
 
-          // 4. Beam ignite to next island (after 0.8s)
+          // 4. Beam ignite to next island (simple fill, no gradient)
           if (ce > 0.8 && ce < 2.0 && i < levels.length - 1) {
             const bP = Math.min(1, (ce - 0.8) / 0.8);
             const next = nodeScreenPos[i + 1];
             if (next) {
-              const bx = (a => a.x)(nodeScreenPos[i]);
+              const bx = nodeScreenPos[i].x;
               const by = nodeScreenPos[i].y + 55;
               const nx2 = next.x;
               const ny2 = next.y - 25;
               const bmx = (bx + nx2) / 2 + (bx < nx2 ? -50 : 50);
               const bmy = (by + ny2) / 2;
-              // energy pulse traveling along beam
-              const pulseT = bP;
-              const px2 = (1-pulseT)*(1-pulseT)*bx + 2*(1-pulseT)*pulseT*bmx + pulseT*pulseT*nx2;
-              const py2 = (1-pulseT)*(1-pulseT)*by + 2*(1-pulseT)*pulseT*bmy + pulseT*pulseT*ny2;
-              const pg = ctx.createRadialGradient(px2, py2, 0, px2, py2, 20);
-              pg.addColorStop(0, `rgba(0,230,118,${0.8 * (1 - bP * 0.5)})`);
-              pg.addColorStop(0.5, `rgba(0,230,118,${0.3 * (1 - bP * 0.5)})`);
-              pg.addColorStop(1, "transparent");
-              ctx.fillStyle = pg;
-              ctx.fillRect(px2 - 20, py2 - 20, 40, 40);
+              const pt = bP;
+              const px2 = (1-pt)*(1-pt)*bx + 2*(1-pt)*pt*bmx + pt*pt*nx2;
+              const py2 = (1-pt)*(1-pt)*by + 2*(1-pt)*pt*bmy + pt*pt*ny2;
+              ctx.fillStyle = `rgba(0,230,118,${0.6 * (1 - bP * 0.5)})`;
+              ctx.beginPath(); ctx.arc(px2, py2, 8, 0, 6.28); ctx.fill();
               ctx.fillStyle = `rgba(255,255,255,${0.9 * (1 - bP * 0.3)})`;
               ctx.beginPath(); ctx.arc(px2, py2, 3, 0, 6.28); ctx.fill();
             }
@@ -1350,76 +1190,54 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         labelPos.push({ x: cx, y: ry + depth + 22 * sc, id: lv.id });
       }
 
-      // ─── METEORS ───
+      // ─── METEORS (simple stroke, no gradient) ───
       for (let m = 0; m < 3; m++) {
         const phase = (t * 0.08 + m * 0.35) % 1;
         if (phase > 0.02 && phase < 0.85) {
           const mx2 = width * 1.1 - phase * width * 1.4;
           const my2 = height * (0.08 + m * 0.28) + phase * height * 0.2;
           const mLen = 60 + m * 25;
-          const angle = -0.45;
           ctx.save();
           ctx.translate(mx2, my2);
-          ctx.rotate(angle);
-          const mG = ctx.createLinearGradient(-mLen, 0, 10, 0);
-          mG.addColorStop(0, "transparent");
-          mG.addColorStop(0.4, `rgba(160,200,255,${0.15 + m * 0.05})`);
-          mG.addColorStop(0.8, "rgba(255,255,255,0.6)");
-          mG.addColorStop(1, "transparent");
-          ctx.strokeStyle = mG;
+          ctx.rotate(-0.45);
+          ctx.strokeStyle = `rgba(200,220,255,${0.2 + m * 0.05})`;
           ctx.lineWidth = 1.5;
           ctx.beginPath(); ctx.moveTo(-mLen, 0); ctx.lineTo(10, 0); ctx.stroke();
           ctx.restore();
         }
       }
 
-      // ─── ALL COMPLETE: synchronized portal pulse wave + New World teaser ───
+      // ─── ALL COMPLETE: pulse wave + teaser (simplified) ───
       if (allDone && nodeScreenPos.length > 0) {
-        // synchronized green pulse wave across all portals
         for (let i = 0; i < nodeScreenPos.length; i++) {
           const np = nodeScreenPos[i];
-          const waveDelay = i * 0.15;
-          const waveP = (Math.sin(t * 2 - waveDelay) + 1) / 2;
+          const waveP = (Math.sin(t * 2 - i * 0.15) + 1) / 2;
           const pulseR = 30 + waveP * 25;
-          const pulseA = 0.1 + waveP * 0.15;
-          ctx.strokeStyle = `rgba(0,230,118,${pulseA})`;
+          ctx.strokeStyle = `rgba(0,230,118,${0.1 + waveP * 0.15})`;
           ctx.lineWidth = 2 * (1 - waveP) + 0.5;
           ctx.beginPath(); ctx.arc(np.x, np.y, pulseR, 0, 6.28); ctx.stroke();
-          // inner glow
-          const ig2 = ctx.createRadialGradient(np.x, np.y, 0, np.x, np.y, pulseR);
-          ig2.addColorStop(0, `rgba(0,230,118,${pulseA * 0.3})`);
-          ig2.addColorStop(1, "transparent");
-          ctx.fillStyle = ig2;
+          ctx.fillStyle = `rgba(0,230,118,${(0.1 + waveP * 0.15) * 0.2})`;
           ctx.beginPath(); ctx.arc(np.x, np.y, pulseR, 0, 6.28); ctx.fill();
         }
 
-        // "New World" teaser portal above island 6 (index 0 in levels array)
+        // "New World" teaser (simplified, no gradient)
         const topNode = nodeScreenPos[0];
         const portalX = topNode.x;
         const portalY2 = topNode.y - 100;
         const teaserPulse = (Math.sin(t * 1.5) + 1) / 2;
         const teaserR = 20 + teaserPulse * 8;
-        // outer ring
         ctx.strokeStyle = `rgba(180,120,255,${0.3 + teaserPulse * 0.3})`;
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(portalX, portalY2, teaserR, 0, 6.28); ctx.stroke();
-        // inner swirl
-        const swG = ctx.createRadialGradient(portalX, portalY2, 0, portalX, portalY2, teaserR);
-        swG.addColorStop(0, `rgba(180,120,255,${0.25 + teaserPulse * 0.15})`);
-        swG.addColorStop(0.5, `rgba(100,60,200,${0.1 + teaserPulse * 0.05})`);
-        swG.addColorStop(1, "transparent");
-        ctx.fillStyle = swG;
+        ctx.fillStyle = `rgba(140,80,220,${0.15 + teaserPulse * 0.1})`;
         ctx.beginPath(); ctx.arc(portalX, portalY2, teaserR, 0, 6.28); ctx.fill();
-        // rotating particles around teaser
-        for (let tp = 0; tp < 6; tp++) {
-          const tAngle = t * 1.2 + (tp / 6) * 6.28;
+        // 3 particles instead of 6
+        for (let tp = 0; tp < 3; tp++) {
+          const tAngle = t * 1.2 + (tp / 3) * 6.28;
           const tDist = teaserR + 8 + Math.sin(t * 2 + tp) * 4;
-          const tx = portalX + Math.cos(tAngle) * tDist;
-          const ty = portalY2 + Math.sin(tAngle) * tDist * 0.6;
           ctx.fillStyle = `rgba(180,120,255,${0.4 + teaserPulse * 0.3})`;
-          ctx.beginPath(); ctx.arc(tx, ty, 1.5, 0, 6.28); ctx.fill();
+          ctx.beginPath(); ctx.arc(portalX + Math.cos(tAngle) * tDist, portalY2 + Math.sin(tAngle) * tDist * 0.6, 1.5, 0, 6.28); ctx.fill();
         }
-        // "?" text
         ctx.fillStyle = `rgba(200,160,255,${0.5 + teaserPulse * 0.3})`;
         ctx.font = "bold 16px 'Orbitron',sans-serif";
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -1430,10 +1248,10 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
       raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
+    return () => { cancelAnimationFrame(raf); if (scrollEl) scrollEl.removeEventListener("scroll", onScroll); };
   }, []);
 
-  return <canvas ref={ref} style={{ position: "sticky", top: 0, left: 0, width, height, zIndex: 1, display: "block" }} />;
+  return <canvas ref={ref} style={{ position: "sticky", top: 0, left: 0, width, height, zIndex: 1, display: "block", willChange: "transform" }} />;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1695,7 +1513,8 @@ export default function CosmicCasino() {
 
   const totalH = levels.length * NODE_GAP + PAD_TOP + 180;
   const isDesktop = dim.w > 768;
-  const sortedLevels = [...levels].sort((a, b) => a.id - b.id);
+  const allComplete = useMemo(() => levels.every(l => l.complete), [levels]);
+  const sortedLevels = useMemo(() => [...levels].sort((a, b) => a.id - b.id), [levels]);
 
   return (
     <div ref={containerRef} style={{ width: "100%", maxWidth: 1200, height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif", margin: "0 auto" }}>
@@ -1873,10 +1692,11 @@ export default function CosmicCasino() {
       {/* Single scroll container — canvas (sticky) + labels scroll together */}
       <div ref={scrollRef} className="hideScroll" style={{
         position: "absolute", inset: 0, zIndex: 20, overflowY: "auto", overflowX: "hidden",
+        WebkitOverflowScrolling: "touch", willChange: "scroll-position",
         ...(isDesktop ? { left: 280, right: 260 } : {}),
       }}>
         {/* Canvas stays in viewport via sticky, negative margin so it doesn't push labels */}
-        <SceneCanvas scrollElRef={scrollRef} width={isDesktop ? dim.w - 540 : dim.w} height={dim.h} onNodePositions={onNodePositions} levels={levels} islandElsRef={islandElsRef} completingId={completingId} completingStartRef={completingStartRef} allComplete={levels.every(l => l.complete)} />
+        <SceneCanvas scrollElRef={scrollRef} width={isDesktop ? dim.w - 540 : dim.w} height={dim.h} onNodePositions={onNodePositions} levels={levels} islandElsRef={islandElsRef} completingId={completingId} completingStartRef={completingStartRef} allComplete={allComplete} />
         <div style={{ height: totalH, position: "relative", marginTop: -dim.h }}>
           {levels.map((lv, i) => {
             const canvasW = isDesktop ? dim.w - 540 : dim.w;
@@ -1895,11 +1715,8 @@ export default function CosmicCasino() {
                 <div style={{
                   position: "absolute", top: jp ? 39 : 65, left: "50%", transform: "translateX(-50%)",
                   zIndex: 30,
-                  filter: locked
-                    ? "grayscale(1) brightness(0.3)"
-                    : `drop-shadow(0 0 14px rgba(${iconR},${iconG},${iconB},0.9)) drop-shadow(0 2px 6px rgba(0,0,0,0.7))`,
-                  opacity: locked ? 0.4 : 1,
-                  transition: "filter 0.8s ease, opacity 0.8s ease",
+                  opacity: locked ? 0.3 : 1,
+                  transition: "opacity 0.8s ease",
                 }}>
                   <svg width={jp ? 40 : 28} height={jp ? 40 : 28} viewBox="0 0 40 40" fill="none">
                     {lv.icon === "wheel" && <>
@@ -1943,7 +1760,6 @@ export default function CosmicCasino() {
                   background: lv.complete
                     ? "rgba(0,20,10,0.75)"
                     : locked ? "rgba(5,3,15,0.65)" : "rgba(5,3,15,0.75)",
-                  backdropFilter: "blur(8px)",
                   border: lv.complete
                     ? "1px solid rgba(0,230,118,0.2)"
                     : locked ? "1px solid rgba(255,255,255,0.04)" : `1px solid rgba(${lv.r},${lv.g},${lv.b},0.2)`,
@@ -1951,7 +1767,7 @@ export default function CosmicCasino() {
                     ? "0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(0,230,118,0.1)"
                     : "0 4px 16px rgba(0,0,0,0.4)",
                   opacity: locked ? 0.5 : 1,
-                  transition: "background 0.8s ease, border 0.8s ease, box-shadow 0.8s ease, opacity 0.8s ease",
+                  transition: "opacity 0.8s ease",
                 }}>
                   {/* level name */}
                   <div style={{
