@@ -2168,7 +2168,7 @@ export default function CosmicCasino() {
                 {/* label card — spring glass for Ch2, dark card for Ch1 */}
                 {currentChapter === 2 ? (
                 <div style={{
-                  position: "absolute", top: "58%", left: "46%", transform: "translate(-50%, -50%)",
+                  position: "absolute", top: "72%", left: "42%", transform: "translate(-50%, -50%)",
                   textAlign: "center", whiteSpace: "nowrap",
                   padding: locked ? "8px 18px" : "10px 20px 12px", borderRadius: 18,
                   background: locked
