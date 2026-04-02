@@ -120,12 +120,12 @@ const MEGA_WHEEL_PRIZES = [
 
 // ── CHAPTER 2: Road to VIP Level 2 ──
 const INITIAL_LEVELS_CH2 = [
-  { id: 6, name: "VIP Level 2", icon: "crown", r: 180, g: 120, b: 255, accent: "#b478ff", reward: "VIP Status Unlocked", rewardShort: "VIP LV2", task: "Complete All Steps", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 5, name: "VIP Spin", icon: "deposit", r: 180, g: 120, b: 255, accent: "#b478ff", reward: "Wheel Ticket $100-1000", rewardShort: "$100-1K", task: "Exclusive VIP Wheel", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 4, name: "Weekly Challenge", icon: "trophy", r: 255, g: 180, b: 50, accent: "#ffb432", reward: "200% Reload Bonus", rewardShort: "200% RLD", task: "Complete Mission", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 3, name: "Refer a Friend", icon: "refer", r: 0, g: 200, b: 150, accent: "#00c896", reward: "+$50 Each", rewardShort: "+$50", task: "Share Referral Link", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 2, name: "Play 50 Rounds", icon: "play", r: 255, g: 100, b: 100, accent: "#ff6464", reward: "+100 Free Spins", rewardShort: "+100 FS", task: "Play 50 Slot Rounds", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 1, name: "First Deposit", icon: "wallet", r: 0, g: 230, b: 118, accent: "#00e676", reward: "200% + 100 FS", rewardShort: "200%+100FS", task: "Make Your First Deposit", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 6, name: "VIP Level 2", icon: "crown", r: 220, g: 180, b: 255, accent: "#dcb4ff", reward: "VIP Status Unlocked", rewardShort: "VIP LV2", task: "Complete All Steps", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 5, name: "VIP Spin", icon: "deposit", r: 255, g: 190, b: 210, accent: "#ffbed2", reward: "Wheel Ticket $100-1000", rewardShort: "$100-1K", task: "Exclusive VIP Wheel", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 4, name: "Weekly Challenge", icon: "trophy", r: 255, g: 210, b: 170, accent: "#ffd2aa", reward: "200% Reload Bonus", rewardShort: "200% RLD", task: "Complete Mission", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 3, name: "Refer a Friend", icon: "refer", r: 180, g: 220, b: 255, accent: "#b4dcff", reward: "+$50 Each", rewardShort: "+$50", task: "Share Referral Link", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 2, name: "Play 50 Rounds", icon: "play", r: 255, g: 170, b: 190, accent: "#ffaabe", reward: "+100 Free Spins", rewardShort: "+100 FS", task: "Play 50 Slot Rounds", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 1, name: "First Deposit", icon: "wallet", r: 240, g: 200, b: 230, accent: "#f0c8e6", reward: "200% + 100 FS", rewardShort: "200%+100FS", task: "Make Your First Deposit", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
 ];
 
 const STAGE_COMPLETE_DATA_CH2 = {
@@ -240,7 +240,7 @@ function ConfettiCanvas() {
 /* ═══════════════════════════════════════════════════
    WHEEL OF FORTUNE — always lands on jackpot
    ═══════════════════════════════════════════════════ */
-function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL OF FORTUNE", countdownStr = "23:59:59" }) {
+function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL OF FORTUNE", countdownStr = "23:59:59", spring = false }) {
   const canvasRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [hasSpun, setHasSpun] = useState(false);
@@ -513,12 +513,16 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
         display: "flex", alignItems: "center", justifyContent: "center",
-        zIndex: 600, background: "rgba(1,0,8,0.92)", backdropFilter: "blur(30px)", animation: "fadeIn 0.2s ease",
+        zIndex: 600,
+        background: spring ? "rgba(60,40,90,0.88)" : "rgba(1,0,8,0.92)",
+        backdropFilter: "blur(30px)", animation: "fadeIn 0.2s ease",
       }}>
         <div onClick={e => e.stopPropagation()} style={{
           position: "relative",
           width: "min(92vw, 380px)", maxHeight: "92vh", overflow: "hidden", borderRadius: 24,
-          background: "linear-gradient(170deg, rgba(28,22,52,0.98), rgba(8,4,20,0.99))",
+          background: spring
+            ? "linear-gradient(170deg, rgba(55,35,85,0.98), rgba(35,20,60,0.99))"
+            : "linear-gradient(170deg, rgba(28,22,52,0.98), rgba(8,4,20,0.99))",
           boxShadow: phase === "result" ? "0 0 0 1px rgba(0,230,118,0.1), 0 0 120px rgba(0,230,118,0.08), 0 50px 100px rgba(0,0,0,0.5)" : "0 0 0 1px rgba(255,210,50,0.1), 0 0 120px rgba(255,210,50,0.08), 0 50px 100px rgba(0,0,0,0.5)",
           animation: "modalPop 0.4s cubic-bezier(0.22,1,0.36,1)",
         }}>
@@ -545,7 +549,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
                 <div style={{
                   position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
                   display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  background: "rgba(1,0,8,0.6)", borderRadius: 24, zIndex: 2,
+                  background: spring ? "rgba(60,40,90,0.6)" : "rgba(1,0,8,0.6)", borderRadius: 24, zIndex: 2,
                   animation: "fadeIn 0.3s ease",
                 }}>
                   <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: 26, fontWeight: 900, color: "#ffd232", textShadow: "0 0 24px rgba(255,210,50,0.5)", letterSpacing: "0.05em", marginBottom: 4 }}>MAX WIN!</div>
@@ -733,7 +737,7 @@ function WheelOfFortune({ onClose, onWin, prizes = WHEEL_PRIZES, title = "WHEEL 
    ═══════════════════════════════════════════════════ */
 /* ── Preload island PNGs ── */
 const islandImages = {};
-const islandImgNames = ["Islandio", "IS-CYAN", "IS-PURPLE", "IS-GREEN", "IS-RED", "KYC"];
+const islandImgNames = ["Islandio", "IS-CYAN", "IS-PURPLE", "IS-GREEN", "IS-RED", "KYC", "SP-1", "SP-2", "SP-3", "SP-4", "SP-5", "SP-6"];
 let allIslandsReady = false;
 let islandsLoadedCount = 0;
 for (const name of islandImgNames) {
@@ -742,14 +746,16 @@ for (const name of islandImgNames) {
   img.onload = () => { islandsLoadedCount++; if (islandsLoadedCount === islandImgNames.length) allIslandsReady = true; };
   islandImages[name] = img;
 }
-// Map level id → island image name
+// Map level id → island image name (Chapter 1)
 const ISLAND_MAP = { 1: "Islandio", 2: "IS-CYAN", 3: "IS-RED", 4: "IS-PURPLE", 5: "IS-RED", 6: "IS-CYAN" };
+// Map level id → spring island image name (Chapter 2)
+const ISLAND_MAP_CH2 = { 1: "SP-1", 2: "SP-2", 3: "SP-3", 4: "SP-4", 5: "SP-5", 6: "SP-6" };
 
-function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, islandElsRef, completingId, completingStartRef, allComplete }) {
+function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, islandElsRef, completingId, completingStartRef, allComplete, currentChapter }) {
   const ref = useRef(null);
-  const state = useRef({ stars: null, dust: null, t: 0, imgReady: false, dpr: 1, bgCache: null, bgW: 0, bgH: 0 });
-  const propsRef = useRef({ width, height, levels, completingId, allComplete });
-  propsRef.current = { width, height, levels, completingId, allComplete };
+  const state = useRef({ stars: null, dust: null, t: 0, imgReady: false, dpr: 1, bgCache: null, bgW: 0, bgH: 0, bgChapter: 0 });
+  const propsRef = useRef({ width, height, levels, completingId, allComplete, currentChapter });
+  propsRef.current = { width, height, levels, completingId, allComplete, currentChapter };
   // smooth color/opacity transitions for each island
   const animColors = useRef(levels.map(lv => ({
     r: lv.r, g: lv.g, b: lv.b,
@@ -794,7 +800,8 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
     const scrollEl = scrollElRef.current;
     if (scrollEl) scrollEl.addEventListener("scroll", onScroll, { passive: true });
     const draw = () => {
-      const { width, height, levels, completingId: cId, allComplete: allDone } = propsRef.current;
+      const { width, height, levels, completingId: cId, allComplete: allDone, currentChapter: chap } = propsRef.current;
+      const isCh2 = chap === 2;
       const cStart = completingStartRef?.current;
       const cElapsed = cId != null && cStart ? (performance.now() - cStart) / 1000 : 0;
       const scrollY = cachedScrollY;
@@ -826,47 +833,92 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
       ctx.clearRect(0, 0, width, height);
 
       // ─── BACKGROUND GRADIENT (cached) ───
-      if (!state.current.bgCache || state.current.bgW !== width || state.current.bgH !== height) {
-        const bg = ctx.createRadialGradient(width * 0.5, height * 0.25, 0, width * 0.5, height * 0.5, height * 0.9);
-        bg.addColorStop(0, "#140838"); bg.addColorStop(0.35, "#0b0525");
-        bg.addColorStop(0.65, "#06031a"); bg.addColorStop(1, "#010010");
-        state.current.bgCache = bg;
+      if (!state.current.bgCache || state.current.bgW !== width || state.current.bgH !== height || state.current.bgChapter !== (isCh2 ? 2 : 1)) {
+        if (isCh2) {
+          const bg = ctx.createLinearGradient(0, 0, 0, height);
+          bg.addColorStop(0, "#c8b8e8");    // soft lavender top
+          bg.addColorStop(0.25, "#b8c0e8"); // light periwinkle
+          bg.addColorStop(0.5, "#c0c8f0");  // pale blue-lavender
+          bg.addColorStop(0.75, "#d0c0e8"); // light purple
+          bg.addColorStop(1, "#e0c8e8");    // soft pink-lavender bottom
+          state.current.bgCache = bg;
+        } else {
+          const bg = ctx.createRadialGradient(width * 0.5, height * 0.25, 0, width * 0.5, height * 0.5, height * 0.9);
+          bg.addColorStop(0, "#140838"); bg.addColorStop(0.35, "#0b0525");
+          bg.addColorStop(0.65, "#06031a"); bg.addColorStop(1, "#010010");
+          state.current.bgCache = bg;
+        }
         state.current.bgW = width; state.current.bgH = height;
+        state.current.bgChapter = isCh2 ? 2 : 1;
       }
       ctx.fillStyle = state.current.bgCache;
       ctx.fillRect(0, 0, width, height);
 
-      // ─── NEBULA BLOBS (simplified — 2 instead of 4) ───
-      const nebOff = scrollY * 0.03;
-      const drawNeb = (fx, fy, fr, cr, cg, cb, ca) => {
-        const nx = width * fx, ny = height * fy - nebOff;
-        const nr = fr * Math.min(width, height);
-        const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
-        ng.addColorStop(0, `rgba(${cr},${cg},${cb},${ca})`); ng.addColorStop(1, "transparent");
-        ctx.fillStyle = ng;
-        ctx.beginPath(); ctx.arc(nx, ny, nr, 0, 6.28); ctx.fill();
-      };
-      drawNeb(0.25, 0.2, 0.35, 60, 20, 140, 0.08);
-      drawNeb(0.78, 0.6, 0.28, 0, 60, 150, 0.06);
+      if (isCh2) {
+        // ─── SOFT CLOUDS for spring sky ───
+        const cloudOff = scrollY * 0.02;
+        const drawCloud = (fx, fy, fr, alpha) => {
+          const cx2 = width * fx, cy2 = height * fy - cloudOff;
+          const cr = fr * Math.min(width, height);
+          const cg = ctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, cr);
+          cg.addColorStop(0, `rgba(255,255,255,${alpha})`);
+          cg.addColorStop(0.5, `rgba(255,255,255,${alpha * 0.3})`);
+          cg.addColorStop(1, "transparent");
+          ctx.fillStyle = cg;
+          ctx.beginPath(); ctx.arc(cx2, cy2, cr, 0, 6.28); ctx.fill();
+        };
+        drawCloud(0.15, 0.1, 0.2, 0.15);
+        drawCloud(0.8, 0.25, 0.18, 0.12);
+        drawCloud(0.5, 0.5, 0.22, 0.1);
+        drawCloud(0.2, 0.7, 0.15, 0.12);
+        drawCloud(0.85, 0.8, 0.2, 0.1);
 
-      // ─── STARS ───
-      for (const s of state.current.stars) {
-        s.p += s.s;
-        const sx = s.x * width, sy = s.y * height;
-        const al = s.a * (0.35 + 0.65 * Math.sin(s.p));
-        ctx.fillStyle = `rgba(190,200,255,${al})`;
-        ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, 6.28); ctx.fill();
-      }
+        // ─── SAKURA PETALS (floating particles) ───
+        for (const d of state.current.dust) {
+          d.x += d.vx; d.y += d.vy; d.p += 0.012;
+          if (d.x < -0.05) d.x = 1.05; if (d.x > 1.05) d.x = -0.05;
+          if (d.y > 1.05) d.y = -0.05; if (d.y < -0.05) d.y = 1.05;
+          const dx = d.x * width, dy = d.y * height - scrollY * 0.015;
+          const da = (d.a * 2) * (0.4 + 0.6 * Math.sin(d.p));
+          // Pink/white sakura petals
+          const petalColors = ["rgba(255,182,193,", "rgba(255,200,210,", "rgba(255,220,230,", "rgba(255,255,255,"];
+          const pc = petalColors[Math.floor(d.r) % petalColors.length];
+          ctx.fillStyle = pc + da + ")";
+          ctx.beginPath(); ctx.arc(dx, dy, d.r * 1.2, 0, 6.28); ctx.fill();
+        }
+      } else {
+        // ─── NEBULA BLOBS (simplified — 2 instead of 4) ───
+        const nebOff = scrollY * 0.03;
+        const drawNeb = (fx, fy, fr, cr, cg, cb, ca) => {
+          const nx = width * fx, ny = height * fy - nebOff;
+          const nr = fr * Math.min(width, height);
+          const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+          ng.addColorStop(0, `rgba(${cr},${cg},${cb},${ca})`); ng.addColorStop(1, "transparent");
+          ctx.fillStyle = ng;
+          ctx.beginPath(); ctx.arc(nx, ny, nr, 0, 6.28); ctx.fill();
+        };
+        drawNeb(0.25, 0.2, 0.35, 60, 20, 140, 0.08);
+        drawNeb(0.78, 0.6, 0.28, 0, 60, 150, 0.06);
 
-      // ─── DUST PARTICLES (parallax, no glow halo) ───
-      for (const d of state.current.dust) {
-        d.x += d.vx; d.y += d.vy; d.p += 0.008;
-        if (d.x < -0.05) d.x = 1.05; if (d.x > 1.05) d.x = -0.05;
-        if (d.y < -0.05) d.y = 1.05; if (d.y > 1.05) d.y = -0.05;
-        const dx = d.x * width, dy = d.y * height - scrollY * 0.015;
-        const da = d.a * (0.4 + 0.6 * Math.sin(d.p));
-        ctx.fillStyle = `rgba(${d.col.r},${d.col.g},${d.col.b},${da})`;
-        ctx.beginPath(); ctx.arc(dx, dy, d.r, 0, 6.28); ctx.fill();
+        // ─── STARS ───
+        for (const s of state.current.stars) {
+          s.p += s.s;
+          const sx = s.x * width, sy = s.y * height;
+          const al = s.a * (0.35 + 0.65 * Math.sin(s.p));
+          ctx.fillStyle = `rgba(190,200,255,${al})`;
+          ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, 6.28); ctx.fill();
+        }
+
+        // ─── DUST PARTICLES (parallax, no glow halo) ───
+        for (const d of state.current.dust) {
+          d.x += d.vx; d.y += d.vy; d.p += 0.008;
+          if (d.x < -0.05) d.x = 1.05; if (d.x > 1.05) d.x = -0.05;
+          if (d.y < -0.05) d.y = 1.05; if (d.y > 1.05) d.y = -0.05;
+          const dx = d.x * width, dy = d.y * height - scrollY * 0.015;
+          const da = d.a * (0.4 + 0.6 * Math.sin(d.p));
+          ctx.fillStyle = `rgba(${d.col.r},${d.col.g},${d.col.b},${da})`;
+          ctx.beginPath(); ctx.arc(dx, dy, d.r, 0, 6.28); ctx.fill();
+        }
       }
 
       // ─── ENERGY BEAMS between nodes ───
@@ -887,24 +939,48 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         const mx = (a.x + b.x) / 2 + (a.x < b.x ? -50 : 50);
         const my = (a.y + b.y) / 2;
 
-        // dashed beam
-        ctx.setLineDash([5, 6]);
-        ctx.lineDashOffset = -t * 40;
-        ctx.strokeStyle = `rgba(${lr},${lg},${lb},0.25)`;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.moveTo(a.x, a.y + 55); ctx.quadraticCurveTo(mx, my, b.x, b.y - 25);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        if (isCh2) {
+          // Spring: glowing white/cyan path with sparkles
+          ctx.setLineDash([]);
+          // outer glow
+          ctx.strokeStyle = "rgba(180,220,255,0.15)";
+          ctx.lineWidth = 6;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y + 55); ctx.quadraticCurveTo(mx, my, b.x, b.y - 25);
+          ctx.stroke();
+          // core white beam
+          ctx.strokeStyle = "rgba(255,255,255,0.35)";
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y + 55); ctx.quadraticCurveTo(mx, my, b.x, b.y - 25);
+          ctx.stroke();
+          // sparkle traveling orb
+          const prog = ((t * 0.12 + i * 0.25) % 1);
+          const ot = 1 - prog;
+          const ox = (1 - ot) * (1 - ot) * a.x + 2 * (1 - ot) * ot * mx + ot * ot * b.x;
+          const oy = (1 - ot) * (1 - ot) * (a.y + 55) + 2 * (1 - ot) * ot * my + ot * ot * (b.y - 25);
+          ctx.fillStyle = "rgba(180,220,255,0.5)";
+          ctx.beginPath(); ctx.arc(ox, oy, 5, 0, 6.28); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,0.9)";
+          ctx.beginPath(); ctx.arc(ox, oy, 2.5, 0, 6.28); ctx.fill();
+        } else {
+          // dashed beam
+          ctx.setLineDash([5, 6]);
+          ctx.lineDashOffset = -t * 40;
+          ctx.strokeStyle = `rgba(${lr},${lg},${lb},0.25)`;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y + 55); ctx.quadraticCurveTo(mx, my, b.x, b.y - 25);
+          ctx.stroke();
+          ctx.setLineDash([]);
 
-        // traveling orb (simple circle, no gradient)
-        const prog = ((t * 0.15 + i * 0.25) % 1);
-        const ot = 1 - prog;
-        const ox = (1 - ot) * (1 - ot) * a.x + 2 * (1 - ot) * ot * mx + ot * ot * b.x;
-        const oy = (1 - ot) * (1 - ot) * (a.y + 55) + 2 * (1 - ot) * ot * my + ot * ot * (b.y - 25);
-        ctx.fillStyle = `rgba(${lr},${lg},${lb},0.45)`;
-        ctx.beginPath(); ctx.arc(ox, oy, 4, 0, 6.28); ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.8)";
-        ctx.beginPath(); ctx.arc(ox, oy, 1.8, 0, 6.28); ctx.fill();
+          // traveling orb (simple circle, no gradient)
+          const prog = ((t * 0.15 + i * 0.25) % 1);
+          const ot = 1 - prog;
+          const ox = (1 - ot) * (1 - ot) * a.x + 2 * (1 - ot) * ot * mx + ot * ot * b.x;
+          const oy = (1 - ot) * (1 - ot) * (a.y + 55) + 2 * (1 - ot) * ot * my + ot * ot * (b.y - 25);
+          ctx.fillStyle = `rgba(${lr},${lg},${lb},0.45)`;
+          ctx.beginPath(); ctx.arc(ox, oy, 4, 0, 6.28); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,0.8)";
+          ctx.beginPath(); ctx.arc(ox, oy, 1.8, 0, 6.28); ctx.fill();
+        }
       }
 
       // ─── HELPER: simple hash for procedural variation ───
@@ -958,7 +1034,12 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         }
 
         // ── AMBIENT GLOW (simplified — single color fill instead of gradient) ──
-        ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.04)`;
+        if (isCh2) {
+          // soft white glow for spring
+          ctx.fillStyle = "rgba(255,255,255,0.06)";
+        } else {
+          ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.04)`;
+        }
         ctx.beginPath(); ctx.arc(cx, cy + 10, 100 * sc, 0, 6.28); ctx.fill();
 
         // ═══════════════════
@@ -969,18 +1050,22 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         const ry = cy + 28 * sc;
 
         // ── ground shadow (simple ellipse) ──
-        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        if (isCh2) {
+          ctx.fillStyle = "rgba(0,0,0,0.08)";
+        } else {
+          ctx.fillStyle = "rgba(0,0,0,0.15)";
+        }
         ctx.beginPath(); ctx.ellipse(cx, ry + depth + 16, rw * 0.9, 14 * sc, 0, 0, 6.28); ctx.fill();
 
         // ── draw island PNG (color-matched or green if complete) ──
         if (state.current.imgReady) {
-          const imgKey = ISLAND_MAP[lv.id] || "Islandio";
+          const imgKey = isCh2 ? (ISLAND_MAP_CH2[lv.id] || "SP-1") : (ISLAND_MAP[lv.id] || "Islandio");
           const img = islandImages[imgKey];
           if (img && img.complete) {
-            const imgW = 220 * sc;
+            const imgW = isCh2 ? 200 * sc : 220 * sc;
             const imgH = imgW * (img.naturalHeight / img.naturalWidth);
             const imgX = cx - imgW / 2;
-            const imgY = ry - imgH * 0.45;
+            const imgY = isCh2 ? (ry - imgH * 0.5) : (ry - imgH * 0.45);
             ctx.drawImage(img, imgX, imgY, imgW, imgH);
             // ── white glow-up overlay during completion (200ms offset per plan) ──
             if (cId === lv.id && cElapsed > 0.2 && cElapsed < 1.7) {
@@ -993,7 +1078,8 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
               ctx.globalAlpha = ac.alpha;
             }
 
-            // ── themed icon overlay on island image ──
+            // ── themed icon overlay on island image (Ch1 only — Ch2 images have baked-in icons) ──
+            if (!isCh2) {
             const iconSz = 28 * sc;
             const iconCx = cx;
             const iconCy = ry - imgH * 0.12;
@@ -1068,9 +1154,17 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
             }
             ctx.restore();
             ctx.globalAlpha = ac.alpha;
+            } // end !isCh2 icon overlay
           }
         }
 
+        // portal position vars (needed by completion animation)
+        const portalY = cy - 28 * sc;
+        const portalRx = 52 * sc;
+        const portalRy = 28 * sc;
+
+        // ── PORTAL & EFFECTS ──
+        {
         // ── CRYSTAL FORMATIONS (reduced to 2) ──
         const crystals = [
           { a: -0.5, h: 22, w: 4.5, off: 0 },
@@ -1120,9 +1214,6 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         // ═══════════════
         // ═══ PORTAL ═══
         // ═══════════════
-        const portalY = cy - 28 * sc;
-        const portalRx = 52 * sc;
-        const portalRy = 28 * sc;
 
         // ── outer bloom (reduced: 2 layers, simple fill) ──
         for (let bl = 0; bl < 2; bl++) {
@@ -1253,6 +1344,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
           ctx.fillStyle = `rgba(${lv.r},${lv.g},${lv.b},0.08)`;
           ctx.beginPath(); ctx.arc(ax, ay, 1.2, 0, 6.28); ctx.fill();
         }
+        } // end portal & effects
 
         // ── COMPLETION ANIMATION ──
         if (cId === lv.id && cElapsed > 0 && cElapsed < 2.5) {
@@ -1390,13 +1482,29 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
    MAIN APP
    ═══════════════════════════════════════════════════ */
 export default function CosmicCasino() {
-  const [currentChapter, setCurrentChapter] = useState(1);
-  const [levels, setLevels] = useState(INITIAL_LEVELS);
+  const [currentChapter, setCurrentChapter] = useState(2);
+  const [levels, setLevels] = useState(INITIAL_LEVELS_CH2);
   const [freeSpins, setFreeSpins] = useState(0);
   // Chapter-aware data selectors
   const chapterStageData = currentChapter === 1 ? STAGE_COMPLETE_DATA : STAGE_COMPLETE_DATA_CH2;
   const chapterSteps = currentChapter === 1 ? ALL_STEPS : ALL_STEPS_CH2;
   const chapterTitle = currentChapter === 1 ? "CHAPTER 1" : "ROAD TO VIP LEVEL 2";
+  // Spring theme helpers for Ch2
+  const isSpr = currentChapter === 2;
+  const sprOverlay = isSpr ? "rgba(60,40,90,0.88)" : "rgba(1,0,8,0.92)";
+  const sprOverlayLight = isSpr ? "rgba(60,40,90,0.82)" : "rgba(0,0,10,0.85)";
+  const sprCard = isSpr
+    ? "linear-gradient(170deg, rgba(55,35,85,0.98), rgba(35,20,60,0.99))"
+    : "linear-gradient(170deg, rgba(28,22,52,0.98), rgba(8,4,20,0.99))";
+  const sprCardAlt = (mid) => isSpr
+    ? "linear-gradient(165deg, rgba(45,28,75,0.97) 0%, rgba(55,35,85,0.98) 50%, rgba(45,28,75,0.97) 100%)"
+    : `linear-gradient(165deg, #0a0a1a 0%, ${mid} 50%, #0a0a1a 100%)`;
+  const sprText = isSpr ? "#2a1850" : "#fff";
+  const sprTextSub = isSpr ? "rgba(42,24,80,0.6)" : "rgba(255,255,255,0.5)";
+  const sprBorder = (r,g,b) => isSpr ? "1px solid rgba(180,160,220,0.3)" : `1px solid rgba(${r},${g},${b},0.1)`;
+  const sprShadow = (r,g,b) => isSpr
+    ? "0 20px 60px rgba(80,40,120,0.15), 0 0 0 1px rgba(180,160,220,0.2)"
+    : `0 0 0 1px rgba(${r},${g},${b},0.1), 0 0 80px rgba(${r},${g},${b},0.12)`;
   const [selected, setSelected] = useState(null);
   const [showWheel, setShowWheel] = useState(false);
   const [showMegaWheel, setShowMegaWheel] = useState(false);
@@ -1689,7 +1797,7 @@ export default function CosmicCasino() {
   const sortedLevels = useMemo(() => [...levels].sort((a, b) => a.id - b.id), [levels]);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", height: "100vh", background: "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif" }}>
+    <div ref={containerRef} style={{ width: "100%", height: "100vh", background: currentChapter === 2 ? "#b0a8d0" : "#010010", overflow: "hidden", position: "relative", fontFamily: "'Exo 2', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Exo+2:wght@200;300;400;500;600;700;800;900&display=swap');
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -1731,8 +1839,10 @@ export default function CosmicCasino() {
       <div className="desktopOnly" style={{
         position: "absolute", top: 0, left: 0, bottom: 0, width: 280, zIndex: 80,
         flexDirection: "column", padding: "20px 16px",
-        background: "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
-        borderRight: "1px solid rgba(255,255,255,0.04)",
+        background: currentChapter === 2
+          ? "linear-gradient(180deg, rgba(35,18,60,0.97) 0%, rgba(45,25,75,0.95) 100%)"
+          : "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
+        borderRight: currentChapter === 2 ? "1px solid rgba(180,120,255,0.08)" : "1px solid rgba(255,255,255,0.04)",
         overflowY: "auto",
       }}>
         {/* Logo */}
@@ -1818,8 +1928,10 @@ export default function CosmicCasino() {
       <div className="desktopOnly" style={{
         position: "absolute", top: 0, right: 0, bottom: 0, width: 260, zIndex: 80,
         flexDirection: "column", padding: "20px 16px",
-        background: "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
-        borderLeft: "1px solid rgba(255,255,255,0.04)",
+        background: currentChapter === 2
+          ? "linear-gradient(180deg, rgba(35,18,60,0.97) 0%, rgba(45,25,75,0.95) 100%)"
+          : "linear-gradient(180deg, rgba(5,2,18,0.97) 0%, rgba(8,4,24,0.95) 100%)",
+        borderLeft: currentChapter === 2 ? "1px solid rgba(180,120,255,0.08)" : "1px solid rgba(255,255,255,0.04)",
         overflowY: "auto",
       }}>
         {/* Free Spins counter */}
@@ -1918,7 +2030,7 @@ export default function CosmicCasino() {
         ...(isDesktop ? { left: 280, right: 260 } : {}),
       }}>
         {/* Canvas stays in viewport via sticky, negative margin so it doesn't push labels */}
-        <SceneCanvas scrollElRef={scrollRef} width={isDesktop ? dim.w - 540 : dim.w} height={dim.h} onNodePositions={onNodePositions} levels={levels} islandElsRef={islandElsRef} completingId={completingId} completingStartRef={completingStartRef} allComplete={allComplete} />
+        <SceneCanvas scrollElRef={scrollRef} width={isDesktop ? dim.w - 540 : dim.w} height={dim.h} onNodePositions={onNodePositions} levels={levels} islandElsRef={islandElsRef} completingId={completingId} completingStartRef={completingStartRef} allComplete={allComplete} currentChapter={currentChapter} />
         <div style={{ height: totalH, position: "relative", marginTop: -dim.h }}>
           {levels.map((lv, i) => {
             const canvasW = isDesktop ? dim.w - 540 : dim.w;
@@ -1933,9 +2045,11 @@ export default function CosmicCasino() {
                 position: "absolute", top: sy - 55, left: sx - (jp ? 130 : 110), width: jp ? 260 : 220, height: jp ? 240 : 200,
                 cursor: "pointer", zIndex: 25, willChange: "transform",
               }} onClick={() => handleLevelClick(lv)}>
-                {/* icon above portal — tight to portal */}
+                {/* icon above portal */}
                 <div style={{
-                  position: "absolute", top: jp ? 39 : 65, left: "50%", transform: "translateX(-50%)",
+                  position: "absolute",
+                  top: jp ? 39 : 65,
+                  left: "50%", transform: "translateX(-50%)",
                   zIndex: 30,
                   opacity: locked ? 0.3 : 1,
                   transition: "opacity 0.8s ease",
@@ -1999,7 +2113,10 @@ export default function CosmicCasino() {
                 {/* Prize bubble — shown when completed */}
                 {lv.complete && (
                   <div style={{
-                    position: "absolute", top: jp ? 85 : 100, left: "50%", transform: "translateX(-50%)",
+                    position: "absolute",
+                    top: currentChapter === 2 ? "50%" : (jp ? 85 : 100),
+                    left: "50%",
+                    transform: currentChapter === 2 ? "translate(-50%, -50%)" : "translateX(-50%)",
                     zIndex: 31, pointerEvents: "none",
                     display: "flex", alignItems: "center", gap: 6,
                     padding: "6px 14px", borderRadius: 20,
@@ -2048,7 +2165,69 @@ export default function CosmicCasino() {
                   </div>
                 )}
 
-                {/* label card below island */}
+                {/* label card — spring glass for Ch2, dark card for Ch1 */}
+                {currentChapter === 2 ? (
+                <div style={{
+                  position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                  textAlign: "center", whiteSpace: "nowrap",
+                  padding: locked ? "8px 18px" : "10px 20px 12px", borderRadius: 18,
+                  background: locked
+                    ? "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))"
+                    : "linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12))",
+                  border: locked
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "1px solid rgba(255,255,255,0.35)",
+                  boxShadow: locked
+                    ? "none"
+                    : "0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(80,40,120,0.06), inset 0 1px 0 rgba(255,255,255,0.4)",
+                  opacity: locked ? 0.45 : 1,
+                  transition: "all 0.8s ease",
+                  backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+                }}>
+                  {/* level name */}
+                  <div style={{
+                    fontFamily: "'Orbitron', sans-serif",
+                    fontSize: 13, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase",
+                    color: locked ? "rgba(255,255,255,0.3)" : "#fff",
+                    textShadow: locked ? "none" : "0 1px 4px rgba(0,0,0,0.4)",
+                  }}>{lv.name}</div>
+
+                  {/* reward pill */}
+                  <div style={{ marginTop: 6, display: "flex", justifyContent: "center" }}>
+                    {lv.complete ? (
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                        padding: "4px 12px", borderRadius: 20,
+                        background: "linear-gradient(135deg, rgba(0,200,100,0.25), rgba(0,180,80,0.15))",
+                        border: "1px solid rgba(0,200,100,0.4)",
+                      }}>
+                        <span style={{ color: "#00a854", fontSize: 11, lineHeight: 1 }}>&#10003;</span>
+                        <span style={{
+                          fontFamily: "'Orbitron', sans-serif", fontSize: 10, fontWeight: 800,
+                          color: "#00a854", letterSpacing: "0.05em",
+                        }}>DONE</span>
+                      </span>
+                    ) : (
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                        padding: "4px 12px", borderRadius: 20,
+                        background: locked
+                          ? "rgba(255,255,255,0.05)"
+                          : "rgba(255,255,255,0.15)",
+                        border: locked
+                          ? "1px solid rgba(255,255,255,0.06)"
+                          : "1px solid rgba(255,255,255,0.3)",
+                      }}>
+                        <span style={{
+                          fontFamily: "'Orbitron', sans-serif", fontSize: 11, fontWeight: 800,
+                          color: locked ? "rgba(255,255,255,0.25)" : "#fff",
+                          letterSpacing: "0.04em",
+                        }}>{lv.rewardShort}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+                ) : (
                 <div style={{
                   position: "absolute", bottom: -16, left: "50%", transform: "translateX(-50%)",
                   textAlign: "center", whiteSpace: "nowrap",
@@ -2129,6 +2308,7 @@ export default function CosmicCasino() {
                     )}
                   </div>
                 </div>
+                )}
               </div>
             );
           })}
@@ -2139,7 +2319,9 @@ export default function CosmicCasino() {
       <div className="desktopOnly" style={{
         position: "absolute", top: 0, left: 280, right: 260, zIndex: 90,
         padding: "14px 28px", animation: "slideDown 0.5s ease-out",
-        background: "linear-gradient(to bottom, rgba(1,0,14,0.97) 0%, rgba(1,0,14,0.8) 50%, rgba(1,0,14,0.4) 80%, transparent 100%)",
+        background: currentChapter === 2
+          ? "linear-gradient(to bottom, rgba(40,20,70,0.95) 0%, rgba(40,20,70,0.8) 50%, rgba(40,20,70,0.4) 80%, transparent 100%)"
+          : "linear-gradient(to bottom, rgba(1,0,14,0.97) 0%, rgba(1,0,14,0.8) 50%, rgba(1,0,14,0.4) 80%, transparent 100%)",
         alignItems: "center", justifyContent: "center", gap: 24,
       }}>
         {/* progress dots with reward labels */}
@@ -2199,7 +2381,9 @@ export default function CosmicCasino() {
       <div className="mobileOnly" style={{
         position: "fixed", top: 0, left: 0, right: 0,
         zIndex: 100, animation: "slideDown 0.5s ease-out",
-        background: "linear-gradient(to bottom, rgba(1,0,14,0.98) 0%, rgba(1,0,14,0.85) 50%, rgba(1,0,14,0.6) 75%, rgba(1,0,14,0.2) 90%, transparent 100%)",
+        background: currentChapter === 2
+          ? "linear-gradient(to bottom, rgba(40,20,70,0.95) 0%, rgba(40,20,70,0.85) 50%, rgba(40,20,70,0.5) 75%, rgba(40,20,70,0.15) 90%, transparent 100%)"
+          : "linear-gradient(to bottom, rgba(1,0,14,0.98) 0%, rgba(1,0,14,0.85) 50%, rgba(1,0,14,0.6) 75%, rgba(1,0,14,0.2) 90%, transparent 100%)",
         backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
         padding: "12px 16px 16px",
         flexDirection: "column",
@@ -2363,14 +2547,14 @@ export default function CosmicCasino() {
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 500, background: "rgba(1,0,8,0.9)", backdropFilter: "blur(28px)", animation: "fadeIn 0.2s ease",
+          zIndex: 500, background: sprOverlay, backdropFilter: "blur(28px)", animation: "fadeIn 0.2s ease",
         }} onClick={() => setSelected(null)}>
           <div onClick={e => e.stopPropagation()} style={{
             width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
-            background: "linear-gradient(170deg, rgba(24,20,48,0.98) 0%, rgba(8,4,20,0.99) 100%)",
-            boxShadow: `
-              0 0 0 1px rgba(${selected.r},${selected.g},${selected.b},0.1),
-              0 0 80px rgba(${selected.r},${selected.g},${selected.b},0.12),
+            background: sprCard,
+            boxShadow: isSpr
+              ? "0 20px 60px rgba(80,40,120,0.15), 0 0 0 1px rgba(180,160,220,0.2)"
+              : `0 0 0 1px rgba(${selected.r},${selected.g},${selected.b},0.1), 0 0 80px rgba(${selected.r},${selected.g},${selected.b},0.12),
               0 30px 60px rgba(0,0,0,0.5),
               inset 0 1px 0 rgba(255,255,255,0.04)
             `,
@@ -2517,6 +2701,7 @@ export default function CosmicCasino() {
           onClose={() => setShowWheel(false)}
           onWin={handleWheelWin}
           countdownStr={countdownStr}
+          spring={isSpr}
         />
       )}
 
@@ -2527,6 +2712,7 @@ export default function CosmicCasino() {
           onWin={handleMegaWheelWin}
           prizes={currentChapter === 1 ? MEGA_WHEEL_PRIZES : VIP_WHEEL_PRIZES}
           title={currentChapter === 1 ? "MEGA SPIN" : "VIP SPIN"}
+          spring={isSpr}
         />
       )}
 
@@ -2536,12 +2722,12 @@ export default function CosmicCasino() {
           <div style={{
             position: "fixed", inset: 0, zIndex: 550,
             display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+            background: sprOverlayLight, backdropFilter: "blur(12px)",
             animation: "fadeIn 0.3s ease-out",
           }}>
             <div style={{
               width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
-              background: "linear-gradient(165deg, #0a0a1a 0%, #061520 50%, #0a0a1a 100%)",
+              background: sprCardAlt("#061520"),
               border: "1px solid rgba(0,180,255,0.15)",
               boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,180,255,0.05)",
               animation: "modalPop 0.4s ease-out",
@@ -2634,12 +2820,12 @@ export default function CosmicCasino() {
         <div style={{
           position: "fixed", inset: 0, zIndex: 550,
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+          background: sprOverlayLight, backdropFilter: "blur(12px)",
           animation: "fadeIn 0.3s ease-out",
         }}>
           <div style={{
             width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
-            background: "linear-gradient(165deg, #0a0a1a 0%, #060d20 50%, #0a0a1a 100%)",
+            background: sprCardAlt("#060d20"),
             border: "1px solid rgba(120,200,255,0.15)",
             boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(120,200,255,0.05)",
             animation: "modalPop 0.4s ease-out",
@@ -2721,14 +2907,16 @@ export default function CosmicCasino() {
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
           display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 600, background: "rgba(1,0,8,0.92)", backdropFilter: "blur(30px)", animation: "fadeIn 0.2s ease",
+          zIndex: 600, background: sprOverlay, backdropFilter: "blur(30px)", animation: "fadeIn 0.2s ease",
         }}>
           <ConfettiCanvas />
           <div onClick={e => e.stopPropagation()} style={{
             position: "relative",
             width: "min(92vw, 380px)", maxHeight: "92vh", overflow: "hidden auto", borderRadius: 24,
-            background: "linear-gradient(170deg, rgba(28,22,52,0.98), rgba(8,4,20,0.99))",
-            boxShadow: "0 0 0 1px rgba(0,230,118,0.1), 0 0 120px rgba(0,230,118,0.08), 0 50px 100px rgba(0,0,0,0.5)",
+            background: sprCard,
+            boxShadow: isSpr
+              ? "0 20px 60px rgba(80,40,120,0.2), 0 0 0 1px rgba(180,160,220,0.2)"
+              : "0 0 0 1px rgba(0,230,118,0.1), 0 0 120px rgba(0,230,118,0.08), 0 50px 100px rgba(0,0,0,0.5)",
             animation: "modalPop 0.4s cubic-bezier(0.22,1,0.36,1)",
           }}>
             <div style={{ height: 2, background: "linear-gradient(90deg, transparent 10%, rgba(0,230,118,0.5) 50%, transparent 90%)" }} />
@@ -2835,12 +3023,12 @@ export default function CosmicCasino() {
           <div style={{
             position: "fixed", inset: 0, zIndex: 550,
             display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+            background: sprOverlayLight, backdropFilter: "blur(12px)",
             animation: "fadeIn 0.3s ease-out",
           }}>
             <div style={{
               width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
-              background: "linear-gradient(165deg, #0a0a1a 0%, #200818 50%, #0a0a1a 100%)",
+              background: sprCardAlt("#200818"),
               border: "1px solid rgba(255,50,120,0.15)",
               boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,50,120,0.05)",
               animation: "modalPop 0.4s ease-out",
@@ -2941,12 +3129,12 @@ export default function CosmicCasino() {
         <div style={{
           position: "fixed", inset: 0, zIndex: 550,
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+          background: sprOverlayLight, backdropFilter: "blur(12px)",
           animation: "fadeIn 0.3s ease-out",
         }}>
           <div style={{
             width: "min(92vw, 380px)", borderRadius: 24, overflow: "hidden",
-            background: "linear-gradient(165deg, #0a0a1a 0%, #1a0d08 50%, #0a0a1a 100%)",
+            background: sprCardAlt("#1a0d08"),
             border: "1px solid rgba(255,160,40,0.15)",
             boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,160,40,0.05)",
             animation: "modalPop 0.4s ease-out",
@@ -3022,12 +3210,12 @@ export default function CosmicCasino() {
         <div style={{
           position: "fixed", inset: 0, zIndex: 550,
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,10,0.85)", backdropFilter: "blur(12px)",
+          background: sprOverlayLight, backdropFilter: "blur(12px)",
           animation: "fadeIn 0.3s ease-out",
         }}>
           <div style={{
             width: "min(92vw, 400px)", borderRadius: 28, overflow: "hidden",
-            background: "linear-gradient(165deg, #0d0620 0%, #1a0d08 50%, #0d0620 100%)",
+            background: sprCardAlt("#1a0d08"),
             border: "2px solid rgba(0,230,118,0.25)",
             boxShadow: "0 0 60px rgba(0,230,118,0.1), 0 30px 80px rgba(0,0,0,0.5)",
             animation: "modalPop 0.5s ease-out",
@@ -3110,15 +3298,17 @@ export default function CosmicCasino() {
         <div style={{
           position: "fixed", inset: 0, zIndex: 700,
           display: "flex", alignItems: "center", justifyContent: "center",
-          background: "rgba(0,0,10,0.92)", backdropFilter: "blur(20px)",
+          background: sprOverlay, backdropFilter: "blur(20px)",
           animation: "fadeIn 0.5s ease-out",
         }}>
           <ConfettiCanvas />
           <div style={{
             width: "min(92vw, 400px)", borderRadius: 28, overflow: "hidden",
-            background: "linear-gradient(165deg, #0d0620 0%, #0a0a1a 50%, #0d0620 100%)",
-            border: "2px solid rgba(0,230,118,0.3)",
-            boxShadow: "0 0 80px rgba(0,230,118,0.15), 0 30px 80px rgba(0,0,0,0.5)",
+            background: sprCardAlt("#0a0a1a"),
+            border: isSpr ? "2px solid rgba(180,160,220,0.3)" : "2px solid rgba(0,230,118,0.3)",
+            boxShadow: isSpr
+              ? "0 20px 60px rgba(80,40,120,0.2), 0 0 0 1px rgba(180,160,220,0.2)"
+              : "0 0 80px rgba(0,230,118,0.15), 0 30px 80px rgba(0,0,0,0.5)",
             animation: "modalPop 0.5s ease-out",
             position: "relative", zIndex: 701,
           }}>
