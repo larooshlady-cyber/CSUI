@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 /* Placeholder cartoon character — replace src with your own */
 const CHARACTER_IMG = null; // Set to URL string to replace placeholder
@@ -120,11 +120,11 @@ const MEGA_WHEEL_PRIZES = [
 
 // ── CHAPTER 2: Road to VIP Level 2 ──
 const INITIAL_LEVELS_CH2 = [
-  { id: 6, name: "VIP Level 2", icon: "crown", r: 220, g: 180, b: 255, accent: "#dcb4ff", reward: "VIP Status Unlocked", rewardShort: "VIP LV2", task: "Complete All Steps", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 5, name: "VIP Spin", icon: "deposit", r: 255, g: 190, b: 210, accent: "#ffbed2", reward: "Wheel Ticket $100-1000", rewardShort: "$100-1K", task: "Exclusive VIP Wheel", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 4, name: "Weekly Challenge", icon: "trophy", r: 255, g: 210, b: 170, accent: "#ffd2aa", reward: "200% Reload Bonus", rewardShort: "200% RLD", task: "Complete Mission", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 3, name: "Refer a Friend", icon: "refer", r: 180, g: 220, b: 255, accent: "#b4dcff", reward: "+$50 Each", rewardShort: "+$50", task: "Share Referral Link", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
-  { id: 2, name: "Play 50 Rounds", icon: "play", r: 255, g: 170, b: 190, accent: "#ffaabe", reward: "+100 Free Spins", rewardShort: "+100 FS", task: "Play 50 Slot Rounds", unlocked: false, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 6, name: "VIP Level 2", icon: "crown", r: 220, g: 180, b: 255, accent: "#dcb4ff", reward: "VIP Status Unlocked", rewardShort: "VIP LV2", task: "Complete All Steps", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 5, name: "VIP Spin", icon: "deposit", r: 255, g: 190, b: 210, accent: "#ffbed2", reward: "Wheel Ticket $100-1000", rewardShort: "$100-1K", task: "Exclusive VIP Wheel", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 4, name: "Weekly Challenge", icon: "trophy", r: 255, g: 210, b: 170, accent: "#ffd2aa", reward: "200% Reload Bonus", rewardShort: "200% RLD", task: "Complete Mission", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 3, name: "Refer a Friend", icon: "refer", r: 180, g: 220, b: 255, accent: "#b4dcff", reward: "+$50 Each", rewardShort: "+$50", task: "Share Referral Link", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
+  { id: 2, name: "Play 50 Rounds", icon: "play", r: 255, g: 170, b: 190, accent: "#ffaabe", reward: "+100 Free Spins", rewardShort: "+100 FS", task: "Play 50 Slot Rounds", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
   { id: 1, name: "First Deposit", icon: "wallet", r: 240, g: 200, b: 230, accent: "#f0c8e6", reward: "200% + 100 FS", rewardShort: "200%+100FS", task: "Make Your First Deposit", unlocked: true, complete: false, completing: false, bonusState: "none", lockedButCompleted: false },
 ];
 
@@ -152,7 +152,7 @@ const VIP_WHEEL_PRIZES = [
 ];
 
 const SIDES = [0.5, 0.7, 0.3, 0.7, 0.3, 0.7];
-const NODE_GAP = 170;
+const NODE_GAP = 210;
 const PAD_TOP = 200;
 
 /* ═══════════════════════════════════════════════════
@@ -1050,11 +1050,7 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
         const ry = cy + 28 * sc;
 
         // ── ground shadow (simple ellipse) ──
-        if (isCh2) {
-          ctx.fillStyle = "rgba(0,0,0,0.08)";
-        } else {
-          ctx.fillStyle = "rgba(0,0,0,0.15)";
-        }
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
         ctx.beginPath(); ctx.ellipse(cx, ry + depth + 16, rw * 0.9, 14 * sc, 0, 0, 6.28); ctx.fill();
 
         // ── draw island PNG (color-matched or green if complete) ──
@@ -1062,10 +1058,10 @@ function SceneCanvas({ scrollElRef, width, height, onNodePositions, levels, isla
           const imgKey = isCh2 ? (ISLAND_MAP_CH2[lv.id] || "SP-1") : (ISLAND_MAP[lv.id] || "Islandio");
           const img = islandImages[imgKey];
           if (img && img.complete) {
-            const imgW = isCh2 ? 200 * sc : 220 * sc;
+            const imgW = 220 * sc;
             const imgH = imgW * (img.naturalHeight / img.naturalWidth);
             const imgX = cx - imgW / 2;
-            const imgY = isCh2 ? (ry - imgH * 0.5) : (ry - imgH * 0.45);
+            const imgY = ry - imgH * 0.45;
             ctx.drawImage(img, imgX, imgY, imgW, imgH);
             // ── white glow-up overlay during completion (200ms offset per plan) ──
             if (cId === lv.id && cElapsed > 0.2 && cElapsed < 1.7) {
@@ -2114,9 +2110,9 @@ export default function CosmicCasino() {
                 {lv.complete && (
                   <div style={{
                     position: "absolute",
-                    top: currentChapter === 2 ? "58%" : (jp ? 85 : 100),
-                    left: currentChapter === 2 ? "46%" : "50%",
-                    transform: currentChapter === 2 ? "translate(-50%, -50%)" : "translateX(-50%)",
+                    top: jp ? 85 : 100,
+                    left: "50%",
+                    transform: "translateX(-50%)",
                     zIndex: 31, pointerEvents: "none",
                     display: "flex", alignItems: "center", gap: 6,
                     padding: "6px 14px", borderRadius: 20,
@@ -2168,28 +2164,28 @@ export default function CosmicCasino() {
                 {/* label card — spring glass for Ch2, dark card for Ch1 */}
                 {currentChapter === 2 ? (
                 <div style={{
-                  position: "absolute", top: "72%", left: "42%", transform: "translate(-50%, -50%)",
+                  position: "absolute", bottom: -16, left: "50%", transform: "translateX(-50%)",
                   textAlign: "center", whiteSpace: "nowrap",
-                  padding: locked ? "8px 18px" : "10px 20px 12px", borderRadius: 18,
+                  padding: locked ? "8px 18px" : "10px 20px 12px", borderRadius: 16,
                   background: locked
-                    ? "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))"
-                    : "linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0.12))",
+                    ? "rgba(30,30,40,0.5)"
+                    : `linear-gradient(135deg, rgba(${lv.r},${lv.g},${lv.b},0.18) 0%, rgba(20,20,30,0.7) 100%)`,
                   border: locked
-                    ? "1px solid rgba(255,255,255,0.08)"
-                    : "1px solid rgba(255,255,255,0.35)",
+                    ? "1px solid rgba(255,255,255,0.06)"
+                    : `1px solid rgba(${lv.r},${lv.g},${lv.b},0.35)`,
                   boxShadow: locked
                     ? "none"
-                    : "0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(80,40,120,0.06), inset 0 1px 0 rgba(255,255,255,0.4)",
+                    : `0 8px 24px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.08) inset, 0 1px 0 rgba(255,255,255,0.1) inset`,
                   opacity: locked ? 0.45 : 1,
                   transition: "all 0.8s ease",
-                  backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+                  backdropFilter: "blur(16px) saturate(1.8)", WebkitBackdropFilter: "blur(16px) saturate(1.8)",
                 }}>
                   {/* level name */}
                   <div style={{
                     fontFamily: "'Orbitron', sans-serif",
                     fontSize: 13, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase",
                     color: locked ? "rgba(255,255,255,0.3)" : "#fff",
-                    textShadow: locked ? "none" : "0 1px 4px rgba(0,0,0,0.4)",
+                    textShadow: "none",
                   }}>{lv.name}</div>
 
                   {/* reward pill */}
@@ -2210,18 +2206,20 @@ export default function CosmicCasino() {
                     ) : (
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 4,
-                        padding: "4px 12px", borderRadius: 20,
+                        padding: "5px 14px", borderRadius: 20,
                         background: locked
                           ? "rgba(255,255,255,0.05)"
-                          : "rgba(255,255,255,0.15)",
+                          : "rgba(0,0,0,0.35)",
                         border: locked
                           ? "1px solid rgba(255,255,255,0.06)"
-                          : "1px solid rgba(255,255,255,0.3)",
+                          : `1px solid ${lv.accent}88`,
+                        boxShadow: "none",
                       }}>
                         <span style={{
-                          fontFamily: "'Orbitron', sans-serif", fontSize: 11, fontWeight: 800,
-                          color: locked ? "rgba(255,255,255,0.25)" : "#fff",
-                          letterSpacing: "0.04em",
+                          fontFamily: "'Orbitron', sans-serif", fontSize: 12, fontWeight: 900,
+                          color: locked ? "rgba(255,255,255,0.25)" : lv.accent,
+                          letterSpacing: "0.05em",
+                          textShadow: "none",
                         }}>{lv.rewardShort}</span>
                       </span>
                     )}
@@ -2320,7 +2318,7 @@ export default function CosmicCasino() {
         position: "absolute", top: 0, left: 280, right: 260, zIndex: 90,
         padding: "14px 28px", animation: "slideDown 0.5s ease-out",
         background: currentChapter === 2
-          ? "linear-gradient(to bottom, rgba(40,20,70,0.95) 0%, rgba(40,20,70,0.8) 50%, rgba(40,20,70,0.4) 80%, transparent 100%)"
+          ? "linear-gradient(to bottom, rgba(60,20,90,0.95) 0%, rgba(120,50,160,0.6) 30%, rgba(200,100,220,0.2) 60%, transparent 100%)"
           : "linear-gradient(to bottom, rgba(1,0,14,0.97) 0%, rgba(1,0,14,0.8) 50%, rgba(1,0,14,0.4) 80%, transparent 100%)",
         alignItems: "center", justifyContent: "center", gap: 24,
       }}>
@@ -2382,7 +2380,7 @@ export default function CosmicCasino() {
         position: "fixed", top: 0, left: 0, right: 0,
         zIndex: 100, animation: "slideDown 0.5s ease-out",
         background: currentChapter === 2
-          ? "linear-gradient(to bottom, rgba(40,20,70,0.95) 0%, rgba(40,20,70,0.85) 50%, rgba(40,20,70,0.5) 75%, rgba(40,20,70,0.15) 90%, transparent 100%)"
+          ? "linear-gradient(to bottom, rgba(60,20,90,0.95) 0%, rgba(120,50,160,0.7) 35%, rgba(180,80,200,0.3) 65%, rgba(200,100,220,0.08) 85%, transparent 100%)"
           : "linear-gradient(to bottom, rgba(1,0,14,0.98) 0%, rgba(1,0,14,0.85) 50%, rgba(1,0,14,0.6) 75%, rgba(1,0,14,0.2) 90%, transparent 100%)",
         backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
         padding: "12px 16px 16px",
@@ -2467,7 +2465,7 @@ export default function CosmicCasino() {
                   const label = (
                     <div style={{
                       fontFamily: "'Orbitron',sans-serif", fontSize: 11, fontWeight: 800,
-                      color: done ? "#00e676" : active ? "#fff" : "rgba(255,255,255,0.2)",
+                      color: done ? "#00e676" : active ? "#fff" : isSpr ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.2)",
                       whiteSpace: "nowrap",
                       textAlign: isFirst ? "left" : isLast ? "right" : "center",
                       justifyContent: isFirst ? "flex-start" : isLast ? "flex-end" : "center",
@@ -2484,7 +2482,7 @@ export default function CosmicCasino() {
                           <div style={{ display: "flex", alignItems: "center", height: 34 }}>
                             <div style={{
                               flex: 1, height: 3, borderRadius: 2,
-                              background: prevDone ? "#00e676" : "rgba(255,255,255,0.06)",
+                              background: prevDone ? "#00e676" : isSpr ? "rgba(10,5,20,0.5)" : "rgba(255,255,255,0.06)",
                               boxShadow: prevDone ? "0 0 8px rgba(0,230,118,0.5)" : "none",
                             }} />
                           </div>
@@ -2502,15 +2500,15 @@ export default function CosmicCasino() {
                           width: 34, height: 34, borderRadius: 10, position: "relative",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           background: done
-                            ? "linear-gradient(145deg, #00e676, #00c853)"
+                            ? "#00c853"
                             : active
-                              ? `linear-gradient(145deg, rgba(${lv.r},${lv.g},${lv.b},0.3), rgba(${lv.r},${lv.g},${lv.b},0.12))`
-                              : "rgba(255,255,255,0.03)",
+                              ? isSpr
+                                ? "rgba(10,5,20,0.7)"
+                                : `linear-gradient(145deg, rgba(${lv.r},${lv.g},${lv.b},0.3), rgba(${lv.r},${lv.g},${lv.b},0.12))`
+                              : isSpr ? "rgba(10,5,20,0.6)" : "rgba(255,255,255,0.03)",
                           border: done ? "2px solid #00e676"
-                            : active ? `2px solid ${lv.accent}` : "1.5px solid rgba(255,255,255,0.08)",
-                          boxShadow: done
-                            ? "0 0 14px rgba(0,230,118,0.5), inset 0 1px 0 rgba(255,255,255,0.2)"
-                            : active ? `0 0 10px rgba(${lv.r},${lv.g},${lv.b},0.25)` : "none",
+                            : active ? `2px solid ${lv.accent}` : isSpr ? "1.5px solid rgba(255,255,255,0.12)" : "1.5px solid rgba(255,255,255,0.08)",
+                          boxShadow: "none",
                         }}>
                           {done ? (
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -2519,7 +2517,7 @@ export default function CosmicCasino() {
                           ) : (
                             <span style={{
                               fontFamily: "'Orbitron',sans-serif", fontSize: 14, fontWeight: 900,
-                              color: active ? "#fff" : "rgba(255,255,255,0.12)",
+                              color: active ? "#fff" : isSpr ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.12)",
                               textShadow: active ? `0 0 8px rgba(${lv.r},${lv.g},${lv.b},0.7)` : "none",
                             }}>{lv.id}</span>
                           )}
